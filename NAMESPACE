@@ -1,0 +1,88 @@
+useDynLib("XDE")
+import(Biobase, methods, stats, graphics)
+##import(Biobase, coda, methods, graphics, stats)
+#MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
+##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
+##importMethodsFrom("MergeMaid", geneStudy, "geneStudy<-", exprs, integrative.cors, intCor, intcorDens)
+##importFrom("MergeMaid", mergeExprs)
+##importFrom("multtest", mt.teststat)
+exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
+exportMethods("[", "[[", "$",
+              bayesianEffectSize,
+              "bayesianEffectSize<-",
+              burnin,
+              "burnin<-",
+              calculateBayesianEffectSize,
+              firstMcmc,
+              "firstMcmc<-",
+              coerce,
+              directory,
+              "directory<-",
+              featureData,              
+              featureNames,
+              geneCenter,
+              hyperparameters,
+              "hyperparameters<-",
+              initialize,
+              .integrativeCorrelationFilter,
+              iterations,
+              "iterations<-",
+              lastMcmc,
+              "lastMcmc<-",
+              notes,
+              nrow,
+              nSamples,
+              output,
+              "output<-",
+              pairs,
+              ##.pca,
+              pData,
+              phenotypeLabel,
+              "phenotypeLabel<-",
+              plot,
+              posteriorAvg,
+              savedIterations,
+              seed,
+              show,
+              showIterations,
+              "showIterations<-",
+              .standardizedDelta,
+              standardizeSamples,
+              studyCenter,
+              studyNames,
+              "studyNames<-",
+              ##.studySplit,
+              thin,
+              "thin<-",
+              tuning,
+              "tuning<-",
+              updates,
+              "updates<-",
+              zeroNu)
+export(.integ.norm,
+       .integ.cal,
+       .chainInitialize,
+       .hyperparametersDefault,
+       empiricalStart,
+       .outputDefault,
+       .parameterNames,
+       .permuteClassLabels,
+       .permutePhenotype,
+       ssStatistic,
+       symbolsInteresting,
+       .tuningDefault,
+       .updatesDefault,
+       xde,
+       .xdeparameterlist,
+       xsScores)
+
+
+
+
+
+              
+              
+              
+
+              
+              

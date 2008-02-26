@@ -1,0 +1,14 @@
+citEntry(entry="TechReport",
+	author="Robert B. Scharpf and Haakon Tjelmeland and Giovanni
+	Parmigiani and Andrew Nobel",
+	title="A Bayesian model for cross-study differential gene
+	expression",
+	institution="Johns Hopkins University, Department of Biostatistics",
+  	year="2007",
+	url="http://www.bepress.com/cgi/viewcontent.cgi?article=1158&context=jhubiostat",
+	type="Technical report 158",
+	textVersion=paste("A Bayesian model for cross-study
+	differential gene expression", "R.B. Scharpf, H. Tjelmeland,
+	G. Parmigiani, and A.B. Nobel", "2007, Technical Report 158,
+	Johns Hopkins University, Department of Biostatistics")
+)

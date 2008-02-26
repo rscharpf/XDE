@@ -1,0 +1,448 @@
+% \VignetteIndexEntry{XDE Vignette}
+% \VignetteKeywords{microarray, differential expression}
+% \VignettePackage{XDE}
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+\usepackage[mathcal]{euscript}
+
+\parindent 0in  % Left justify
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rfunction}[1]{\texttt{#1}}
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\stan}{\texttt{Stanford}}
+\newcommand{\xde}{\textit{XDE}}
+\newcommand{\eset}{\Robject{ExpressionSet}}
+\newcommand{\esets}{\Robject{ExpressionSet}s}
+\newcommand{\esetList}{\Robject{ExpressionSetList}}
+\newcommand{\esetLists}{\Robject{ExpressionSetList}s}
+\newcommand{\xparam}{\Robject{XdeParameter}}
+\newcommand{\xmcmc}{\Robject{XdeMcmc}}
+\newcommand{\R}{\textsf{R}}
+\newcommand{\bioc}{http://www.bioconductor.org}
+
+\textwidth=6.2in
+\textheight=8.5in
+\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\title{XDE: A Bayesian hierarchical model for analysis of differential
+  expression in multiple studies}
+
+\author{Robert Scharpf, Andrew Nobel, Giovanni Parmigiani, H\aa kon
+  Tjelmeland}
+
+\begin{document}
+
+\maketitle
+
+<<echo=FALSE>>=
+options(width=60)
+@ 
+
+\section{Introduction}
+
+There are many publicly available high throughput gene expression
+studies that address comparable biological questions with similar
+patient populations.  For economical and practical reasons many of
+these studies have a relatively small number of biological replicates.
+To improve the statistical power it is of interest to combine observed
+data from several microarray studies, potentially measured with
+different technologies.  However, variation in the measured gene
+expression levels is caused not only by the biological conditions of
+interest and natural variation in gene expression in different samples
+of the same type, but also to a great extent by technological
+differences between studies.  To successfully combine observed data
+from different studies, it is therefore essential to filter out the
+technological effects.  The \R{} package \Rpackage{XDE} fits a
+Bayesian Hierarchical model for estimation of differential expression
+in 2 or more studies.  Alternative methods for assessing differential
+expression are provided.  Other \R{} packages developed for the
+cross-study analysis of differential expression are
+\Rpackage{GeneMeta} \cite{Lusa2007}, \Rpackage{metaArray}
+\cite{Choi2007}, and \Rpackage{rankProduct} \cite{Hong2006}.
+
+
+After reading this vignette, one should be able to 
+\begin{itemize}
+  
+\item create an instance of the class \esetList{}
+    
+\item create an instance of the class \xparam{} that contains default
+  options for the MCMC
+  
+\item fit the Bayesian hierarchical model to two or more studies
+  stored as an \esetList{} class
+    
+\item plot MCMC chains to assess convergence
+    
+\item compute posterior averages for concordant and discordant
+  differential expression
+    
+\item generate alternative cross-study summaries of differential
+  expression
+  
+\end{itemize}
+
+See \cite{Scharpf2007d} for a more detailed discussion of the Bayesian
+hierarchical model
+
+\section{\label{sec:xlist} The \esetList{} Class}
+
+Presently the software for fitting the Bayesian hierarchical model
+requires that each study be represented as an \Robject{ExpressionSet}
+\cite{Gentleman2004} and that the same features be present in each
+study (the \Rfunction{featureNames} of the studies must be identical).
+Therefore, for the meta-analysis of several platforms,
+platform-specific annotations must be mapped to a common reference
+identifier.  Mapping identifiers in each platform is a non-trivial
+stop in any cross-study analysis.  The \R{} packages
+\Rpackage{funcBox} (not yet publicly available) and
+\Rpackage{MergeMaid} have been developed to facilitate the annotation
+process and the merging of multiple studies, respectively
+\cite{Cope2004}.
+
+For the purposes of this vignette, \xde{} provides an example dataset
+of a single study that was split into three artificial datasets.
+
+<<data, eval=TRUE>>=
+library(XDE)
+data(expressionSetList)
+xlist <- expressionSetList
+class(xlist)
+@ 
+
+The original study is described in \cite{garb:etal:2001}.  The
+processed data was mapped to unigene identifiers and made available in
+the experimental data package \Rpackage{lungExpression} (\bioc) to
+facilitate the reproducibility of the analyses described in
+\cite{Parmigiani2004a}.
+
+The function \Rfunction{validObject} checks that the each element in
+\esetList{} is a valid \eset{} and that the \Robject{featureNames} are
+the same in each element.
+
+<<validObject, eval=TRUE>>=
+validObject(xlist)
+@ 
+
+In order to assess differential expression across multiple studies,
+one must define a dichotomous covariate in the \Robject{phenoData} of
+each \eset{} element in the \esetList{} object.  This covariate must
+have an identical name in each study.  In this vignette, we will use
+\xde{} to quantify differential expression between adenocarcinomas and
+squamous carcinomas.  The binary covariate ``adenoVsquamous'' has been
+defined in each of the \eset{} elements for this purpose.  The
+following statement must evaluate to \texttt{TRUE}:
+
+<<covariate, eval=TRUE>>=
+all(sapply(xlist, function(x, label){ label %in% varLabels(x)}, label="adenoVsquamous"))
+@ 
+
+
+
+\section{\label{sec:XdeParam} The \xparam{} Class}
+
+There are many features in our implementation of the hierarchical
+Bayesian model that can be modified:
+
+\begin{itemize}
+  
+\item hyperparameters for the Bayesian hierarchical model
+
+\item the seed for generating random values in the MCMC
+    
+\item the starting values for the MCMC chains
+
+\item tuning parameters for Metropolis-Hastings proposals
+    
+\item the number of updates per MCMC iteration (each parameter can
+  have a different number of updates)
+    
+\item selection of MCMC chains that are to be written to log files
+    
+\end{itemize}
+
+All of the above features are provided in the \xparam{} class.  The
+attributes provided when initializing an instance of class \xparam{}
+work well in most instances.  The \xparam{} vignette provides a more
+detailed description of how the attributes can be modified, as well as
+a brief description of the Bayesian model and the algorithm for the
+MCMC.  See \cite{Scharpf2007d} for a more detailed description of the
+Bayesian model.
+
+The default values for our \Robject{xlist} object are obtained by
+initializing an instance of the \xparam{} class:
+
+<<initializeList, eval=TRUE>>=
+params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous")
+params
+@ 
+
+\section{\label{sec:fit} Fitting the Bayesian hierarchical model}
+
+By default, the first iteration of the MCMC chain stored in the slot
+\texttt{firstMcmc} of the \Robject{params} are simulated randomly from
+the priors.  When the value of \texttt{burnin} is true, the output
+from the MCMC are not saved to file and the chain can not be monitored
+for convergence. By default the value of \Robject{burnin} is TRUE and
+only the last iteration from the chain will be available (the
+parameters are not written to log files).  For instance, here we run a
+burnin of 3 iterations:
+
+<<burnin, eval=FALSE>>=
+iterations(params) <- 3
+fit <- xde(params, xlist)
+@ 
+
+Only the first and last iterations of the MCMC are available when
+\texttt{burnin} is \texttt{TRUE}.  The output of the \Rfunction{xde}
+is an object of class \xmcmc{}.
+
+This object contains the last iteration from the MCMC, as well as a
+different seed that will be used if one decided that three iterations
+were insufficient.  To run two more iterations, starting at the last
+iteration stored in the \texttt{fit} object, one should provide the
+\Robject{params}, \Robject{xlist}, and \Robject{fit} objects to the
+\Rfunction{xde} function:
+
+<<moreIterations, eval=FALSE>>=
+##stopifnot(seed(params) != seed(fit))
+iterations(params) <- 2
+fit2 <- xde(params, xlist, fit)
+@ 
+
+When an object of class \xmcmc{} is supplied as an argument to the
+\Rfunction{xde} function, the seed and the last iteration from the
+\Robject{fit} object are used to begin the next chain.  Note that
+the results from the previous call to the \Rfunction{xde} would be
+identical to the following sequence of commands:
+
+<<firstMcmc, eval=FALSE>>=
+firstMcmc(params) <- lastMcmc(fit)
+seed(params) <- seed(fit)
+fit2 <- xde(params, xlist)
+@ 
+
+One should run several thousand iterations (saving all parameters to
+file) to monitor convergence.  In the following code chunk (not run)
+we save only the chains for the parameters that are not indexed by
+genes and/or study by setting the \texttt{output} for these parameters
+to zero -- this step was taken to keep this package from becoming
+unnecessarily large.  By setting the \texttt{thin} to 2, we only write
+every other MCMC iteration to file.  In total, 1000 iterations are
+saved.
+
+<<runMoreIterations, eval=FALSE, echo=TRUE>>=
+burnin(params) <- FALSE
+iterations(params) <- 2000
+output(params)[c("potential", "acceptance", "nu", "DDelta",
+                 "delta", "probDelta", "sigma2", "phi")] <- 0
+thin(params) <- 2
+xmcmc <- xde(params, xlist)
+@ 
+
+See the \xparam{} vignette for a more detailed discussion of the
+output, burnin, and thin methods.  The \Robject{xmcm} object can be
+loaded by:
+
+<<loadObject, eval=TRUE, echo=FALSE>>=
+data(xmcmc)
+@ 
+
+\section{\label{sec:mcmc} MCMC diagnostics}
+
+In this section we briefly describe how to access the chains for
+assessing convergence of the MCMC. We refer the \R user to the package
+\Rpackage{coda} for more detailed discussion of MCMC diagnostics
+\cite{Plummer2007}.
+
+The following is a list of the chains that were saved in our run with
+1000 saved iterations:
+<<savedParams, eval=TRUE>>=
+output(xmcmc)[2:22][output(xmcmc)[2:22] == 1]
+@ 
+
+The \$ operator can be used to read in log files.  First, we need to
+update the \texttt{directory} slot in the \Robject{xmcmc} with a
+character string indicating the path to the log files.  (Note that an
+assignment method for directory is only available for \R{} object of
+class \xmcmc{} -- typically one would not need to change the directory
+in the \xmcmc{} object).  In the following code chunk, we extract the
+chain for the $c^2$ parameter:
+
+<<c2, fig=TRUE, include=TRUE, eval=TRUE>>=
+pathToLogFiles <- system.file("logFiles", package="XDE")
+xmcmc@directory <- pathToLogFiles
+c2 <- xmcmc$c2
+if(require(coda)){
+  plot(as.mcmc(c2))
+}
+@
+
+A default plotting method has been provided that displays the chains
+of the parameters that tend to converge slower.  Again, this function
+requires the \R{} package \Rpackage{coda}:
+
+<<chains, fig=TRUE, include=TRUE, eval=TRUE>>=
+if(require(coda)){
+    plot(xmcmc)
+}
+@ 
+
+\section{\label{sec:posterior} Posterior probabilities of differential expression}
+
+We refer to the posterior mean of the standardized offsets in the
+hierarchical model as the Bayesian effect size (BES).  The BES is
+calculated as $\frac{\delta_g\Delta_{gp}}{c \tau \sigma^{b_p}}$ and
+obtained by
+
+<<bayesianEffectSize, eval=FALSE>>=
+bayesianEffectSize(xmcmc) <- calculateBayesianEffectSize(xmcmc)
+@ 
+
+As the function \Rfunction{calculateBayesianEffectSize} requires that
+the $\delta, \Delta$, and $\sigma^2$ chains are saved, the above code
+chunk is not evaluated in this vignette.
+
+<<bes, eval=TRUE>>=
+bes <- bayesianEffectSize(xmcmc)
+@ 
+
+Posterior averages for the probability of differential expression,
+concordant differential expression, and discordant differential
+expression are stored in the \Robject{xmcmc} object:
+
+<<postAvg, eval=TRUE>>=
+postAvg <- posteriorAvg(xmcmc)
+@ 
+
+See \cite{Scharpf2007d} for a discussion of how the above posterior
+average probabilities are computed.
+
+<<histFxn, eval=TRUE>>=
+plotPosteriorAvg <- function(){
+  par(mfrow=c(2, 1), las=1)
+  ##hist(postAvg[, "diffExpressed"], breaks=50, xlim=c(0, 1))
+  hist(postAvg[, "concordant"], breaks=50, xlim=c(0, 1), main="")
+  hist(postAvg[, "discordant"], breaks=50, xlim=c(0, 1), main="")
+}
+@ 
+
+<<postAvgFig, eval=TRUE, echo=FALSE, fig=TRUE, include=TRUE>>=
+plotPosteriorAvg()
+@ 
+
+We may wish to differentially label the study-specific statistics of
+effect size that have high probabilities of concordant differential
+expression.  To do this, we order the matrix of the BES so that the
+genes with the highest posterior probabilities are plotted last.  The
+function \Rfunction{symbolsInteresting} returns a list of graphical
+options to \Rfunction{pairs}.
+
+<<setPar, eval=TRUE>>=
+op.conc <- symbolsInteresting(rankingStatistic=postAvg[, "concordant"])
+op.disc <- symbolsInteresting(rankingStatistic=postAvg[, "discordant"])
+@ 
+
+<<conc, fig=TRUE, include=TRUE, eval=TRUE>>=
+par(las=1)
+graphics:::pairs(bes[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+                 bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)
+@ 
+
+or high probabilities of discordant differential expression
+
+<<disc, fig=TRUE, include=TRUE, eval=TRUE>>=
+graphics:::pairs(bes[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg, upper.panel=NULL, cex=op.disc$cex)
+@ 
+
+\section{\label{sec:alternatives} Alternative cross-study summaries of differential expression}
+
+Study-specific estimates of effect size, such as SAM or t-statistics,
+can be useful to check the overall reproducibility between studies.
+Again using pairwise scatterplots we plot t- and SAM-statistics using
+different colors and plotting symbols for the genes that show high
+posterior probabilities of concordant differential expression.
+
+<<ssAlternatives, eval=FALSE>>=
+t <- ssStatistic(statistic="t", phenotypeLabel="adenoVsquamous", esetList=xlist)
+if(require(siggenes)){
+  sam <- ssStatistic(statistic="sam", phenotypeLabel="adenoVsquamous", esetList=xlist)
+}
+if(require(GeneMeta)){
+  z <- ssStatistic(statistic="z", phenotypeLabel="adenoVsquamous", esetList=xlist)
+}
+@ 
+
+<<tstatConc, fig=TRUE, include=TRUE, eval=FALSE>>=
+graphics:::pairs(t[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+                 bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
+
+@
+
+<<zConc, fig=TRUE, include=TRUE, eval=FALSE>>=
+graphics:::pairs(t[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+                 bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
+
+@
+
+<<tstatDisc, fig=TRUE, include=TRUE, eval=FALSE>>=
+graphics:::pairs(t[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, 
+                 bg=op.disc$bg, upper.panel=NULL, cex=op.disc$cex)  
+@ 
+
+Uncorrelated $t$ and $SAM$ statistics suggest a low level of
+reproducibility that may be attributable to technological differences
+in the platforms, probes that align to different transcripts of the
+same gene, or differences in the study populations. Low or
+non-existing reproducibility may induce a wrong borrowing of strength
+in the Bayesian model, whereby concordant differential expression is
+seen as noise and shrunk to zero.  Hence, study-specific estimates of
+t- and SAM-statistics may be helpful in deciding whether the Bayesian
+model is likely to be beneficial.
+
+If the correlation across studies is low, we suggest an unsupervised
+approach to gene filtering, such as integrative correlation, to select
+for genes that show some level of reproducibility across studies.  The
+\R{} packages \Rpackage{MergeMaid} and \Rpackage{genefilter} may be
+helpful.
+
+For evaluating the overall differential expression, we follow the
+discussion of \citet{Garrett-Mayer2007}, and combine the elements of
+single study statistics in a linear fashion to obtain a statistic
+suitable for assessing differential expression.  For a more detailed
+discussion of how these cross-study summaries were generated for
+evaluating concordant and discordant differential expression, see
+\cite{Scharpf2007d}.
+
+<<pca, eval=FALSE>>=
+tScores <- xsScores(t, N=nSamples(xlist))
+samScores <- xsScores(sam, nSamples(xlist))
+zScores <- xsScores(z[, match(names(xlist), colnames(z))], N=nSamples(xlist))
+##Concordant differential expression, we use the combined score from the random effects model directly
+zScores[, "concordant"] <- z[, "zSco"]
+@
+
+\section{Session Information}
+
+The version number of \R{} and packages loaded for generating the
+vignette were:
+
+<<sessionInfo, echo=FALSE, results=tex, eval=FALSE>>=
+toLatex(sessionInfo())
+@ 
+
+\bibliography{genomics}
+\bibliographystyle{plain}
+
+\end{document}
+
+
