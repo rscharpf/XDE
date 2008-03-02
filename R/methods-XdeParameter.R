@@ -9,8 +9,7 @@ setMethod("initialize", "XdeParameter",
                    output=.outputDefault(),
                    iterations=as.integer(10),
                    burnin=TRUE,
-                   seed=as.integer(runif(1, 0, 1e6)), ##Default is NULL
-                   randomSeed=TRUE,  ##If true, when calling xde() a new seed will be simulating
+                   seed=runif(1, 0, 1e6), ##Default is NULL
                    genes=integer(0),
                    studies=integer(),
                    firstMcmc=new.env(),
@@ -42,7 +41,7 @@ setMethod("initialize", "XdeParameter",
             .Object@tuning <- tuning
             .Object@hyperparameters <- .hyperparametersDefault(length(esetList))
             .Object@output <- output
-            seed(.Object) <- seed
+            .Object@seed <- as.integer(seed)
             .Object@directory <- paste(directory, "/", sep="")
             .Object@verbose <- verbose
             ##if firstIteration is not supplied
@@ -55,8 +54,8 @@ setMethod("initialize", "XdeParameter",
               ##Nothing will be written to file if burnin is TRUE
               .Object@burnin <- TRUE
               firstMcmc(.Object) <- .chainInitialize(object=esetList,
-                                                          chain.length=chain.length,
-                                                          verbose=verbose)
+                                                     chain.length=chain.length,
+                                                     verbose=verbose)
               ##get starting values by simulating from the prior
               firstMcmc(.Object) <- lastMcmc(xde(paramsMcmc=.Object, esetList=esetList))
             } else{
@@ -114,10 +113,8 @@ setReplaceMethod("directory", "XdeParameter",
                    if(!file.exists(fname)){
                      print("Directory does not exist. Creating new directory")
                      dir.create(path=fname)
-                   } else{
-                     object@directory <- fname
-                   }
-
+                   } 
+                   object@directory <- fname
                    object
                  })
 

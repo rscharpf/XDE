@@ -25,6 +25,9 @@ xde <- function(paramsMcmc, esetList, outputMcmc){
   ##Convert expression to vector
   f <- function(x)  x <- as.vector(t(exprs(x)))
   expression.vector <- as.numeric(unlist(lapply(esetList, f)))
+  if(any(is.na(expression.vector))){
+    stop("Missing values in the expression data")
+  }
   ##Convert phenoData to a vector 
   convertToVector <- function(x, phenotypeLabel){
     x <- pData(x)

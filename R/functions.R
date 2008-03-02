@@ -246,7 +246,7 @@ symbolsInteresting <- function(rankingStatistic, percentile=0.9,
   col <- rep(colors[1], N)
   col[j] <- colors[2]
   cex <- rep(size[1], N)
-  cex[j] <- 1
+  cex[j] <- size[2]
   bg <- rep(background[1], N)
   bg[j] <- background[2]
   list(order=order(i), pch=pch, col=col, bg=bg, cex=cex)
@@ -416,7 +416,7 @@ empiricalStart <- function(object, zeroNu=FALSE){
 
   if(!zeroNu){
     meanExpression <- function(eset) rowMeans(exprs(eset))  
-    Nu <- sapply(object@data, meanExpression)
+    Nu <- sapply(object, meanExpression)
     Rho <- cor(Nu)[upper.tri(cor(Nu))]
     Nu <- as.vector(Nu)
     Gamma2 <- var(Nu)    
@@ -434,7 +434,7 @@ empiricalStart <- function(object, zeroNu=FALSE){
     avdif <- mn1-mn0
     avdif
   }
-  DDelta <- sapply(object@data, averageDifference, classLabel=phenotypeLabel(object))
+  DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel(object))
   R <- c(cor(DDelta[, 1], DDelta[, 2]), cor(DDelta[, 1], DDelta[,3]), cor(DDelta[,2], DDelta[,3]))        
 
   quant <- quantile(rowMeans(DDelta), probs=c(0.1, 0.9))
@@ -454,7 +454,7 @@ empiricalStart <- function(object, zeroNu=FALSE){
   varianceExpression <- function(eset){
     apply(exprs(eset), 1, var)
   }
-  Sigma2 <- sapply(object@data, varianceExpression)
+  Sigma2 <- sapply(object, varianceExpression)
 
   ##Gamma with mean 1
   ##L and T are mean and variance, respectively
