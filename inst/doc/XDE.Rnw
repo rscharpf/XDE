@@ -436,7 +436,7 @@ zScores[, "concordant"] <- z[, "zSco"]
 The version number of \R{} and packages loaded for generating the
 vignette were:
 
-<<sessionInfo, echo=FALSE, results=tex, eval=FALSE>>=
+<<sessionInfo, echo=FALSE, results=tex>>=
 toLatex(sessionInfo())
 @ 
 

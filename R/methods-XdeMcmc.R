@@ -19,13 +19,13 @@ setMethod("initialize", "XdeMcmc",
             .Object@posteriorAvg <- posteriorAvg
             .Object@bayesianEffectSize <- bayesianEffectSize
             .Object
-          })
+    })
 
 setMethod("$", "XdeMcmc", function(x, name) {
-  if(!(name %in% .parameterNames()[output(x) != 0])){
-    stop(paste("Parameter", name, "not saved.  See output for XdeParameter object"))
-  }
-  mcmc <- scan(paste(directory(x), "/", name, ".log", sep = ""))
+	if(!(name %in% .parameterNames()[output(x) != 0])){
+		stop(paste("Parameter", name, "not saved.  See output for XdeParameter object"))
+	}
+	mcmc <- scan(paste(directory(x), "/", name, ".log", sep = ""))
 
   ##################################################
   ##Parameters indexed by gene and study
@@ -39,7 +39,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
                     featureNames(x),
                     as.character(1:I)))
     return(mcmc)
-  }
+}
 
   
   ##################################################

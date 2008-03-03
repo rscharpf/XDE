@@ -285,32 +285,33 @@ xsScores <- function(statistic, N){
 
 
 .outputDefault <- function(thin=1, burnin=FALSE){
-  if(!burnin) out <- rep(1, 22) else out <- rep(0, 22)
-  out[1] <- thin
-  out[22] <- 1  ##by default, keep a running average of the posterior statistics attached to the object (do not write to file)
-  names(out) <- c("thin",
-                  "potential",
-                  "acceptance",
-                  "nu",
-                  "deltaDelta",
-                  "a",
-                  "b",
-                  "c2",
-                  "gamma2",
-                  "r",
-                  "rho",
-                  "delta",
-                  "xi",
-                  "sigma2",
-                  "t",
-                  "l",
-                  "phi",
-                  "theta",
-                  "lambda",
-                  "tau2",
-                  "p.delta",
-                  "diffExpressed")
-  return(out)
+##  if(!burnin) out <- rep(1, 22) else out <- rep(0, 22)
+	out <- rep(1, 22)
+	out[1] <- thin
+	out[22] <- 1  ##by default, keep a running average of the posterior statistics attached to the object (do not write to file)
+	names(out) <- c("thin",
+			"potential",
+			"acceptance",
+			"nu",
+			"deltaDelta",
+			"a",
+			"b",
+			"c2",
+			"gamma2",
+			"r",
+			"rho",
+			"delta",
+			"xi",
+			"sigma2",
+			"t",
+			"l",
+			"phi",
+			"theta",
+			"lambda",
+			"tau2",
+			"p.delta",
+			"diffExpressed")
+	return(out)
 }
 ##Number of platforms (P)
 .hyperparametersDefault <- function(P){
