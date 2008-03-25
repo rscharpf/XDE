@@ -11,8 +11,8 @@ PotentialZero potC2;
 PotentialZero potGamma2;
 PotentialR potR(&str);
 PotentialRho potRho(&str);
-PotentialDelta potDelta(&str);
-PotentialXi potXi(&str);
+PotentialDelta potDelta(&str,oneDelta);
+PotentialXi potXi(&str,oneDelta);
 PotentialSigma2 potSigma2(&str);
 PotentialZero potT;
 PotentialZero potL;
@@ -147,14 +147,14 @@ for (i = 0; i < term.size(); i++)
      // Update for delta
      //
      
-     update.push_back(new UpdateDeltaMH(&str));
+     update.push_back(new UpdateDeltaMH(&str,oneDelta));
      nUpdate.push_back(1);
      
      //
      // Update for xi
      //
      
-     update.push_back(new UpdateXiGibbs(&str,CHECKGIBBS,&potTotal));
+     update.push_back(new UpdateXiGibbs(&str,CHECKGIBBS,&potTotal,oneDelta));
      nUpdate.push_back(1);
      
      //

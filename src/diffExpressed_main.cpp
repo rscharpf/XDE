@@ -56,7 +56,7 @@ using namespace std;
 
 extern "C" {
 
-  void xdeLIN_main(int *Iseed,int *IshowIterations,int *InIt,
+  void xdeLIN_main(int *Iseed,int *IshowIterations,int *InIt,int oneDelta,
 		   int *IQ,int *IG,int *IS,
 		   double *Ix,int *IPsi,int *IspecifiedInitialValues,
 		   double *INu,double *IDDelta,double *IA,
@@ -112,7 +112,7 @@ extern "C" {
     // Initialise data and parameters
     //
 
-    Structure str(Q,G,S,x,psi,ran,CHECKINPUT);
+    Structure str(Q,G,S,x,psi,ran,CHECKINPUT,oneDelta);
 
     //
     // Set hyper-parameter values
@@ -179,7 +179,7 @@ extern "C" {
 					 OvalueA,OvalueB,OvalueC2,OvalueGamma2,OvalueR,
 					 OvalueRho,OvalueDelta,OvalueXi,OvalueSigma2,OvalueT,
 					 OvalueL,OvaluePhi,OvalueTheta,OvalueLambda,OvalueTau2,
-					 OvalueProbDelta,OvalueDiffexpressed,IwriteDiffexpressedTofile);
+					 OvalueProbDelta,OvalueDiffexpressed,IwriteDiffexpressedTofile,oneDelta);
 
     //
     // run Metropolis-Hastings algorithm

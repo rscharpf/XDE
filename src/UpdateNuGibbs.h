@@ -110,7 +110,7 @@ inline int UpdateNuGibbs::update(Random &ran)
 	    {
 	      double variance = str->psi[q][s] == 0 ? var0 : var1;
 	      varInv[q][q] += 1.0 / variance;
-	      Mean[q] += (str->x[q][g][s] - str->delta[g] * (2.0 * str->psi[q][s] - 1.0) * 
+	      Mean[q] += (str->x[q][g][s] - str->delta[q][g] * (2.0 * str->psi[q][s] - 1.0) * 
 			  str->Delta[q][g]) / variance;
 	    }
 	}

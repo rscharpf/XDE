@@ -29,7 +29,7 @@
 #include "ReportDiffexpressed.h"
 
 
-Structure::Structure(string &filename,Random &ran)
+Structure::Structure(string &filename,Random &ran,int oneDelta)
 {
   ifstream in;
   in.open(filename.c_str());
@@ -194,14 +194,14 @@ Structure::Structure(string &filename,Random &ran)
   // initialise remaining variables
   //
 
-  initialiseVariables(ran);
+  initialiseVariables(ran,oneDelta);
 
   return;
 }
 
 
 
-Structure::Structure(int Q,int G,int *S,double *x,int *psi,Random &ran,int checkinput)
+Structure::Structure(int Q,int G,int *S,double *x,int *psi,Random &ran,int checkinput,int oneDelta)
 {
   this->Q = Q;
   this->G = G;
@@ -268,7 +268,7 @@ Structure::Structure(int Q,int G,int *S,double *x,int *psi,Random &ran,int check
   // initialise remaining parameters
   //
 
-  initialiseVariables(ran);
+  initialiseVariables(ran,oneDelta);
 
   return;
 }
@@ -311,7 +311,10 @@ void Structure::allocateSpace(void)
   for (q = 0; q < Q; q++)
     Delta[q].resize(G);
 
-  delta.resize(G);
+  delta.resize(Q);
+  for (q = 0; q < Q; q++)
+    delta[q].resize(G);
+  xi.resize(Q);
   a.resize(Q);
   b.resize(Q);
   tau2.resize(Q);
@@ -343,7 +346,7 @@ void Structure::allocateSpace(void)
 }
 
 
-void Structure::initialiseVariables(Random &ran)
+void Structure::initialiseVariables(Random &ran,int oneDelta)
 {
   //
   // initialise remaining fixed variables
@@ -460,9 +463,27 @@ void Structure::initialiseVariables(Random &ran)
 	Delta[q][g] = value[q];
     }
   
-  xi = ran.Beta(alphaXi,betaXi);
-  for (g = 0; g < G; g++)
-    delta[g] = (ran.Unif01() <= xi);
+  if (oneDelta == 0)
+    {
+      for (q = 0; q < Q; q++)
+	xi[q] = ran.Beta(alphaXi,betaXi);
+      for (q = 0; q < Q; q++)
+	for (g = 0; g < G; g++)
+	  delta[q][g] = (ran.Unif01() <= xi[q]);
+    }
+  else
+    {
+      xi[0] = ran.Beta(alphaXi,betaXi);
+      for (q = 1; q < Q; q++)
+	xi[q] = xi[0];
+      for (g = 0; g < G; g++)
+	{
+	  int dd = (ran.Unif01() <= xi[0]);
+	  for (q = 0; q < Q; q++)
+	    delta[q][g] = dd;
+	}
+    }
+      
 
   for (q = 0; q < Q; q++)
     {
@@ -1111,8 +1132,10 @@ void Structure::setInitialValues(string &filename)
 		  cout << " in file " << filename << ". Aborting.";
 		  exit(-1);
 		}
-	      int g;
-	      for (g = 0; g < G; g++) delta[g] = (int) value;
+	      int q,g;
+	      for (q = 0; q < Q; q++)
+		for (g = 0; g < G; g++) 
+		  delta[q][g] = (int) value;
 
 	      cout << varName << " = " << (int) value << "\n";
 	    }
@@ -1124,7 +1147,9 @@ void Structure::setInitialValues(string &filename)
 		  cout << " in file " << filename << ". Aborting.";
 		  exit(-1);
 		}
-	      xi = value;
+	      int q;
+	      for (q = 0; q < Q; q++)
+		xi[q] = value;
 	    }
 	  else if (line == 11)
 	    {
@@ -1297,12 +1322,14 @@ void Structure::setInitialValues(double *Nu,double *DDelta,double *A,
   
   nr = 0;
   for (g = 0; g < G; g++)
-    {
-      delta[g] = Delta[nr];
-      nr++;
-    }  
+    for (q = 0; q < Q; q++)
+      {
+	delta[q][g] = Delta[nr];
+	nr++;
+      }  
 
-  xi = *Xi;
+  for (q = 0; q < Q; q++)
+    xi[q] = Xi[q];
   
   nr = 0;
   for (g = 0; g < G; g++)
@@ -1431,12 +1458,14 @@ void Structure::setFinalValues(double *Nu,double *DDelta,double *A,
   
   nr = 0;
   for (g = 0; g < G; g++)
-    {
-      Delta[nr] = delta[g];
-      nr++;
-    }  
+    for (q = 0; q < Q; q++)
+      {
+	Delta[nr] = delta[q][g];
+	nr++;
+      }  
 
-  *Xi = xi;
+  for (q = 0; q < Q; q++)
+    Xi[q] = xi[q];
   
   nr = 0;
   for (g = 0; g < G; g++)
@@ -1646,7 +1675,7 @@ void Structure::setNumberOfUpdates(int *InUpdate,double *Iepsilon,
 
 
 ReportDiffexpressed *Structure::setReports(string &filename,int &nBetweenReport,vector<Potential *> &potential,
-			   vector<Update *> &update,vector<Report *> &report)
+			   vector<Update *> &update,vector<Report *> &report,int oneDelta)
 {
   ReportDiffexpressed *reportDiffexpressed = NULL;
 
@@ -1798,7 +1827,7 @@ ReportDiffexpressed *Structure::setReports(string &filename,int &nBetweenReport,
 	      else if (line == 20)
 		report.push_back(new ReportTau2(value));
 	      else if (line == 21)
-		report.push_back(new ReportProbDelta(value,this));
+		report.push_back(new ReportProbDelta(value,this,oneDelta));
 	      else if (line == 22)
 		{
 		  reportDiffexpressed = new ReportDiffexpressed(value,this);
@@ -1824,7 +1853,8 @@ ReportDiffexpressed *Structure::setReports(int *output,int &nBetweenReport,int w
 			   double *valueXi,double *valueSigma2,double *valueT,
 			   double *valueL,double *valuePhi,double *valueTheta,
 			   double *valueLambda,double *valueTau2,
-			   double *valueProbDelta,double *valueDiffexpressed,int *writeDiffexpressedTofile)
+			   double *valueProbDelta,double *valueDiffexpressed,int *writeDiffexpressedTofile,
+			   int oneDelta)
 {
   int nr = 0;
   ReportDiffexpressed *reportDiffexpressed = NULL;
@@ -1891,7 +1921,7 @@ ReportDiffexpressed *Structure::setReports(int *output,int &nBetweenReport,int w
       if (output[nr]) report.push_back(new ReportTau2(valueTau2));
       nr++;
       
-      if (output[nr]) report.push_back(new ReportProbDelta(valueProbDelta,this));
+      if (output[nr]) report.push_back(new ReportProbDelta(valueProbDelta,this,oneDelta));
       nr++;
 
       if (output[nr]) 
@@ -2034,7 +2064,7 @@ ReportDiffexpressed *Structure::setReports(int *output,int &nBetweenReport,int w
       filename.empty();
       filename = "probDelta.log";
       filename = dir + filename;
-      if (output[nr]) report.push_back(new ReportProbDelta(filename,this));
+      if (output[nr]) report.push_back(new ReportProbDelta(filename,this,oneDelta));
       nr++;
 
       filename.empty();

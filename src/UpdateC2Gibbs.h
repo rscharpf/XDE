@@ -69,7 +69,12 @@ inline int UpdateC2Gibbs::update(Random &ran)
   int g;
   for (g = 0; g < str->G; g++)
     {
-      if (str->delta[g] == 1)
+      int nOn = 0;
+      int q;
+      for (q = 0; q < str->Q; q++)
+	nOn += str->delta[q][g];
+
+      if (nOn >= 1)
 	{
 	  vector<vector<double> > varInv;
 	  varInv.resize(str->Q);
@@ -86,16 +91,51 @@ inline int UpdateC2Gibbs::update(Random &ran)
 		varInv[q][p] = varInv[p][q];
 	      }
 
-	  vector<vector<double> > var;
-	  inverse(varInv,var);
+	  //
+	  // pick out the elements of Delta and varInv that corresponds to delta_qg=1
+	  //
 	  
-	  vector<double> Delta(str->Q);
+	  vector<double> Delta(nOn);
+	  vector<vector<double> > varInvRed;
+	  varInvRed.resize(nOn);
+	  for (q = 0; q < nOn; q++)
+	    varInvRed[q].resize(nOn);
+
+	  int qq = 0;
 	  for (q = 0; q < str->Q; q++)
-	    Delta[q] = str->Delta[q][g];
+	    {
+	      if (str->delta[q][g] == 1)
+		{
+		  Delta[qq] = str->Delta[q][g];
+		  qq++;
+		}
+	    }
+
+	  qq = 0;
+	  for (q = 0; q < str->Q; q++)
+	    {
+	      if (str->delta[q][g] == 1)
+		{
+		  int p,pp = 0;
+		  for (p = 0; p < str->Q; p++)
+		    {
+		      if (str->delta[p][g] == 1)
+			{
+			  varInvRed[qq][pp] = varInv[q][p];
+			  pp++;
+			}
+		    }
+		  qq++;
+		}
+	    }
+
+
+	  vector<vector<double> > var;
+	  inverse(varInvRed,var);
 	  
 	  double value = quadratic(var,Delta);
 	  lambda += 0.5 * value;
-	  s += 0.5 * str->Q;
+	  s += 0.5 * nOn;
 	}
     }
 
@@ -104,7 +144,7 @@ inline int UpdateC2Gibbs::update(Random &ran)
   //
   
   double newValue;
-  if (s != -1.0 && s != 0.0) // there exist at least one delta == 1
+  if (s > 0.0) // there exist at least one delta == 1
     {
       int nTry = 0;
       do
@@ -117,8 +157,11 @@ inline int UpdateC2Gibbs::update(Random &ran)
     }
   else if (s == 0.0)
     {
-      double fmax = exp(-1.0)/lambda;
-      if (str->c2Max < lambda) fmax = exp(-lambda/str->c2Max)/str->c2Max;
+      double fmax;
+      if (lambda < str->c2Max)
+	fmax = exp(-1.0)/lambda;
+      else
+	fmax = exp(-lambda/str->c2Max) / str->c2Max;
       int nTry = 0;
       int accept = 0;
       do
@@ -127,37 +170,32 @@ inline int UpdateC2Gibbs::update(Random &ran)
 	  newValue = str->c2Max * ran.Unif01();
 	  double alpha = (exp(-lambda/newValue)/newValue) / fmax;
 	  accept = (ran.Unif01() <= alpha);
-	  if (newValue > str->c2Max) accept = 0;
 	}
       while (accept == 0 && nTry < 100);
+      if (nTry == 100) newValue = str->c2;   // propose an unchanged value!
+    }
+  else if (s == -0.5)
+    {
+      double fmax;
+      if (lambda < 0.5 * str->c2Max)
+	fmax = exp(-0.5)/sqrt(2*lambda);
+      else
+	fmax = exp(-lambda/str->c2Max) / sqrt(str->c2Max);
+      int nTry = 0;
+      int accept = 0;
+      do 
+	{
+	  nTry++;
+	  newValue = str->c2Max * ran.Unif01();
+	  double alpha = (exp(-lambda/newValue)/sqrt(newValue)) / fmax;
+	  accept = (ran.Unif01() < alpha);
+	}
+      while (accept == 0 && newValue < 100);
       if (nTry == 100) newValue = str->c2;   // propose an unchanged value!
     }
   else
     newValue = str->c2Max * ran.Unif01();
 
-
-  
-  //
-  // Check acceptance probability
-  //
-  
-  if (check != 0)
-    {
-      double oldValue = str->c2;
-      double pot = - model->potential(ran);
-      pot -= ran.PotentialInverseGamma(s,lambda,newValue);
-      
-      str->c2 = newValue;
-
-      pot += model->potential(ran);
-      pot += ran.PotentialInverseGamma(s,lambda,oldValue);
-
-      str->c2 = oldValue;
-      
-      if (pot >= 1.0e-6 || pot <= -1.0e-6)
-	cout << "WARNING: Possible implementation error in UpdateC2Gibbs located. Check out!\n\n";
-    }
-  
   //
   // Set new value
   //
@@ -165,12 +203,17 @@ inline int UpdateC2Gibbs::update(Random &ran)
   str->c2 = newValue;
 
   //
-  // draw new Delta values for genes with delta_g == 0
+  // draw new Delta values for genes with delta_qg == 0
   //
 
   for (g = 0; g < str->G; g++)
     {
-      if (str->delta[g] == 0)
+      int nOn = 0;
+      int q;
+      for (q = 0; q < str->Q; q++)
+	nOn += str->delta[q][g];
+
+      if (nOn < str->Q)
 	{
 	  vector<vector<double> > var;
 	  var.resize(str->Q);
@@ -195,10 +238,131 @@ inline int UpdateC2Gibbs::update(Random &ran)
 	  
 	  vector<double> mean(str->Q);
 	  for (p = 0; p < str->Q; p++) mean[p] = 0.0;
-	  
-	  vector<double> newDDelta = ran.MultiGaussian(var,mean);
-	  for (p = 0; p < str->Q; p++)
-	    str->Delta[p][g] = newDDelta[p];
+
+	  if (nOn == 0)  // draw all the Delta's
+	    {
+	      vector<double> newDDelta = ran.MultiGaussian(var,mean);
+	      for (p = 0; p < str->Q; p++)
+		str->Delta[p][g] = newDDelta[p];
+	    }
+	  else  // draw some Delta's conditional on the rest
+	    {
+	      vector<double> Delta1(nOn);
+	      vector<double> Delta2(str->Q - nOn);
+	      vector<double> mu1(nOn);
+	      vector<double> mu2(str->Q - nOn);
+	      vector<vector<double> > sigma11(nOn);
+	      int q;
+	      for (q = 0; q < nOn; q++)
+		sigma11[q].resize(nOn);
+	      vector<vector<double> > sigma12(nOn);
+	      for (q = 0; q < nOn; q++)
+		sigma12[q].resize(str->Q - nOn);
+	      vector<vector<double> > sigma21(str->Q - nOn);
+	      for (q = 0; q < str->Q - nOn; q++)
+		sigma21[q].resize(nOn);
+	      vector<vector<double> > sigma22(str->Q - nOn);
+	      for (q = 0; q < str->Q - nOn; q++)
+		sigma22[q].resize(str->Q - nOn);
+
+	      int q1 = 0;
+	      int q2 = 0;
+	      for (q = 0; q < str->Q; q++)
+		{
+		  if (str->delta[q][g] == 1)
+		    {
+		      Delta1[q1] = str->Delta[q][g];
+		      mu1[q1] = mean[q];
+		      q1++;
+		    }
+		  else
+		    {
+		      Delta2[q2] = str->Delta[q][g];
+		      mu2[q2] = mean[q];
+		      q2++;
+		    }
+		}
+	      
+	      q1 = 0;
+	      q2 = 0;
+	      for (q = 0; q < str->Q; q++)
+		{
+		  if (str->delta[q][g] == 1)
+		    {
+		      int p1 = 0;
+		      int p2 = 0;
+		      int p;
+		      for (p = 0; p < str->Q; p++)
+			{
+			  if (str->delta[p][g] == 1)
+			    {
+			      sigma11[q1][p1] = var[q][p];
+			      p1++;
+			    }
+			  else
+			    {
+			      sigma12[q1][p2] = var[q][p];
+			      p2++;
+			    }
+			}
+		      q1++;
+		    }
+		  else
+		    {
+		      int p1 = 0;
+		      int p2 = 0;
+		      int p;
+		      for (p = 0; p < str->Q; p++)
+			{
+			  if (str->delta[p][g] == 1)
+			    {
+			      sigma21[q2][p1] = var[q][p];
+			      p1++;
+			    }
+			  else
+			    {
+			      sigma22[q2][p2] = var[q][p];
+			      p2++;
+			    }
+			}
+		      q2++;
+		    }
+		}
+	      
+	      vector<vector<double> > sigma11Inv;
+	      inverse(sigma11,sigma11Inv);
+	      vector<double> diff1(Delta1);
+	      for (q = 0; q < nOn; q++)
+		diff1[q] -= mu1[q];
+	      vector<vector<double> > sigma21sigma11Inv;
+	      matrixMult(sigma21,sigma11Inv,sigma21sigma11Inv);
+	      vector<double> correct1;
+	      matrixMult(sigma21sigma11Inv,diff1,correct1);
+	      vector<double> muCond(mu2);
+	      for (q = 0; q < str->Q - nOn; q++)
+		muCond[q] += correct1[q];
+	      vector<vector<double> > correctMatrix;
+	      matrixMult(sigma21sigma11Inv,sigma12,correctMatrix);
+	      vector<vector<double> > sigmaCond(str->Q - nOn);
+	      for (q = 0; q < str->Q - nOn; q++)
+		{
+		  sigmaCond[q].resize(str->Q - nOn);
+		  int p;
+		  for (p = 0; p < str->Q - nOn; p++)
+		    sigmaCond[q][p] = sigma22[q][p] - correctMatrix[q][p];
+		}
+
+	      vector<double> newDDelta = ran.MultiGaussian(sigmaCond,muCond);
+	      int qq = 0;
+	      for (q = 0; q < str->Q; q++)
+		{
+		  if (str->delta[q][g] == 0)
+		    {
+		      str->Delta[q][g] = newDDelta[qq];
+		      qq++;
+		    }
+		}
+	    }
 	}
     }
   

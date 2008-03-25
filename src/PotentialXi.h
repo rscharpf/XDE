@@ -10,7 +10,7 @@ class PotentialXi : public Potential
 {
  public:
 
-  PotentialXi(const Structure *str);
+  PotentialXi(const Structure *str,int oneDelta);
   virtual ~PotentialXi(void);
 
   double potential(Random &ran) const;
@@ -18,13 +18,15 @@ class PotentialXi : public Potential
 
  private:
   const Structure *str;
+  int oneDelta;
 };
 
 
 
-inline PotentialXi::PotentialXi(const Structure *str) : Potential()
+inline PotentialXi::PotentialXi(const Structure *str,int oneDelta) : Potential()
 {
   this->str = str;
+  this->oneDelta = oneDelta;
 
   return;
 }
@@ -39,7 +41,7 @@ inline PotentialXi::~PotentialXi(void)
 
 inline Potential *PotentialXi::copy(void) const
 {
-  Potential *pp = new PotentialXi(str);
+  Potential *pp = new PotentialXi(str,oneDelta);
 
   return pp;
 }
@@ -47,8 +49,19 @@ inline Potential *PotentialXi::copy(void) const
 
 inline double PotentialXi::potential(Random &ran) const
 {
-  double pot = ran.PotentialBeta(str->alphaXi,str->betaXi,str->xi);
+  double pot = 0.0;
 
+  if (oneDelta == 0)
+    {
+      int q;
+      for (q = 0; q < str->Q; q++)
+	pot += ran.PotentialBeta(str->alphaXi,str->betaXi,str->xi[q]);
+    }
+  else
+    {
+      pot += ran.PotentialBeta(str->alphaXi,str->betaXi,str->xi[0]);
+    }
+  
   return pot;
 }
 

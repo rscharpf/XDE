@@ -56,7 +56,7 @@ inline double PotentialXqg::potential(Random &ran) const
   double var1 = str->sigma2[q][g] / str->phi[q][g];
   double mm = str->nu[q][g];
 
-  if (str->delta[g] != 0)
+  if (str->delta[q][g] != 0)
     {
       int s;
       for (s = 0; s < str->S[q]; s++)

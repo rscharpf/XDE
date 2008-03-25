@@ -29,6 +29,7 @@ class Structure
   friend class PotentialR;
   friend class PotentialRho;
   friend class PotentialDelta;
+  friend class PotentialDeltag;
   friend class PotentialXi;
   friend class PotentialSigma2;
   friend class PotentialPhi;
@@ -78,8 +79,9 @@ class Structure
   friend class ReportDiffexpressed;
 
  public:
-  Structure(string &filename,Random &ran);
-  Structure(int P,int G,int *S,double *x,int *psi,Random &ran,int checkinput);
+  Structure(string &filename,Random &ran,int oneDelta);
+  Structure(int P,int G,int *S,double *x,int *psi,Random &ran,int checkinput,
+	    int oneDelta);
   virtual ~Structure(void);
 
   void setParameterValues(string &filename);
@@ -107,7 +109,7 @@ class Structure
 			  vector<int> &nUpdate,vector<Update *> &update);
 
   ReportDiffexpressed *setReports(string &filename,int &nBetweenReport,vector<Potential *> &potential,
-		  vector<Update *> &update,vector<Report *> &report);
+		  vector<Update *> &update,vector<Report *> &report,int oneDelta);
   ReportDiffexpressed *setReports(int *output,int &nBetweenReport,int writeToFile,
 		  char **directory,vector<Potential *> &potential,
 		  vector<Update *> &update,vector<Report *> &report,
@@ -119,14 +121,15 @@ class Structure
 		  double *valueL,double *valuePhi,double *valueTheta,
 		  double *valueLambda,double *valueTau2,
 		  double *valueProbDelta,double *valueDiffexpressed,
-		  int *writeDiffexpressedTofile);
+		  int *writeDiffexpressedTofile,
+		  int oneDelta);
 
 
  protected: 
   void readCorrelationValues(vector<vector<double> > &corr,const char *line,int bufSize,
 			     const string varName,string &filename) const;
   void allocateSpace(void);
-  void initialiseVariables(Random &ran);
+  void initialiseVariables(Random &ran,int oneDelta);
 
   //
   // fixed parameter and variables
@@ -151,7 +154,7 @@ class Structure
 
   vector<vector<double> > nu;           // nu[q][g]
   vector<vector<double> > Delta;        // Delta[q][g]
-  vector<int> delta;                    // delta[g]
+  vector<vector<int> > delta;           // delta[q][g]
   vector<double> a;                     // a[q]
   vector<double> b;                     // b[q]
   double c2; 
@@ -159,7 +162,7 @@ class Structure
   vector<double> tau2;                  // tau2[q]
   vector<vector<double> > r;            // r[q1][q2]
   vector<vector<double> > rho;          // rho[q1][q2]
-  double xi;
+  vector<double> xi;                    // xi[q]
   vector<vector<double> > sigma2;       // sigma2[q][g]
   vector<double> t;                     // t[q];
   vector<double> l;                     // l[q]

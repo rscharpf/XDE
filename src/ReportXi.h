@@ -53,15 +53,21 @@ inline void ReportXi::report(const Structure *str)
 {
   if (writeToFile)
     {
-      out << str->xi << " ";
+      int q;
+      for (q = 0; q < str->Q; q++)
+	out << str->xi[q] << " ";
       
       out << "\n";
       out.flush();
     }
   else
     {
-      value[nr] = str->xi;
-      nr++;
+      int q;
+      for (q = 0; q < str->Q; q++)
+	{
+	  value[nr] = str->xi[q];
+	  nr++;
+	}
     }
 
   return;

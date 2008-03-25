@@ -12,8 +12,8 @@ class ReportProbDelta : public Report
 {
  public:
 
-  ReportProbDelta(const string &filename,Structure *str);
-  ReportProbDelta(double *value,Structure *str);
+  ReportProbDelta(const string &filename,Structure *str,int oneDelta);
+  ReportProbDelta(double *value,Structure *str,int oneDelta);
   ~ReportProbDelta(void);
 
   void report(const Structure *str);
@@ -30,7 +30,7 @@ class ReportProbDelta : public Report
 
 
 
-inline ReportProbDelta::ReportProbDelta(const string &filename,Structure *str) : Report(filename)
+inline ReportProbDelta::ReportProbDelta(const string &filename,Structure *str,int oneDelta) : Report(filename)
 {
   writeToFile = 1;
 
@@ -41,7 +41,7 @@ inline ReportProbDelta::ReportProbDelta(const string &filename,Structure *str) :
   for (g = 0; g < str->G; g++)
     {
       vector <Potential *> term;
-      term.push_back(new PotentialDelta(str));
+      term.push_back(new PotentialDelta(str,oneDelta));
       term.push_back(new PotentialDDeltag(g,str));
       int q;
       for (q = 0; q < str->Q; q++)
@@ -59,7 +59,7 @@ inline ReportProbDelta::ReportProbDelta(const string &filename,Structure *str) :
 
 
 
-inline ReportProbDelta::ReportProbDelta(double *value,Structure *str) : Report()
+inline ReportProbDelta::ReportProbDelta(double *value,Structure *str,int oneDelta) : Report()
 {
   writeToFile = 0;
 
@@ -73,7 +73,7 @@ inline ReportProbDelta::ReportProbDelta(double *value,Structure *str) : Report()
   for (g = 0; g < str->G; g++)
     {
       vector <Potential *> term;
-      term.push_back(new PotentialDelta(str));
+      term.push_back(new PotentialDelta(str,oneDelta));
       term.push_back(new PotentialDDeltag(g,str));
       int q;
       for (q = 0; q < str->Q; q++)
@@ -107,40 +107,41 @@ inline void ReportProbDelta::report(const Structure *str)
 
   Random ran(1);
 
-  int g;
+  int q,g;
   for (g = 0; g < str->G; g++)
-    {
-      int oldValue = str->delta[g];
-
-      this->str->delta[g] = 0;
-      pot0 = model[g]->potential(ran);
-      this->str->delta[g] = 1;
-      pot1 = model[g]->potential(ran);
-      
-      double minPot = pot0 < pot1 ? pot0 : pot1;
-      pot0 -= minPot;
-      pot1 -= minPot;
-
-      prob = exp(- pot1) / (exp(- pot0) + exp(- pot1));
-
-      Structure *ss = (Structure *) str;
-      ss->delta[g] = oldValue;
-      
-      if (writeToFile)
-	out << prob << " ";
-      else
-	{
-	  value[nr] = prob;
-	  nr++;
-	}
-    }
-
+    for (q = 0; q < str->Q; q++)
+      {
+	int oldValue = str->delta[q][g];
+	
+	this->str->delta[q][g] = 0;
+	pot0 = model[g]->potential(ran);
+	this->str->delta[q][g] = 1;
+	pot1 = model[g]->potential(ran);
+	
+	double minPot = pot0 < pot1 ? pot0 : pot1;
+	pot0 -= minPot;
+	pot1 -= minPot;
+	
+	prob = exp(- pot1) / (exp(- pot0) + exp(- pot1));
+	
+	Structure *ss = (Structure *) str;
+	ss->delta[q][g] = oldValue;
+	
+	if (writeToFile)
+	  out << prob << " ";
+	else
+	  {
+	    value[nr] = prob;
+	    nr++;
+	  }
+      }
+  
   if (writeToFile)
     {
       out << "\n";
       out.flush();
     }
-
+  
   
   return;
 }

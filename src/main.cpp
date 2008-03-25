@@ -54,9 +54,9 @@ int main(int argc,char **argv)
 {
   cout.setf(ios::scientific,ios::floatfield);
 
-  if (argc != 8)
+  if (argc != 9)
     {
-      cout << "Usage: " << argv[0] << " <seed> <number of iterations> <data file> <parameter file> <initial values file> <update file> <output file>\n\n";
+      cout << "Usage: " << argv[0] << " <seed> <number of iterations> <one Delta> <data file> <parameter file> <initial values file> <update file> <output file>\n\n";
       exit(-1);
     }
 
@@ -72,16 +72,23 @@ int main(int argc,char **argv)
   int nIt;
   nIt = atoi(argv[2]);
 
+  int oneDelta = 0;
+  oneDelta = atoi(argv[3]);
+  if (oneDelta != 0 && oneDelta != 1)
+    {
+      cout << "Illegal value for oneDelta specified: " << oneDelta << "\n";
+      exit(-1);
+    }
 
-  string filenameData(argv[3]);
-  Structure str(filenameData,ran);
+  string filenameData(argv[4]);
+  Structure str(filenameData,ran,oneDelta);
 
   //
   // Set non-default hyper-parameter values
   //
 
-  string filenameParam(argv[4]);
-  if (argv[4][0] != '=')
+  string filenameParam(argv[5]);
+  if (argv[5][0] != '=')
     str.setParameterValues(filenameParam);
   str.printParameterValues();
   
@@ -89,8 +96,8 @@ int main(int argc,char **argv)
   // Set non-default initial parameter values
   //
 
-  string filenameInitial(argv[5]);
-  if (argv[5][0] != '=')
+  string filenameInitial(argv[6]);
+  if (argv[6][0] != '=')
     {
       cout << "Specified initial values:\n\n";
       str.setInitialValues(filenameInitial);
@@ -111,8 +118,8 @@ int main(int argc,char **argv)
   PotentialZero potGamma2;
   PotentialR potR(&str);
   PotentialRho potRho(&str);
-  PotentialDelta potDelta(&str);
-  PotentialXi potXi(&str);
+  PotentialDelta potDelta(&str,oneDelta);
+  PotentialXi potXi(&str,oneDelta);
   PotentialSigma2 potSigma2(&str);
   PotentialZero potT;
   PotentialZero potL;
@@ -247,14 +254,14 @@ int main(int argc,char **argv)
   // Update for delta
   //
   
-  update.push_back(new UpdateDeltaMH(&str));
+  update.push_back(new UpdateDeltaMH(&str,oneDelta));
   nUpdate.push_back(1);
   
   //
   // Update for xi
   //
   
-  update.push_back(new UpdateXiGibbs(&str,CHECKGIBBS,&potTotal));
+  update.push_back(new UpdateXiGibbs(&str,CHECKGIBBS,&potTotal,oneDelta));
   nUpdate.push_back(1);
   
   //
@@ -318,8 +325,8 @@ int main(int argc,char **argv)
   // Set non-default number of updates of each type
   //
   
-  string filenameUpdate(argv[6]);
-  if (argv[6][0] != '=')
+  string filenameUpdate(argv[7]);
+  if (argv[7][0] != '=')
     str.setNumberOfUpdates(filenameUpdate,nUpdate,update);
   cout << "Number of updates in one iteration (epsilon):\n\n";
   cout << "nu:     " << nUpdate[0] << "\n";
@@ -347,10 +354,10 @@ int main(int argc,char **argv)
   
   vector<Report *> report;
   int nBetweenReport = 1;
-  string filenameOutput(argv[7]);
+  string filenameOutput(argv[8]);
   ReportDiffexpressed *reportDiffexpressed = NULL;
-  if (argv[7][0] != '=')
-    reportDiffexpressed = str.setReports(filenameOutput,nBetweenReport,potAll,update,report);
+  if (argv[8][0] != '=')
+    reportDiffexpressed = str.setReports(filenameOutput,nBetweenReport,potAll,update,report,oneDelta);
   
   //
   // run Metropolis-Hastings algorithm

@@ -98,24 +98,35 @@ inline int UpdateDDeltaGibbs::update(Random &ran)
 
       vector<double> mean(str->Q);
       for (p = 0; p < str->Q; p++) mean[p] = 0.0;
-      if (str->delta[g] != 0)
+
+      int modify = 0;
+      for (q = 0; q < str->Q; q++)
+	{
+	  if (str->delta[q][g] == 1)
+	    modify = 1;
+	}
+
+      if (modify != 0)
 	{
 	  vector<vector<double> > varInv;
 	  inverse(var,varInv);
 	  
-	  int s;
 	  for (q = 0; q < str->Q; q++)
 	    {
-	      double var0 = str->sigma2[q][g] * str->phi[q][g];
-	      double var1 = str->sigma2[q][g] / str->phi[q][g];
-	      for (s = 0; s < str->S[q]; s++)
-	      {
-		double variance = str->psi[q][s] == 0 ? var0 : var1;
-		varInv[q][q] += 1.0 / variance;
-		Mean[q] += (2.0 * str->psi[q][s] - 1.0) * (str->x[q][g][s] - str->nu[q][g]) / variance;
-	      }
+	      if (str->delta[q][g] == 1)
+		{
+		  double var0 = str->sigma2[q][g] * str->phi[q][g];
+		  double var1 = str->sigma2[q][g] / str->phi[q][g];
+		  int s;
+		  for (s = 0; s < str->S[q]; s++)
+		    {
+		      double variance = str->psi[q][s] == 0 ? var0 : var1;
+		      varInv[q][q] += 1.0 / variance;
+		      Mean[q] += (2.0 * str->psi[q][s] - 1.0) * (str->x[q][g][s] - str->nu[q][g]) / variance;
+		    }
+		}
 	    }
-
+	  
 	  inverse(varInv,var);
 	  matrixMult(var,Mean,mean);
 	}

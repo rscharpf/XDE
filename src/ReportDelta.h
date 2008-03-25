@@ -52,21 +52,23 @@ inline void ReportDelta::report(const Structure *str)
 {
   if (writeToFile)
     {
-      int g;
+      int q,g;
       for (g = 0; g < str->G; g++)
-	out << str->delta[g] << " ";
+	for (q = 0; q < str->Q; q++)
+	  out << str->delta[q][g] << " ";
       
       out << "\n";
       out.flush();
     }
   else
     {
-      int g;
+      int q,g;
       for (g = 0; g < str->G; g++)
-	{
-	  value[nr] = str->delta[g];
-	  nr++;
-	}      
+	for (q = 0; q < str->Q; q++)
+	  {
+	    value[nr] = str->delta[q][g];
+	    nr++;
+	  }      
     }
 
   return;

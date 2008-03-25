@@ -10,7 +10,7 @@ class PotentialDelta : public Potential
 {
  public:
 
-  PotentialDelta(const Structure *str);
+  PotentialDelta(const Structure *str,int oneDelta);
   virtual ~PotentialDelta(void);
 
   double potential(Random &ran) const;
@@ -18,13 +18,15 @@ class PotentialDelta : public Potential
 
  private:
   const Structure *str;
+  int oneDelta;
 };
 
 
 
-inline PotentialDelta::PotentialDelta(const Structure *str) : Potential()
+inline PotentialDelta::PotentialDelta(const Structure *str,int oneDelta) : Potential()
 {
   this->str = str;
+  this->oneDelta = oneDelta;
 
   return;
 }
@@ -39,7 +41,7 @@ inline PotentialDelta::~PotentialDelta(void)
 
 inline Potential *PotentialDelta::copy(void) const
 {
-  Potential *pp = new PotentialDelta(str);
+  Potential *pp = new PotentialDelta(str,oneDelta);
 
   return pp;
 }
@@ -48,14 +50,29 @@ inline Potential *PotentialDelta::copy(void) const
 inline double PotentialDelta::potential(Random &ran) const
 {
   double pot = 0.0;
-
-  int g;
-  for (g = 0; g < str->G; g++)
+  
+  if(oneDelta == 0)
     {
-      if (str->delta[g] == 1)
-	pot += - log(str->xi);
-      else
-	pot += - log(1.0 - str->xi);
+      int q,g;
+      for (q = 0; q < str->Q; q++)
+	for (g = 0; g < str->G; g++)
+	  {
+	    if (str->delta[q][g] == 1)
+	      pot += - log(str->xi[q]);
+	    else
+	      pot += - log(1.0 - str->xi[q]);
+	  }
+    }
+  else
+    {
+      int g;
+      for (g = 0; g < str->G; g++)
+	{
+	  if (str->delta[0][g] == 1)
+	    pot += - log(str->xi[0]);
+	  else
+	    pot += - log(1.0 - str->xi[0]);
+	}
     }
   
   return pot;
