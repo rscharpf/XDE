@@ -56,7 +56,7 @@ using namespace std;
 
 extern "C" {
 
-  void xdeLIN_main(int *Iseed,int *IshowIterations,int *InIt,int oneDelta,
+  void xdeLIN_main(int *Iseed,int *IshowIterations,int *InIt,int *IoneDelta,
 		   int *IQ,int *IG,int *IS,
 		   double *Ix,int *IPsi,int *IspecifiedInitialValues,
 		   double *INu,double *IDDelta,double *IA,
@@ -107,6 +107,8 @@ extern "C" {
 
     double *x = Ix;
     int *psi = IPsi;
+
+    int oneDelta = *IoneDelta;
 
     //
     // Initialise data and parameters
