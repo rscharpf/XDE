@@ -28,50 +28,50 @@ setMethod("$", "XdeMcmc", function(x, name) {
 	mcmc <- scan(paste(directory(x), "/", name, ".log", sep = ""))
 
   ##################################################
-  ##Parameters indexed by gene and study
-  if(name %in% c("DDelta", "nu", "phi", "sigma2")){
-    I <- iterations(x)
-    mcmc <- array(mcmc,
-                  dim=c(length(studyNames(x)),
-                    nrow(x),
-                    iterations(x)),
-                  dimnames=list(studyNames(x),
-                    featureNames(x),
-                    as.character(1:I)))
-    return(mcmc)
-}
+	##Parameters indexed by gene and study
+	if(name %in% c("DDelta", "nu", "phi", "sigma2", "delta", "probDelta")){
+		I <- iterations(x)
+		mcmc <- array(mcmc,
+			      dim=c(length(studyNames(x)),
+			      nrow(x),
+			      iterations(x)),
+			      dimnames=list(studyNames(x),
+			      featureNames(x),
+			      as.character(1:I)))
+		return(mcmc)
+	}
 
   
-  ##################################################
-  ##Parameters indexed by gene 
-  if(name %in% c("delta", "probDelta")){
-    mcmc <- matrix(mcmc, ncol=iterations(x))
-    rownames(mcmc) <- featureNames(x)
-    return(mcmc)
-  }
+	##--------------------------------------------------
+	##Parameters indexed by gene 
+##	if(name %in% "probDelta"){
+##		mcmc <- matrix(mcmc, ncol=iterations(x))
+##		rownames(mcmc) <- featureNames(x)
+##		return(mcmc)
+##	}
 
   ##################################################
-  ##Parameters indexed by study
-  if(name %in% c("a", "b", "lambda", "l", "tau2", "t", "theta")){
-    mcmc <- matrix(mcmc, nc=length(studyNames(x)), byrow=TRUE)
-    colnames(mcmc) <- studyNames(x)
-    return(mcmc)    
-  }
+	##Parameters indexed by study
+	if(name %in% c("a", "b", "lambda", "l", "tau2", "t", "theta", "xi")){
+		mcmc <- matrix(mcmc, nc=length(studyNames(x)), byrow=TRUE)
+		colnames(mcmc) <- studyNames(x)
+		return(mcmc)    
+	}
 
   ##################################################
-  ##Parameters not indexed by gene or study
-  if(name %in% c("c2", "gamma2", "xi")){
-    mcmc <- matrix(mcmc, nc=1, byrow=TRUE)
-    return(mcmc)    
-  }
+	##Parameters not indexed by gene or study
+	if(name %in% c("c2", "gamma2")){
+		mcmc <- matrix(mcmc, nc=1, byrow=TRUE)
+		return(mcmc)    
+	}
 
   ##################################################  
-  ##Correlation parameters
-  if(name %in% c("r", "rho")){
-    S <- length(studyNames(x))
-    mcmc <- matrix(mcmc, nc=S*(S-1)/2, byrow=TRUE)
-    return(mcmc)    
-  }
+	##Correlation parameters
+	if(name %in% c("r", "rho")){
+		S <- length(studyNames(x))
+		mcmc <- matrix(mcmc, nc=S*(S-1)/2, byrow=TRUE)
+		return(mcmc)    
+	}
 
   ##################################################    
   ##Diagnostics
@@ -102,84 +102,125 @@ setMethod("$", "XdeMcmc", function(x, name) {
 })
 
 setMethod("bayesianEffectSize", "XdeMcmc", function(object) object@bayesianEffectSize)
+
 setReplaceMethod("bayesianEffectSize", c("XdeMcmc", "matrix"),
                  function(object, value){
-                   object@bayesianEffectSize <- value
-                   object
-                   })
+			 object@bayesianEffectSize <- value
+			 object
+		 })
+
 setMethod("calculateBayesianEffectSize", "XdeMcmc",
           function(object){
-            D <- .standardizedDelta(object)
-            averageDelta <- apply(D, c(2, 3), "mean")
-            averageDelta
+		  D <- .standardizedDelta(object)
+		  averageDelta <- apply(D, c(2, 3), "mean")
+		  averageDelta
           })
+
 setMethod("directory", "XdeMcmc", function(object) object@directory)
 setMethod("featureNames", "XdeMcmc", function(object) object@featureNames)
 setMethod("iterations", "XdeMcmc", function(object) object@iterations)
 setMethod("lastMcmc", "XdeMcmc", function(object) object@lastMcmc)
 setMethod("nrow", "XdeMcmc", function(x) length(featureNames(x)))
 setMethod("output", "XdeMcmc", function(object) object@output)
-setMethod("posteriorAvg", "XdeMcmc", function(object){
-  postAvg <- object@posteriorAvg
-  if(!is.null(postAvg)){
-    colnames(postAvg) <- c("diffExpressed", "concordant", "discordant")
-  }
-  postAvg
+
+setMethod("calculatePosteriorAvg", "XdeMcmc", function(object, NCONC=2, NDIFF=2){
+##	postAvg <- object@posteriorAvg
+##	if(nrow(postAvg) == 0){
+	D <- object$DDelta
+	d <- object$delta
+	dD <- sign(d*D)
+	f <- function(x){
+		##define an indicator for concordance
+		##indicator for discordance
+		tmp <- t(rbind(colSums(x > 0), colSums(x < 0)))
+		colnames(tmp) <- c("#up", "#down")
+		discordant <- (tmp[, 1] * tmp[, 2]) != 0
+		concordant <- (tmp[, 1] * tmp[, 2]) == 0  ##first require no discordant signs
+		##Finally, let the number of concordant studies be user-specified
+		concordant <- concordant * (rowSums(tmp) >= NCONC)
+		diffExpr <- rowSums(abs(tmp)) >= NDIFF
+		indicators <- matrix(c(concordant,
+				       discordant,
+				       diffExpr), ncol=3, byrow=FALSE)
+	}
+	I <- array(NA, c(dim(dD)[2], 3, dim(dD)[3]))
+	dimnames(I) <- list(featureNames(object),
+			    c("concordant", "discordant", "diffExpressed"),
+			    paste("iterations", 1:dim(dD)[3], sep="_"))
+	for(i in 1:dim(dD)[3]){
+		I[, , i] <- f(dD[, , i])
+	}
+	concordant.avg <- rowMeans(I[, 1, ])
+	discordant.avg <- rowMeans(I[, 2, ])
+	diffExpressed.avg <- rowMeans(I[, 3, ])
+	X <- cbind(concordant.avg, discordant.avg, diffExpressed.avg)
+	colnames(X) <- c("concordant", "discordant", "diffExpressed")
+	rownames(X) <- featureNames(object)
+	X
 })
+setMethod("posteriorAvg", "XdeMcmc", function(object) object@posteriorAvg)
+setReplaceMethod("posteriorAvg", c("XdeMcmc", "matrix"),
+		 function(object, value){
+			 object@posteriorAvg <- value
+			 object
+		 })
+
 setMethod("seed", "XdeMcmc", function(object) object@seed)
 setMethod("studyNames", "XdeMcmc", function(object) object@studyNames)
+	  
 setMethod(".standardizedDelta", "XdeMcmc",
           function(object, deltaProduct=TRUE){
-            delta <- object$delta
-            sqrt.c2 <- sqrt(object$c2)
-            ##C <- sqrt(c2Log(object))
-            sigma <- sqrt(object$sigma2)
-            tau <- sqrt(object$tau2)
-            b <- object$b
-            dDelta <- object$DDelta
-            b <- t(b)
-            tau <- t(tau)
-            s <- array(NA, dim=dim(sigma))
-            ##dDelta <- Delta
-            P <- dim(sigma)[1]
-            ##For each platform...
-            for(i in 1:P){
-              s[i, , ] <- t(apply(as.matrix(sigma[i, , ]), 1, "^", b[i, ]))
-              s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", tau[i, ]))
-              s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", sqrt.c2))
-              if(deltaProduct) dDelta[i, ,] <- as.matrix(dDelta[i, , ]) * delta
-            }
-            D <- dDelta/s
-            D <- aperm(D)
-            D
+		  delta <- object$delta
+		  sqrt.c2 <- sqrt(object$c2)
+		  ##C <- sqrt(c2Log(object))
+		  sigma <- sqrt(object$sigma2)
+		  tau <- sqrt(object$tau2)
+		  b <- object$b
+		  dDelta <- object$DDelta
+		  b <- t(b)
+		  tau <- t(tau)
+		  s <- array(NA, dim=dim(sigma))
+		  ##dDelta <- Delta
+		  P <- dim(sigma)[1]
+		  ##For each platform...
+		  for(i in 1:P){
+			  s[i, , ] <- t(apply(as.matrix(sigma[i, , ]), 1, "^", b[i, ]))
+			  s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", tau[i, ]))
+			  s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", sqrt.c2))
+##			  if(deltaProduct) dDelta[i, ,] <- as.matrix(dDelta[i, , ]) * delta
+			  if(deltaProduct) dDelta <- dDelta * delta
+		  }
+		  D <- dDelta/s
+		  D <- aperm(D)
+		  D
           })
 
 setMethod("show", "XdeMcmc",
           function(object){
-            cat("Instance of", class(object), "\n")
-            cat("Study names:", studyNames(object), "\n")
-            cat("Number of features:" , length(featureNames(object)), "\n\n")
-            ##cat("phenotypeLabel", phenotypeLabel(object), "\n\n")
-            cat("seed (a new seed):", seed(object), "\n\n")            
-            cat("iterations (saved):", iterations(object), "\n\n")
-            out <- as.logical(output(object)[2:length(output(object))])
-            names(out) <- .parameterNames()[2:length(output(object))]
-            cat("output (parameters saved):\n")
-            print(out)
-            cat("\n")
-            cat("directory (of saved log files):", directory(object), "\n\n")
-            cat("lastMcmc:", class(lastMcmc(object)), "\n\n")
-            if(!is.null(posteriorAvg(object))){
-              cat("posteriorAvg:\n")
-              str(posteriorAvg(object))
-              cat("\n")
-            } else cat("posteriorAvg: NULL\n")
-            if(!is.null(bayesianEffectSize(object))){
-              cat("bayesianEffectSize:\n")
-              str(bayesianEffectSize(object))
-              cat("\n\n")
-            } else cat("bayesianEffectSize: NULL\n")
-            return()
+		  cat("Instance of", class(object), "\n")
+		  cat("Study names:", studyNames(object), "\n")
+		  cat("Number of features:" , length(featureNames(object)), "\n\n")
+		  ##cat("phenotypeLabel", phenotypeLabel(object), "\n\n")
+		  cat("seed (a new seed):", seed(object), "\n\n")            
+		  cat("iterations (saved):", iterations(object), "\n\n")
+		  out <- as.logical(output(object)[2:length(output(object))])
+		  names(out) <- .parameterNames()[2:length(output(object))]
+		  cat("output (parameters saved):\n")
+		  print(out)
+		  cat("\n")
+		  cat("directory (of saved log files):", directory(object), "\n\n")
+		  cat("lastMcmc:", class(lastMcmc(object)), "\n\n")
+		  if(!is.null(posteriorAvg(object))){
+			  cat("posteriorAvg:\n")
+			  str(posteriorAvg(object))
+			  cat("\n")
+		  } else cat("posteriorAvg: NULL\n")
+		  if(!is.null(bayesianEffectSize(object))){
+			  cat("bayesianEffectSize:\n")
+			  str(bayesianEffectSize(object))
+			  cat("\n\n")
+		  } else cat("bayesianEffectSize: NULL\n")
+		  return()
           })
 
 ##See help on plot.mcmc
@@ -256,8 +297,9 @@ setMethod("plot", "XdeMcmc",
             }
 
             if(output(x)["xi"] == 1){                        
-              xi <- as.mcmc(x$xi)
-              coda:::plot.mcmc(xi, density=FALSE, col=1, main=expression(xi), smooth=FALSE, auto.layout=FALSE, ...)
+		    xi <- as.mcmc(x$xi)
+		    plotFxn(xi, main=expression(xi), xaxt="s", ylim=c(0, 1), ...)
+##		    coda:::plot.mcmc(xi, density=FALSE, col=1, main=expression(xi), smooth=FALSE, auto.layout=FALSE, ...)
             }
 
             if(output(x)["rho"] == 1){                        

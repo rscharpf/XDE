@@ -1,21 +1,7 @@
 ##setMethod("chain.initialize", "XdeSet",
 .chainInitialize <- function(object,
                              chain.length,
-##                             writeToFile,
-##                             iterations,
-##                             output,
                              verbose){
-            ##When writing to file, only the last iteration is stored in memory
-##            if(writeToFile){
-##              iter <- output[2:length(output)]
-##              for(i in 1:length(iter)) iter[i] <- max(iter[i], 1)              
-##              if(verbose) print("Writing selected chains (see output(xdeParams)) to file...")              
-##            }else{
-##              if(verbose) print("Storing chain in memory.  Only one iteration will be stored in the object returned by xde ")
-##              iter <- iterations*output[2:length(output)]
-##              ##Segmentation default occurs if following line is
-##              ##ommitted...should talk to haakon about this
-##              for(i in 1:length(iter)) iter[i] <- max(iter[i], 1)
               names(chain.length) <- c("potential",
                                         "acceptance",
                                         "nu",
@@ -53,8 +39,9 @@
             Gamma2 <- rep(0, chain.length[["gamma2"]])
             Rho <- rep(0, QQ*(QQ-1)/2*chain.length[["rho"]])
             R <- rep(0, QQ*(QQ-1)/2*chain.length[["r"]])              
-            Delta <- rep(0, G*chain.length[["delta"]])
-            Xi <- rep(0, chain.length[["xi"]])
+##            Delta <- rep(0, G*chain.length[["delta"]])
+            Delta <- rep(0, G*QQ*chain.length[["delta"]])
+            Xi <- rep(0, QQ*chain.length[["xi"]])
             Sigma2 <- rep(0, QQ * G*chain.length[["sigma2"]])
             T <- rep(0, QQ*chain.length[["t"]])
             L <- rep(0, QQ*chain.length[["l"]])
@@ -62,7 +49,7 @@
             Theta <- rep(0, QQ*chain.length[["theta"]])
             Lambda <- rep(0, QQ*chain.length[["lambda"]])
             Tau2 <- rep(0, QQ*chain.length[["tau2"]])
-            ProbDelta <- rep(0, G*chain.length[["probDelta"]])
+            ProbDelta <- rep(0, G*QQ*chain.length[["probDelta"]])
             Diffexpressed <- rep(0, 3*G)
             eenv <- new.env()
             x <- list(Potential=potential,
@@ -410,79 +397,80 @@ xsScores <- function(statistic, N){
 
 
 empiricalStart <- function(object, zeroNu=FALSE){
-  if(length(grep(phenotypeLabel(object), varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
-  potential <- rep(0, 19)
-  acceptance <- rep(0, 17)
+	if(length(grep(phenotypeLabel(object), varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
+	potential <- rep(0, 19)
+	acceptance <- rep(0, 17)
   
 
-  if(!zeroNu){
-    meanExpression <- function(eset) rowMeans(exprs(eset))  
-    Nu <- sapply(object, meanExpression)
-    Rho <- cor(Nu)[upper.tri(cor(Nu))]
-    Nu <- as.vector(Nu)
-    Gamma2 <- var(Nu)    
-  } else{
-    Nu <- as.vector(matrix(0, nrow(object), length(object)))
-    Rho <- rep(0, choose(length(object), 2))
-    Gamma2 <- 0
-  }
+	if(!zeroNu){
+		meanExpression <- function(eset) rowMeans(exprs(eset))  
+		Nu <- sapply(object, meanExpression)
+		Rho <- cor(Nu)[upper.tri(cor(Nu))]
+		Nu <- as.vector(Nu)
+		Gamma2 <- var(Nu)    
+	} else{
+		Nu <- as.vector(matrix(0, nrow(object), length(object)))
+		Rho <- rep(0, choose(length(object), 2))
+		Gamma2 <- 0
+	}
 
-  averageDifference <- function(eset, classLabel){
-    phenoColumn <- grep(classLabel, names(pData(eset)))
-    pheno <- pData(eset)[, phenoColumn]
-    mn1 <- rowMeans(exprs(eset)[, pheno == 1])
-    mn0 <- rowMeans(exprs(eset)[, pheno == 0])
-    avdif <- mn1-mn0
-    avdif
-  }
-  DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel(object))
-  R <- c(cor(DDelta[, 1], DDelta[, 2]), cor(DDelta[, 1], DDelta[,3]), cor(DDelta[,2], DDelta[,3]))        
+	averageDifference <- function(eset, classLabel){
+		## limma would be an easy way to fit a linear model to each gene
+		phenoColumn <- grep(classLabel, names(pData(eset)))
+		pheno <- pData(eset)[, phenoColumn]
+		mn1 <- rowMeans(exprs(eset)[, pheno == 1])
+		mn0 <- rowMeans(exprs(eset)[, pheno == 0])
+		avdif <- mn1-mn0
+		avdif
+	}
+	DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel(object))
+	R <- c(cor(DDelta[, 1], DDelta[, 2]), cor(DDelta[, 1], DDelta[,3]), cor(DDelta[,2], DDelta[,3]))        
 
-  quant <- quantile(rowMeans(DDelta), probs=c(0.1, 0.9))
-  Delta <- ifelse(rowMeans(DDelta) < quant[1] | rowMeans(DDelta) > quant[2], 1, 0)
-  Delta <- as.vector(Delta)
-  DDelta <- as.vector(DDelta)
-  C2 <- var(DDelta)
+	quant <- quantile(rowMeans(DDelta), probs=c(0.1, 0.9))
+	Delta <- ifelse(rowMeans(DDelta) < quant[1] | rowMeans(DDelta) > quant[2], 1, 0)
+	Delta <- as.vector(Delta)
+	DDelta <- as.vector(DDelta)
+	C2 <- var(DDelta)
 
-  ##Should we start at zero or somewhere in the middle
-  A <- rep(0.5, length(object))
-  B <- rep(0.5, length(object))
+	##Should we start at zero or somewhere in the middle
+	A <- rep(0.5, length(object))
+	B <- rep(0.5, length(object))
 
-  ##0.2 seems reasonable,  or the proportion of t-statistics > X
-  Xi <- 0.2
+	##0.2 seems reasonable,  or the proportion of t-statistics > X
+	Xi <- 0.2
   
-  ##Start at the empirical standard deviation
-  varianceExpression <- function(eset){
-    apply(exprs(eset), 1, var)
-  }
-  Sigma2 <- sapply(object, varianceExpression)
+	##Start at the empirical standard deviation
+	varianceExpression <- function(eset){
+		apply(exprs(eset), 1, var)
+	}
+	Sigma2 <- sapply(object, varianceExpression)
 
-  ##Gamma with mean 1
-  ##L and T are mean and variance, respectively
-  ##
-  L <- as.numeric(colMeans(Sigma2))
-  T <- as.numeric(apply(Sigma2, 2, var))
-  Sigma2 <- as.vector(Sigma2)
+	##Gamma with mean 1
+	##L and T are mean and variance, respectively
+	##
+	L <- as.numeric(colMeans(Sigma2))
+	T <- as.numeric(apply(Sigma2, 2, var))
+	Sigma2 <- as.vector(Sigma2)
 
-  ##Lambda and theta are the mean and variance
-  ##respectively (as per Haakon's 10/23/2006 e-mail)
-  Lambda <- rep(1, length(object))
-  Theta <- rep(0.001, length(object))
+	##Lambda and theta are the mean and variance
+	##respectively (as per Haakon's 10/23/2006 e-mail)
+	Lambda <- rep(1, length(object))
+	Theta <- rep(0.001, length(object))
 
   
-  Phi <- rep(1, (length(object) * nrow(object)))
-  Tau2 <- rep(1, length(object))
-  ProbDelta <- Delta
-  eenv <- new.env()
-  linInitialValues <- list(#potential=potential, 
-                           #acceptance=acceptance, 
-                           Nu=Nu, DDelta=DDelta, 
-                           A=A, B=B, C2=C2, Gamma2=Gamma2, 
-                           R=R, Rho=Rho, Delta=Delta,
-                           Xi=Xi, Sigma2=Sigma2, T=T, L=L, 
-                           Phi=Phi, Theta=Theta, Lambda=Lambda, 
-                           Tau2=Tau2, ProbDelta=ProbDelta)
-  linInitialValues
+	Phi <- rep(1, (length(object) * nrow(object)))
+	Tau2 <- rep(1, length(object))
+	ProbDelta <- Delta
+	eenv <- new.env()
+	linInitialValues <- list(#potential=potential, 
+					#acceptance=acceptance, 
+				 Nu=Nu, DDelta=DDelta, 
+				 A=A, B=B, C2=C2, Gamma2=Gamma2, 
+				 R=R, Rho=Rho, Delta=Delta,
+				 Xi=Xi, Sigma2=Sigma2, T=T, L=L, 
+				 Phi=Phi, Theta=Theta, Lambda=Lambda, 
+				 Tau2=Tau2, ProbDelta=ProbDelta)
+	linInitialValues
 }
 
 

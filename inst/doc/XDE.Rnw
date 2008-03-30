@@ -183,8 +183,14 @@ initializing an instance of the \xparam{} class:
 
 <<initializeList, eval=TRUE>>=
 params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous")
+iterations(params) <- 3
+burnin(params) <- FALSE
+fit <- xde(params, xlist)
 params
 @ 
+
+
+
 
 \section{\label{sec:fit} Fitting the Bayesian hierarchical model}
 
@@ -199,6 +205,7 @@ burnin of 3 iterations:
 
 <<burnin, eval=FALSE>>=
 iterations(params) <- 3
+burnin(params) <- TRUE
 fit <- xde(params, xlist)
 @ 
 
@@ -214,7 +221,6 @@ iteration stored in the \texttt{fit} object, one should provide the
 \Rfunction{xde} function:
 
 <<moreIterations, eval=FALSE>>=
-##stopifnot(seed(params) != seed(fit))
 iterations(params) <- 2
 fit2 <- xde(params, xlist, fit)
 @ 
@@ -247,6 +253,11 @@ output(params)[c("potential", "acceptance", "nu", "DDelta",
                  "delta", "probDelta", "sigma2", "phi")] <- 0
 thin(params) <- 2
 xmcmc <- xde(params, xlist)
+##posteriorAvg(xmcmc) <- calculatePosteriorAvg(xmcmc, NCONC=3)
+@ 
+
+<<echo=FALSE, eval=FALSE>>=
+save(xmcmc, file="~/madman/Rpacks/XDE/data/xmcmc.RData")
 @ 
 
 See the \xparam{} vignette for a more detailed discussion of the
@@ -254,7 +265,7 @@ output, burnin, and thin methods.  The \Robject{xmcm} object can be
 loaded by:
 
 <<loadObject, eval=TRUE, echo=FALSE>>=
-data(xmcmc)
+data(xmcmc, package="XDE")
 @ 
 
 \section{\label{sec:mcmc} MCMC diagnostics}
@@ -283,7 +294,7 @@ pathToLogFiles <- system.file("logFiles", package="XDE")
 xmcmc@directory <- pathToLogFiles
 c2 <- xmcmc$c2
 if(require(coda)){
-  plot(as.mcmc(c2))
+	plot(as.mcmc(c2))
 }
 @
 
@@ -291,9 +302,10 @@ A default plotting method has been provided that displays the chains
 of the parameters that tend to converge slower.  Again, this function
 requires the \R{} package \Rpackage{coda}:
 
-<<chains, fig=TRUE, include=TRUE, eval=TRUE>>=
+%FIXME
+<<chains, fig=TRUE, include=TRUE, eval=FALSE>>=
 if(require(coda)){
-    plot(xmcmc)
+	plot(xmcmc)
 }
 @ 
 
@@ -320,7 +332,7 @@ Posterior averages for the probability of differential expression,
 concordant differential expression, and discordant differential
 expression are stored in the \Robject{xmcmc} object:
 
-<<postAvg, eval=TRUE>>=
+<<postAvg>>=
 postAvg <- posteriorAvg(xmcmc)
 @ 
 
@@ -329,10 +341,9 @@ average probabilities are computed.
 
 <<histFxn, eval=TRUE>>=
 plotPosteriorAvg <- function(){
-  par(mfrow=c(2, 1), las=1)
-  ##hist(postAvg[, "diffExpressed"], breaks=50, xlim=c(0, 1))
-  hist(postAvg[, "concordant"], breaks=50, xlim=c(0, 1), main="")
-  hist(postAvg[, "discordant"], breaks=50, xlim=c(0, 1), main="")
+	par(mfrow=c(2, 1), las=1)
+	hist(postAvg[, "concordant"], breaks=50, xlim=c(0, 1), main="")
+	hist(postAvg[, "discordant"], breaks=50, xlim=c(0, 1), main="")
 }
 @ 
 

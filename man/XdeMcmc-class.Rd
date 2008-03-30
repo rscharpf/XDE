@@ -20,6 +20,7 @@
 \alias{output,XdeMcmc-method}
 \alias{plot,XdeMcmc-method}
 \alias{posteriorAvg,XdeMcmc-method}
+\alias{posteriorAvg<-,XdeMcmc,matrix-method}
 \alias{seed,XdeMcmc-method}
 \alias{show,XdeMcmc-method}
 \alias{studyNames,XdeMcmc-method}

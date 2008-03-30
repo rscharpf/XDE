@@ -55,7 +55,8 @@ setClass("XdeParameter",
                         directory="character",
                         phenotypeLabel="character",
                         verbose="logical",
-                        studyNames="character"))
+                        studyNames="character",
+			one.delta="logical"))
 
 
 

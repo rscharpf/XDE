@@ -18,8 +18,12 @@ setMethod("initialize", "XdeParameter",
                    phenotypeLabel="",
                    showIterations=TRUE,
                    verbose=FALSE,
+		   one.delta=TRUE,
                    studyNames=names(esetList)){
-            if(missing(esetList)) stop("Must provide an ExpressionSetList in order to set up default values for XDE")
+		  if(missing(esetList)) stop("Must provide an ExpressionSetList in order to set up default values for XDE")
+		  if(class(esetList) != "ExpressionSetList"){
+			  esetList <- as(esetList, "ExpressionSetList")
+		  }
             ##check that phenotypeLabel is in each ExpressionSet
             if(!(all(sapply(esetList, function(x, label){ label %in% varLabels(x)}, label=phenotypeLabel)))){
               stop("supplied phenotypeLabel must be present in all ExpressionSets")
@@ -33,10 +37,13 @@ setMethod("initialize", "XdeParameter",
             .Object@updates <- updates            
             ##Directory to write files to must exist
             if(!burnin){
-              if(!file.exists(directory)) stop(paste(directory, "does not exist"))
+		    if(!file.exists(directory)){
+			    print(paste(directory, "does not exist. Creating new one"))
+			    dir.create(directory, recursive=TRUE)
+		    }
             } else{
-              output <- c(1, rep(0, 21))
-              names(output) <- .parameterNames()              
+		    output <- c(1, rep(0, 21))
+		    names(output) <- .parameterNames()              
             }
             .Object@tuning <- tuning
             .Object@hyperparameters <- .hyperparametersDefault(length(esetList))
@@ -44,22 +51,24 @@ setMethod("initialize", "XdeParameter",
             .Object@seed <- as.integer(seed)
             .Object@directory <- paste(directory, "/", sep="")
             .Object@verbose <- verbose
+	    .Object@one.delta <- one.delta
+	    
             ##if firstIteration is not supplied
             if(length(firstMcmc) == 0){
-              .Object@specifiedInitialValues <- FALSE
-              .Object@iterations <- 1
-              .Object@showIterations <- FALSE
-              chain.length <- rep(1, length(2:length(output)))
-              ##only need to store the results from one iteration
-              ##Nothing will be written to file if burnin is TRUE
-              .Object@burnin <- TRUE
-              firstMcmc(.Object) <- .chainInitialize(object=esetList,
-                                                     chain.length=chain.length,
-                                                     verbose=verbose)
-              ##get starting values by simulating from the prior
-              firstMcmc(.Object) <- lastMcmc(xde(paramsMcmc=.Object, esetList=esetList))
+		    .Object@specifiedInitialValues <- FALSE
+		    .Object@iterations <- 1
+		    .Object@showIterations <- FALSE
+		    chain.length <- rep(1, length(2:length(output)))
+		    ##only need to store the results from one iteration
+		    ##Nothing will be written to file if burnin is TRUE
+		    .Object@burnin <- TRUE
+		    firstMcmc(.Object) <- .chainInitialize(object=esetList,
+							   chain.length=chain.length,
+							   verbose=verbose)
+		    ##get starting values by simulating from the prior
+		    firstMcmc(.Object) <- lastMcmc(xde(paramsMcmc=.Object, esetList=esetList))
             } else{
-              firstMcmc(.Object) <- firstMcmc
+		    firstMcmc(.Object) <- firstMcmc
             }
             .Object@specifiedInitialValues <- TRUE            
             .Object@burnin <- burnin            
@@ -109,13 +118,13 @@ setReplaceMethod("firstMcmc", c("XdeParameter", "list"),
 setMethod("directory", "XdeParameter", function(object) object@directory)
 setReplaceMethod("directory", "XdeParameter",
                  function(object, value){
-                   fname <- paste(value, "/", sep="")
-                   if(!file.exists(fname)){
-                     print("Directory does not exist. Creating new directory")
-                     dir.create(path=fname)
-                   } 
-                   object@directory <- fname
-                   object
+			 fname <- paste(value, "/", sep="")
+			 if(!file.exists(fname)){
+				 print("Directory does not exist. Creating new directory")
+				 dir.create(path=fname, recursive=TRUE)
+			 } 
+			 object@directory <- fname
+			 object
                  })
 
 ##setMethod("featureData", "XdeParameter", function(object) object@featureData)
@@ -187,6 +196,7 @@ setMethod("show", "XdeParameter",
             cat("directory (where to save the MCMC chains): ", directory(object), "\n")
             cat("phenotypeLabel: ", phenotypeLabel(object), "\n")
             cat("studyNames: ", studyNames(object), "\n")
+	    cat("one.delta: ", object@one.delta, "\n")
           })
             
 setMethod("showIterations", "XdeParameter", function(object) object@showIterations)
