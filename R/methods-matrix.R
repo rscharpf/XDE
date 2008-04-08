@@ -19,27 +19,27 @@ setMethod("pairs", "matrix",
 ##N is a vector of sample sizes
 setMethod(".pca", "matrix",
           function(object, N=NULL, ...){
-            if(length(N) != ncol(object)) stop("The sample size in each study must be specified")
-            ##1. obtain the effect sizes in the P studies
-            ##   - these are stored in 'object'
-            ##2. center the effect sizes by their means
-            meancen <- colMeans(object)
-            xcen <- sweep(object, 2, meancen)
+		  if(length(N) != ncol(object)) stop("The sample size in each study must be specified")
+		  ##1. obtain the effect sizes in the P studies
+		  ##   - these are stored in 'object'
+		  ##2. center the effect sizes by their means
+		  meancen <- colMeans(object)
+		  xcen <- sweep(object, 2, meancen)
   
-            ##3. Fit principal components to w1, w2, and w3 using
-            ##   covariance, saving a1, a2 and a3, the loadings of the first
-            ##   principal component.
-            fit <- princomp(xcen, cor = FALSE)
-            a <- fit$loadings[1:ncol(object), 1]
+		  ##3. Fit principal components to w1, w2, and w3 using
+		  ##   covariance, saving a1, a2 and a3, the loadings of the first
+		  ##   principal component.
+		  fit <- princomp(xcen, cor = FALSE)
+		  a <- fit$loadings[1:ncol(object), 1]
   
-            ##4. Estimate the combined effect: (see p.9 of Garrett-Mayer
-            ##   paper)
-            weight <- sum(a * sqrt(N))
-            combined.effect <- matrix(NA, ncol=ncol(object), nrow=nrow(object))
-            for(i in 1:ncol(object)){
-              combined.effect[,i] <- a[i] * sqrt(N[i]) * xcen[, i]
-            }
-            score <- apply(combined.effect, 1, sum)
-            score <- score/weight
-            return(score)
+		  ##4. Estimate the combined effect: (see p.9 of Garrett-Mayer
+		  ##   paper)
+		  weight <- sum(a * sqrt(N))
+		  combined.effect <- matrix(NA, ncol=ncol(object), nrow=nrow(object))
+		  for(i in 1:ncol(object)){
+			  combined.effect[,i] <- a[i] * sqrt(N[i]) * xcen[, i]
+		  }
+		  score <- apply(combined.effect, 1, sum)
+		  score <- score/weight
+		  return(score)
           })

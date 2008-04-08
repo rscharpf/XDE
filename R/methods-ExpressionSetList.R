@@ -144,36 +144,36 @@ setMethod("nSamples", "ExpressionSetList", function(x)  unlist(lapply(x, functio
 ##pca <- function(object, x, ...){
 setMethod(".pca", "ExpressionSetList",
           function(object, x, ...){
-            P <- length(object)
-            N <- nSamples(object)
-            G <- nrow(object)
-            principal.components <- function(x, P, N, G){
-              ##1. obtain the effect sizes in the P studies
-              ##   - these are stored in 'x'
+		  P <- length(object)
+		  N <- nSamples(object)
+		  G <- nrow(object)
+		  principal.components <- function(x, P, N, G){
+			  ##1. obtain the effect sizes in the P studies
+			  ##   - these are stored in 'x'
             
-              ##2. center the effect sizes by their means
-              meancen <- colMeans(x)
-              xcen <- sweep(x, 2, meancen)
+			  ##2. center the effect sizes by their means
+			  meancen <- colMeans(x)
+			  xcen <- sweep(x, 2, meancen)
 
-              ##3. Fit principal components to w1, w2, and w3 using
-              ##   covariance, saving a1, a2 and a3, the loadings of the first
-              ##   principal component.
-              fit <- princomp(xcen, cor = FALSE)
-              a <- fit$loadings[1:P, 1]
+			  ##3. Fit principal components to w1, w2, and w3 using
+			  ##   covariance, saving a1, a2 and a3, the loadings of the first
+			  ##   principal component.
+			  fit <- princomp(xcen, cor = FALSE)
+			  a <- fit$loadings[1:P, 1]
 
-              ##4. Estimate the combined effect: (see p.9 of Garrett-Mayer
-              ##   paper)
-              weight <- sum(a * sqrt(N))
-              combined.effect <- matrix(NA, ncol=P, nrow=G)
-              for(i in 1:P){
-                combined.effect[,i] <- a[i] * sqrt(N[i]) * xcen[, i]
-              }
-              score <- apply(combined.effect, 1, sum)
-              score <- score/weight
-              return(score)
-            }
-            score <- principal.components(x=x, P=P, N=N, G=G)
-            return(score)
+			  ##4. Estimate the combined effect: (see p.9 of Garrett-Mayer
+			  ##   paper)
+			  weight <- sum(a * sqrt(N))
+			  combined.effect <- matrix(NA, ncol=P, nrow=G)
+			  for(i in 1:P){
+				  combined.effect[,i] <- a[i] * sqrt(N[i]) * xcen[, i]
+			  }
+			  score <- apply(combined.effect, 1, sum)
+			  score <- score/weight
+			  return(score)
+		  }
+		  score <- principal.components(x=x, P=P, N=N, G=G)
+		  return(score)
           })
 
 setMethod("pData", "ExpressionSetList",

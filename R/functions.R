@@ -123,60 +123,59 @@
 ssStatistic <- function(statistic=c("t", "sam", "z")[1],
                         phenotypeLabel,
                         esetList, ...){
-  if(!(statistic == "t" | statistic == "sam" | statistic == "z")){
-    stop("only t and sam study-specific statistics provided")
-  }
+	if(!(statistic == "t" | statistic == "sam" | statistic == "z")){
+		stop("only t and sam study-specific statistics provided")
+	}
 
-  ###########################################################################
-  ##Wrapper for Welch t-statistic
-  multtestWrapper <- function(eset, classlabel, ...){
-    require(multtest) || stop("Package multtest not available")    
-    column <- grep(classlabel, colnames(pData(eset)))
-    if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
-    if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
-    if(length(column) == 1) classlabel <- pData(eset)[, column]
-    X <- exprs(eset)
-    stat <- mt.teststat(X=X, classlabel=classlabel, test="t",
-                        nonpara="n")
-    stat
-  }
+	##-----------------------------------------------------------
+	##Wrapper for Welch t-statistic
+	multtestWrapper <- function(eset, classlabel, ...){
+		require(multtest) || stop("Package multtest not available")    
+		column <- grep(classlabel, colnames(pData(eset)))
+		if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
+		if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
+		if(length(column) == 1) classlabel <- pData(eset)[, column]
+		X <- exprs(eset)
+		stat <- mt.teststat(X=X, classlabel=classlabel, test="t",
+				    nonpara="n")
+		stat
+	}
 
-  sam.wrapper <- function(eset, classlabel, method, returnQ, gene.names){
-    require(siggenes) || stop("Package siggenes not available")              
-    column <- grep(classlabel, colnames(pData(eset)))
-    if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
-    if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
-    if(length(column) == 1) classlabel <- pData(eset)[, column]
-    X <- exprs(eset)
-    stat <- sam(data=X, cl=classlabel, method=method,
-                gene.names=gene.names)
-    if(returnQ) stat <- stat@q.value else stat <- stat@d
-    stat
-  }
+	sam.wrapper <- function(eset, classlabel, method, returnQ, gene.names){
+		require(siggenes) || stop("Package siggenes not available")              
+		column <- grep(classlabel, colnames(pData(eset)))
+		if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
+		if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
+		if(length(column) == 1) classlabel <- pData(eset)[, column]
+		X <- exprs(eset)
+		stat <- sam(data=X, cl=classlabel, method=method,
+			    gene.names=gene.names)
+		if(returnQ) stat <- stat@q.value else stat <- stat@d
+		stat
+	}
 
-  z.wrapper <- function(object, classlabel, useREM=TRUE){
-    ##object is a list of ExpressionSets
-    require(GeneMeta) || stop("Package GeneMeta is not available")
-    pDataList <- function(eset, covariateName){
-      1-(pData(eset)[, grep(covariateName, colnames(pData(eset)))])
-    }  
-    classes <- lapply(object, pDataList, classlabel)
-    options(warn=-1)
-    z <- zScores(object, classes=classes, useREM=useREM)
-##    z <- data.frame(z[, grep("zSco", colnames(z))])
-    z <- z[, grep("zSco", colnames(z))]
-    return(z)
-  }
+	z.wrapper <- function(object, classlabel, useREM=TRUE){
+		##object is a list of ExpressionSets
+		require(GeneMeta) || stop("Package GeneMeta is not available")
+		pDataList <- function(eset, covariateName){
+			1-(pData(eset)[, grep(covariateName, colnames(pData(eset)))])
+		}  
+		classes <- lapply(object, pDataList, classlabel)
+		z <- zScores(object, classes=classes, useREM=useREM)
+		##    z <- data.frame(z[, grep("zSco", colnames(z))])
+		z <- z[, grep("zSco", colnames(z))]
+		return(z)
+	}
 
-  ###########################################################################
-  ##Wrapper for SAM-statistic
-  stat <- switch(statistic,
-                 t=sapply(esetList, multtestWrapper, classlabel=phenotypeLabel),
-                 sam=sapply(esetList, sam.wrapper, classlabel=phenotypeLabel,
-                   returnQ=FALSE, method="d.stat", gene.names=featureNames(esetList), ...),
-                 z=z.wrapper(object=esetList, classlabel=phenotypeLabel, useREM=TRUE))
-  rownames(stat) <- featureNames(esetList)
-  return(stat)
+	##---------------------------------------------------------------------------
+	##Wrapper for SAM-statistic
+	stat <- switch(statistic,
+		       t=sapply(esetList, multtestWrapper, classlabel=phenotypeLabel),
+		       sam=sapply(esetList, sam.wrapper, classlabel=phenotypeLabel,
+		       returnQ=FALSE, method="d.stat", gene.names=featureNames(esetList), ...),
+		       z=z.wrapper(object=esetList, classlabel=phenotypeLabel, useREM=TRUE))
+	rownames(stat) <- featureNames(esetList)
+	return(stat)
 }
 
 .integ.norm<-function(x){
@@ -242,32 +241,31 @@ symbolsInteresting <- function(rankingStatistic, percentile=0.9,
 
 ##statistic should be the standardized Delta
 xsScores <- function(statistic, N){
-  if(class(statistic) != "matrix") stop("study-specific statistics must be provided as a matrix")
-  if(missing(N)) stop("Must specify the sample size of each study")
+	if(class(statistic) != "matrix") stop("study-specific statistics must be provided as a matrix")
+	if(missing(N)) stop("Must specify the sample size of each study")
 
-  scores <- matrix(NA, nrow(statistic), ncol=3)
-  if(!is.null(rownames(statistic))) rownames(scores) <- rownames(statistic)  
-  colnames(scores) <- c("diffExpressed", "concordant", "discordant")  
+	scores <- matrix(NA, nrow(statistic), ncol=3)
+	if(!is.null(rownames(statistic))) rownames(scores) <- rownames(statistic)  
+	colnames(scores) <- c("diffExpressed", "concordant", "discordant")  
   
-  ##################################################
-  ##Differential expression
-  ##################################################  
-  scores[, 1] <- .pca(abs(statistic), N=N)
+	##------------------------------------------------
+	##Differential expression
+	scores[, 1] <- .pca(abs(statistic), N=N)
 
-  ##################################################
-  ##Concordance
-  ##################################################  
-  scores[, 2] <- abs(.pca(statistic, N=N))
+	##------------------------------------------------
+	##Concordance
+	scores[, 2] <- abs(.pca(statistic, N=N))
 
-
-  ##################################################
-  ##Discordance
-  ##################################################    
-  I <- abs(rowSums(sign(statistic))) < ncol(statistic)
-  I[!I] <- -1
-  scores[, 3] <- .pca(abs(statistic), N)
-
-  return(scores)
+	##------------------------------------------------
+	##Discordance
+	tmp <- cbind(rowSums(statistic > 0), rowSums(statistic < 0))
+	I <- which((tmp[, 1] * tmp[, 2]) == 0)  ##concordant signs
+##	I <- abs(rowSums(sign(statistic))) < ncol(statistic)
+##	I[!I] <- -1
+	scores[, 3] <- .pca(abs(statistic), N)
+	##penalize concordance
+	scores[I, 3] <- scores[I, 3] * -1
+	return(scores)
 }
 
 

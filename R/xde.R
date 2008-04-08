@@ -153,10 +153,10 @@ xde <- function(paramsMcmc, esetList, outputMcmc){
 	if(!burnin(paramsMcmc)){
 		##paramsMcmc has directory where chains are stored, number of iterations, etc
 		i <- match(c("c2", "sigma2", "tau2", "b"), names(output(paramsMcmc)))
-		xmcmc@posteriorAvg <- xmcmc$diffExpressed
-		if(nrow(xmcmc@posteriorAvg) == ZZ$G){
-			rownames(xmcmc@posteriorAvg) <- featureNames(esetList)
-		}
+		##xmcmc@posteriorAvg <- xmcmc$diffExpressed
+		##if(nrow(xmcmc@posteriorAvg) == ZZ$G){
+		##	rownames(xmcmc@posteriorAvg) <- featureNames(esetList)
+		##}
 	} 
 	xmcmc
 }

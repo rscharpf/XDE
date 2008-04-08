@@ -79,7 +79,8 @@ export(.integ.norm,
        xsScores)
 
 ##export when debugging
-exportMethods("seed<-")
+exportMethods("seed<-", .pca)
+
 
 
 
