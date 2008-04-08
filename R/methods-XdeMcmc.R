@@ -123,41 +123,8 @@ setMethod("lastMcmc", "XdeMcmc", function(object) object@lastMcmc)
 setMethod("nrow", "XdeMcmc", function(x) length(featureNames(x)))
 setMethod("output", "XdeMcmc", function(object) object@output)
 
-setMethod("calculatePosteriorAvg", "XdeMcmc", function(object, NCONC=2, NDIFF=2){
-##	postAvg <- object@posteriorAvg
-##	if(nrow(postAvg) == 0){
-	D <- object$DDelta
-	d <- object$delta
-	dD <- sign(d*D)
-	f <- function(x){
-		##define an indicator for concordance
-		##indicator for discordance
-		tmp <- t(rbind(colSums(x > 0), colSums(x < 0)))
-		colnames(tmp) <- c("#up", "#down")
-		discordant <- (tmp[, 1] * tmp[, 2]) != 0
-		concordant <- (tmp[, 1] * tmp[, 2]) == 0  ##first require no discordant signs
-		##Finally, let the number of concordant studies be user-specified
-		concordant <- concordant * (rowSums(tmp) >= NCONC)
-		diffExpr <- rowSums(abs(tmp)) >= NDIFF
-		indicators <- matrix(c(concordant,
-				       discordant,
-				       diffExpr), ncol=3, byrow=FALSE)
-	}
-	I <- array(NA, c(dim(dD)[2], 3, dim(dD)[3]))
-	dimnames(I) <- list(featureNames(object),
-			    c("concordant", "discordant", "diffExpressed"),
-			    paste("iterations", 1:dim(dD)[3], sep="_"))
-	for(i in 1:dim(dD)[3]){
-		I[, , i] <- f(dD[, , i])
-	}
-	concordant.avg <- rowMeans(I[, 1, ])
-	discordant.avg <- rowMeans(I[, 2, ])
-	diffExpressed.avg <- rowMeans(I[, 3, ])
-	X <- cbind(concordant.avg, discordant.avg, diffExpressed.avg)
-	colnames(X) <- c("concordant", "discordant", "diffExpressed")
-	rownames(X) <- featureNames(object)
-	X
-})
+##setMethod("calculatePosteriorAvg", "XdeMcmc", function(object, NCONC=2, NDIFF=2){
+
 setMethod("posteriorAvg", "XdeMcmc", function(object) object@posteriorAvg)
 setReplaceMethod("posteriorAvg", c("XdeMcmc", "matrix"),
 		 function(object, value){

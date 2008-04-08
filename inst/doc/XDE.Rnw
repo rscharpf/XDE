@@ -427,11 +427,11 @@ for genes that show some level of reproducibility across studies.  The
 helpful.
 
 For evaluating the overall differential expression, we follow the
-discussion of \citet{Garrett-Mayer2007}, and combine the elements of
-single study statistics in a linear fashion to obtain a statistic
-suitable for assessing differential expression.  For a more detailed
-discussion of how these cross-study summaries were generated for
-evaluating concordant and discordant differential expression, see
+discussion of Garrett-Mayer \citep{Garrett-Mayer2007}, and combine the
+elements of single study statistics in a linear fashion to obtain a
+statistic suitable for assessing differential expression.  For a more
+detailed discussion of how these cross-study summaries were generated
+for evaluating concordant and discordant differential expression, see
 \cite{Scharpf2007d}.
 
 <<pca, eval=FALSE>>=

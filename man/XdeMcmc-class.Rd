@@ -10,6 +10,7 @@
 \alias{bayesianEffectSize<-,XdeMcmc,matrix-method}
 \alias{calculateBayesianEffectSize}
 \alias{calculateBayesianEffectSize,XdeMcmc-method}
+\alias{calculatePosteriorAvg,XdeMcmc-method}
 \alias{directory}
 \alias{directory,XdeMcmc-method}
 \alias{featureNames,XdeMcmc-method}
@@ -54,7 +55,10 @@
     \item{\code{$}}{\code{signature(x = "XdeMcmc")} }
     \item{.standardizedDelta}{\code{signature(object = "XdeMcmc")}}
     \item{bayesianEffectSize}{\code{signature(object = "XdeMcmc")} }
-    \item{bayesianEffectSize<-}{\code{signature(object = "XdeMcmc", value = "matrix")} }
+    \item{bayesianEffectSize<-}{\code{signature(object = "XdeMcmc",
+	value = "matrix")} }
+    \item{calculatePosteriorAvg}{\code{signature(object = "XdeMcmc")}:
+  See \code{\link{calculatePosteriorAvg}}}
     \item{directory}{\code{signature(object = "XdeMcmc")} }
     \item{featureNames}{\code{signature(object = "XdeMcmc")} }
     \item{initialize}{\code{signature(.Object = "XdeMcmc")} }

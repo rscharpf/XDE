@@ -1,42 +1,34 @@
 \name{posteriorAvg}
 \alias{posteriorAvg}
-\title{Accessor for posterior averages}
+\alias{posteriorAvg<-}
+\title{Accessor and replacement methods for posterior averages of
+  differential expression}
+\description{
 
-\description{ Accessor for posterior averages of the probability of
-  differential expression, concordant differential expression, and
-  discordant differential expression.  }
+  Accessor and replacement methods for objects of class \code{XdeMcmc}
+  for posterior averages of differential expression
 
+}
 \usage{
 posteriorAvg(object)
+posteriorAvg(object) <- value
 }
 \arguments{
-  \item{object}{An object of class \code{XdeMcmc}}
+  \item{object}{Object of class \code{XdeMcmc}}
+  \item{value}{A matrix of dimension G x 3, where G is the number of
+    genes and 3 are different ways of quantifying differential
+    expression in the context of multiple studies (concordant,
+    discordant, or the union).}
 }
-
+  
 \value{
-  
-  A matrix. Rows are genes and columns are posterior averages for
-  differential expression ("diffExpressed"), concordant differential
-  expression ("concordant"), and discordant differential expression
-  ("discordant").
-  
-}
 
-\references{
-
-  R. Scharpf et al., A Bayesian Model for Cross-Study Differential
-  Gene Expression, Technical Report 158, Johns Hopkins University,
-  Department of Biostatistics, 2007
+  A matrix of dimension G x 3, where G is the number of genes and 3 are
+    different ways of quantifying differential expression in the context
+    of multiple studies (concordant, discordant, or the union).
   
 }
-
-\author{R. Scharpf}
-\seealso{\code{\link{XdeMcmc-class}}}
-
-\examples{
-data(xmcmc)
-posteriorAvg(xmcmc)[1:5, ]
-hist(posteriorAvg(xmcmc)[, "concordant"], breaks=50, main="")
-}
+\author{RS}
+\seealso{\code{\link{calculatePosteriorAvg}}}
 \keyword{methods}
 

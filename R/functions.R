@@ -77,6 +77,41 @@
               eenv
           }
 
+calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1){
+	if(class(object) != "XdeMcmc") stop("object must be of class XdeMcmc")
+	D <- object$DDelta
+	d <- object$delta
+	dD <- sign(d*D)
+	f <- function(x){
+		##define an indicator for concordance
+		##indicator for discordance
+		tmp <- t(rbind(colSums(x > 0), colSums(x < 0)))
+		colnames(tmp) <- c("#up", "#down")
+		discordant <- (tmp[, 1] * tmp[, 2]) != 0
+		concordant <- (tmp[, 1] * tmp[, 2]) == 0  ##first require no discordant signs
+		##Finally, let the number of concordant studies be user-specified
+		concordant <- concordant * (rowSums(tmp) >= NCONC)
+		diffExpr <- rowSums(abs(tmp)) >= NDIFF
+		indicators <- matrix(c(concordant,
+				       discordant,
+				       diffExpr), ncol=3, byrow=FALSE)
+	}
+	I <- array(NA, c(dim(dD)[2], 3, dim(dD)[3]))
+	dimnames(I) <- list(featureNames(object),
+			    c("concordant", "discordant", "diffExpressed"),
+			    paste("iterations", 1:dim(dD)[3], sep="_"))
+	for(i in 1:dim(dD)[3]){
+		I[, , i] <- f(dD[, , i])
+	}
+	concordant.avg <- rowMeans(I[, 1, ])
+	discordant.avg <- rowMeans(I[, 2, ])
+	diffExpressed.avg <- rowMeans(I[, 3, ])
+	X <- cbind(concordant.avg, discordant.avg, diffExpressed.avg)
+	colnames(X) <- c("concordant", "discordant", "diffExpressed")
+	rownames(X) <- featureNames(object)
+	X
+}
+
 .parameterNames <- function(){
   c("thin",
     "potential",

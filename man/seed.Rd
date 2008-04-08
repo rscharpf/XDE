@@ -7,9 +7,11 @@
 }
 \usage{
 seed(object)
+seed(object) <- value
 }
 \arguments{
   \item{object}{ An object of \code{XdeParameter} or \code{XdeMcmc} }
+  \item{value}{Numeric or integer}
 }
 \details{
   
@@ -19,7 +21,8 @@ seed(object)
   used to initialize an MCMC chain.  By contrast, an object of class
   \code{XdeMcmc} contains a seed that would be useful for running
   additional iterations -- the seed here is guaranteed to be different
-  from the seed that was used to initiate the MCMC. 
+  from the seed that was used to initiate the MCMC.
+  
 }
 \value{
   An integer

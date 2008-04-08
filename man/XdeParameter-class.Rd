@@ -24,6 +24,8 @@
 \alias{savedIterations}
 \alias{savedIterations,XdeParameter-method}
 \alias{seed,XdeParameter-method}
+\alias{seed<-,XdeParameter,integer-method}
+\alias{seed<-,XdeParameter,numeric-method}
 \alias{show,XdeParameter-method}
 \alias{showIterations}
 \alias{showIterations<-}
@@ -64,8 +66,7 @@ Objects can be created by calls of the form \code{new("XdeParameter", esetList, 
     \item{\code{burnin}:}{Object of class \code{logical}.  If set to
       FALSE, by default none of the chains will be saved (called for its
       side-effect of setting the output to zero for each parameter).}
-    \item{\code{seed}:}{Object of class \code{integer}.  The seed used
-      for the random number generator.  Useful for reproducing runs. }
+
     \item{\code{notes}:}{Object of class \code{character}. }
     \item{\code{firstMcmc}:}{Object of class \code{environment}. Values
       for the first iteration of the MCMC }
@@ -120,7 +121,10 @@ Objects can be created by calls of the form \code{new("XdeParameter", esetList, 
     number of MCMC iterations written to file.  It is the value of the
     total number of iterations divided by the thinning parameter.  See
     also \code{\link{output}}}
-    \item{seed}{\code{signature(object = "XdeParameter")} See \code{\link{seed}}}
+    \item{seed}{\code{signature(object = "XdeParameter")} See
+      \code{\link{seed}}}
+    \item{seed<-}{\code{signature(object = "XdeParameter",
+    value="integer")} Replacement method. See also \code{\link{seed}}.}    
     \item{show}{\code{signature(object = "XdeParameter")} Produces a
       short summary of objects that are instances of the
       \code{XdeParameter} class}

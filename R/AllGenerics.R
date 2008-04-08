@@ -6,7 +6,7 @@ setGeneric("bayesianEffectSize<-",   function(object, value) standardGeneric("ba
 setGeneric("burnin",   function(object) standardGeneric("burnin"))
 setGeneric("burnin<-",   function(object, value) standardGeneric("burnin<-"))
 setGeneric("calculateBayesianEffectSize",   function(object) standardGeneric("calculateBayesianEffectSize"))
-setGeneric("calculatePosteriorAvg", function(object, ...) standardGeneric("calculatePosteriorAvg"))
+##setGeneric("calculatePosteriorAvg", function(object, ...) standardGeneric("calculatePosteriorAvg"))
 setGeneric("diffExpressed", function(object) standardGeneric("diffExpressed"))
 setGeneric("directory", function(object) standardGeneric("directory"))
 setGeneric("directory<-", function(object, value) standardGeneric("directory<-"))
