@@ -91,22 +91,28 @@ measures of differential expression are discussed in the
 \newcommand{\bx}{\mbox{\boldmath $x$}}
 \newcommand{\bpsi}{\mbox{\boldmath $\psi$}}
 
-Let $x_{gsp}$ denote observed expression value for gene 
-$g\in \{ 1,\ldots,G\}$ and sample (array) $s\in \{ 1,\ldots,S_q\}$ in 
-study $p \in \{ 1,\ldots,P\}$, where $P\geq 2$. We
-assume that some clinical variable (with two possible values) 
-is available for each of the arrays in all studies. We denote 
-this by $\psi_{sp}\in\{ 0,1\}$ for sample (array) number $s$ in study 
-number $p$. We will assume that the studies have been somehow
-standardized so that the values in each study is centered around
-zero and are approximately Gaussian distributed.
+Let $x_{gsp}$ denote observed expression value for gene $g\in \{
+1,\ldots,G\}$ and sample (array) $s\in \{ 1,\ldots,S_q\}$ in study $p
+\in \{ 1,\ldots,P\}$, where $P\geq 2$. We assume that some clinical
+variable (with two possible values) is available for each of the
+arrays in all studies. We denote this by $\psi_{sp}\in\{ 0,1\}$ for
+sample (array) number $s$ in study number $p$. We will assume that the
+studies have been somehow standardized so that the values in each
+study is centered around zero and are approximately Gaussian
+distributed.
 
-Our model defined below is based on the following assumptions,
-$(i)$ for some of the genes, the expression values $x_{gsp}$ are
-differentially expressed (have different mean values) 
-for arrays where $\psi_{sp}=0$ and 
-arrays where $\psi_{sp}=1$, and $(ii)$ any gene is either 
-differentially expresses in all studies or in no studies.
+Our model defined below is based on the following assumptions, $(i)$
+for some of the genes, the expression values $x_{gsp}$ are
+differentially expressed (have different mean values) for arrays where
+$\psi_{sp}=0$ and arrays where $\psi_{sp}=1$, and $(ii)$ any gene is
+either differentially expresses in all studies or in no studies (the
+``$\delta_g$'' model).  Assumption $(ii)$ can be relaxed by fitting
+the ``$\delta_{gp}$'' model that allows for a given gene to be
+differentially expressed in some studies but not in others.  The
+following description of the Bayesian model is for the $\delta_g$"
+model.  The $\delta_{gp}$ model is very similar, substituting
+$\delta_{gp}$ for $\delta_g$ and independent beta priors with
+parameter $\xi_p$ instead of $\xi$.
 
 We assume the following hierarchical Bayesian model for the expression
 data. Conditionally on underlying unobserved parameters we assume the

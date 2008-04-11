@@ -183,14 +183,27 @@ initializing an instance of the \xparam{} class:
 
 <<initializeList, eval=TRUE>>=
 params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous")
-iterations(params) <- 3
-burnin(params) <- FALSE
-fit <- xde(params, xlist)
 params
 @ 
 
+This parameterization, presently the default, assumes that a gene is
+differentially expressed in all studies or in none.  An alternative
+parametrization that allows genes to be differentially expressed in a
+subset of studies can be obtained by setting the argument
+\Robject{one.delta} to \Robject{FALSE}.
 
+<<initializeList, eval=TRUE>>=
+params <- new("XdeParameter", esetList=xlist, 
+	      phenotypeLabel="adenoVsquamous", one.delta=FALSE)
+@ 
 
+Whether one fits the ``$\delta_g$'' (\Robject{one.delta=TRUE}) or the
+``$\delta_{gp}$'' model (\Robject{one.delta=FALSE}), the chain written
+to file is of dimension G x P x I, where G is the number of genes, P
+is the number of studies, and S is the number of samples (in the case
+of the $\delta_g$ model, the value written to file for a single gene
+will be the same for each study.  The same is true for the $\xi_p$
+parameter.)  
 
 \section{\label{sec:fit} Fitting the Bayesian hierarchical model}
 
@@ -203,7 +216,7 @@ only the last iteration from the chain will be available (the
 parameters are not written to log files).  For instance, here we run a
 burnin of 3 iterations:
 
-<<burnin, eval=FALSE>>=
+<<burnin, eval=TRUE>>=
 iterations(params) <- 3
 burnin(params) <- TRUE
 fit <- xde(params, xlist)
@@ -256,10 +269,6 @@ xmcmc <- xde(params, xlist)
 ##posteriorAvg(xmcmc) <- calculatePosteriorAvg(xmcmc, NCONC=3)
 @ 
 
-<<echo=FALSE, eval=FALSE>>=
-save(xmcmc, file="~/madman/Rpacks/XDE/data/xmcmc.RData")
-@ 
-
 See the \xparam{} vignette for a more detailed discussion of the
 output, burnin, and thin methods.  The \Robject{xmcm} object can be
 loaded by:
@@ -293,17 +302,15 @@ chain for the $c^2$ parameter:
 pathToLogFiles <- system.file("logFiles", package="XDE")
 xmcmc@directory <- pathToLogFiles
 c2 <- xmcmc$c2
-if(require(coda)){
-	plot(as.mcmc(c2))
-}
+plot.ts(c2)
 @
 
-A default plotting method has been provided that displays the chains
-of the parameters that tend to converge slower.  Again, this function
-requires the \R{} package \Rpackage{coda}:
+%A default plotting method has been provided that displays the chains
+%of the parameters that tend to converge slower.  Again, this function
+%requires the \R{} package \Rpackage{coda}:
 
 %FIXME
-<<chains, fig=TRUE, include=TRUE, eval=FALSE>>=
+<<chains, fig=TRUE, include=TRUE, eval=FALSE, echo=FALSE>>=
 if(require(coda)){
 	plot(xmcmc)
 }
