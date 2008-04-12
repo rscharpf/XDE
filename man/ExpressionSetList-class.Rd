@@ -14,6 +14,7 @@
 \alias{pca,ExpressionSetList-method}
 \alias{standardizeSamples,ExpressionSetList-method}
 \alias{studyCenter,ExpressionSetList-method}
+\alias{xapply,ExpressionSetList-method}
 \alias{zeroNu,ExpressionSetList-method}
 
 \title{A class for containing a list of ExpressionSets}
@@ -86,6 +87,9 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
 \item{studyCenter}{\code{signature(object = "ExpressionSetList")}
   See \code{\link{studyCenter}}
 }
+
+\item{xapply}{\code{signature(object="ExpressionSetList")} An lapply for
+  \code{ExpressionSetList} instances.  See \code{\link{xapply}}.}
 
 \item{zeroNu}{\code{signature(object = "ExpressionSetList")}
   See \code{`\link{zeroNu}}. }

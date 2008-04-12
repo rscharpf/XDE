@@ -192,7 +192,7 @@ parametrization that allows genes to be differentially expressed in a
 subset of studies can be obtained by setting the argument
 \Robject{one.delta} to \Robject{FALSE}.
 
-<<initializeList, eval=TRUE>>=
+<<initializeList2, eval=FALSE>>=
 params <- new("XdeParameter", esetList=xlist, 
 	      phenotypeLabel="adenoVsquamous", one.delta=FALSE)
 @ 

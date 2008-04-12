@@ -64,7 +64,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
 		mcmc <- matrix(mcmc, nc=1, byrow=TRUE)
 		if(name == "c2"){
 			##check for xi-inflation
-			if(median(c2) < 0.01){
+			if(median(mcmc) < 0.01){
 				warning("c2 values are small.  The estimated proportion of differentially expressed genes in a study (given by the parameter xi) is likely inflated.  See the discussion in the XDE manuscript for additional details")
 			}
 		}
