@@ -48,6 +48,7 @@ setGeneric("tuning", function(object) standardGeneric("tuning"))
 setGeneric("tuning<-", function(object, value) standardGeneric("tuning<-"))
 setGeneric("updates", function(object) standardGeneric("updates"))
 setGeneric("updates<-", function(object, value) standardGeneric("updates<-"))
+setGeneric("xapply", function(X, FUN, ...) standardGeneric("xapply"))
 setGeneric("zeroNu", function(object, ...) standardGeneric("zeroNu"))
 
 

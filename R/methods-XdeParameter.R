@@ -78,25 +78,16 @@ setMethod("initialize", "XdeParameter",
           })
 
 
-##how to get...
-##params$delta to retrieve the array
-##and
-##params$Delta to retrieve an array
-##write an if statement that checks whether the name is Delta, sigma2, ...
-
-
-
-
 setMethod("burnin", "XdeParameter", function(object) object@burnin)
 setReplaceMethod("burnin", c("XdeParameter", "logical"), function(object, value){
-  object@burnin <- value
-  if(value) {
-    object@output[2:22] <- rep(0, 21)
-  } else {
-    object@output[2:22] <- rep(1, 21)
-  }
-  names(object@output) <- .parameterNames()    
-  object
+	object@burnin <- value
+	if(value) {
+		object@output[2:22] <- rep(0, 21)
+	} else {
+		object@output[2:22] <- rep(1, 21)
+	}
+	names(object@output) <- .parameterNames()    
+	object
 })
 
 

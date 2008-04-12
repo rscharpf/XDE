@@ -62,6 +62,12 @@ setMethod("$", "XdeMcmc", function(x, name) {
 	##Parameters not indexed by gene or study
 	if(name %in% c("c2", "gamma2")){
 		mcmc <- matrix(mcmc, nc=1, byrow=TRUE)
+		if(name == "c2"){
+			##check for xi-inflation
+			if(median(c2) < 0.01){
+				warning("c2 values are small.  The estimated proportion of differentially expressed genes in a study (given by the parameter xi) is likely inflated.  See the discussion in the XDE manuscript for additional details")
+			}
+		}
 		return(mcmc)    
 	}
 
@@ -100,6 +106,31 @@ setMethod("$", "XdeMcmc", function(x, name) {
 
 ##  eval(substitute(pData(x)$NAME_ARG, list(NAME_ARG=name)))
 })
+
+##setMethod("[", "XdeMcmc", function(x, i, j, ..., drop = FALSE){
+##	if (missing(drop)) drop <- FALSE
+##	if (missing(i) && missing(j))
+##	{
+##		if (length(list(...))!=0)
+##			stop("specify genes or samples to subset; use '",
+##			     substitute(x), "$", names(list(...))[[1]],
+##			     "' to access phenoData variables")
+##		return(x)
+##	}
+##	if (!missing(j)){
+##		f <- function(x, j){
+##			x <- x[, j]
+##		}
+##		x <- lapply(x, f, j)
+##	}
+##	if(!missing(i)){
+##		f <- function(x, i){
+##			x <- x[i, ]
+##		}
+##		x <- lapply(x, f, i)
+##	}
+##	as(x, "ExpressionSetList")
+##})
 
 setMethod("bayesianEffectSize", "XdeMcmc", function(object) object@bayesianEffectSize)
 

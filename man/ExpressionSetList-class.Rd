@@ -6,6 +6,7 @@
 \alias{coerce,list,ExpressionSetList-method}
 \alias{featureNames,ExpressionSetList-method}
 \alias{geneCenter,ExpressionSetList-method}
+\alias{lapply,ExpressionSetList-method}
 \alias{nSamples}
 \alias{nSamples,ExpressionSetList-method}
 \alias{nrow,ExpressionSetList-method}
@@ -56,7 +57,12 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
 \item{featureNames}{\code{signature(object = "ExpressionSetList")}
   Accessor for the \code{featureNames}}
 
-\item{geneCenter}{\code{signature(object = "ExpressionSetList")} See \code{\link{geneCenter}}}
+\item{geneCenter}{\code{signature(object = "ExpressionSetList")} See
+  \code{\link{geneCenter}}}
+
+\item{lapply}{\code{signature(object="ExpresssionSetList")} Coerces
+  instance of ExpressionSetList to a list and does lapply on the list.
+  Returns an object of class ExpressionSetList}
 
 \item{nSamples}{\code{signature(x = "ExpressionSetList")} Numerical
   vector giving the number of samples in each \code{ExpressionSet}}

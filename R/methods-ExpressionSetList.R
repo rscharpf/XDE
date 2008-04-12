@@ -1,3 +1,9 @@
+setMethod("xapply", "ExpressionSetList", function(X, FUN, ...){
+	class(X) <- "list"
+	X <- as(lapply(X, FUN, ...), "ExpressionSetList")
+	X <- as(X, "ExpressionSetList")
+})
+
 ##object is a LinearXdeSet or loglinearXdeSet
 setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
           function(object, fdrCut, ...){
