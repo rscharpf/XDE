@@ -6,8 +6,9 @@ setMethod(".studySplit", "ExpressionSet",
                    classSize=100,
                    studyName="study",
                    SCALE.SD=1, ...){
-            if(missing(phenotypeLabel)) stop("must indicate phenotypeLabel as an element in varLabel")
-            phenotypeLabels <- pData(object)[, grep(phenotypeLabel, colnames(pData(object)))]
+
+		  if(missing(phenotypeLabel)) stop("must indicate phenotypeLabel as an element in varLabel")
+		  phenotypeLabels <- pData(object)[, grep(phenotypeLabel, colnames(pData(object)))]
             group0 <- grep(0, phenotypeLabels)
             group1 <- grep(1, phenotypeLabels)
             if(balanced){
