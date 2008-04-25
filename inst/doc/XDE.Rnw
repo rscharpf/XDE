@@ -216,7 +216,7 @@ only the last iteration from the chain will be available (the
 parameters are not written to log files).  For instance, here we run a
 burnin of 3 iterations:
 
-<<burnin, eval=TRUE>>=
+<<burnin, eval=FALSE>>=
 iterations(params) <- 3
 burnin(params) <- TRUE
 fit <- xde(params, xlist)
@@ -270,10 +270,10 @@ xmcmc <- xde(params, xlist)
 @ 
 
 See the \xparam{} vignette for a more detailed discussion of the
-output, burnin, and thin methods.  The \Robject{xmcm} object can be
+output, burnin, and thin methods.  The \Robject{xmcmc} object can be
 loaded by:
 
-<<loadObject, echo=FALSE>>=
+<<loadObject, echo=FALSE, eval=TRUE>>=
 data(xmcmc, package="XDE")
 @ 
 
@@ -298,27 +298,16 @@ class \xmcmc{} -- typically one would not need to change the directory
 in the \xmcmc{} object).  In the following code chunk, we extract the
 chain for the $c^2$ parameter:
 
-<<>>=
+<<eval=TRUE>>=
 pathToLogFiles <- system.file("logFiles", package="XDE")
 xmcmc@directory <- pathToLogFiles
 c2 <- xmcmc$c2
 @
 
-<<c2, fig=TRUE>>=
+<<c2, fig=TRUE, eval=TRUE>>=
 par(las=1)
 plot.ts(c2, ylab="c2", xlab="iterations")
 @
-
-%A default plotting method has been provided that displays the chains
-%of the parameters that tend to converge slower.  Again, this function
-%requires the \R{} package \Rpackage{coda}:
-
-%FIXME
-<<chains, eval=FALSE, echo=FALSE>>=
-if(require(coda)){
-	plot(xmcmc)
-}
-@ 
 
 \section{\label{sec:posterior} Posterior probabilities of differential expression}
 
@@ -343,20 +332,20 @@ Posterior averages for the probability of differential expression,
 concordant differential expression, and discordant differential
 expression are stored in the \Robject{xmcmc} object:
 
-<<postAvg>>=
+<<postAvg, eval=TRUE>>=
 postAvg <- posteriorAvg(xmcmc)
 @ 
 
 See \cite{Scharpf2007d} for a discussion of how the above posterior
 average probabilities are computed.
 
-<<postAvgFig_conc, echo=FALSE, fig=TRUE>>=
+<<postAvgFig_conc, echo=FALSE, fig=TRUE, eval=TRUE>>=
 par(las=1)
 hist(postAvg[, "concordant"], breaks=50, xlim=c(0, 1), main="",
      xlab="posterior probability of concordant differential expression")
 @ 
 
-<<postAvgFig_disc, echo=FALSE, fig=TRUE>>=
+<<postAvgFig_disc, echo=FALSE, fig=TRUE, eval=TRUE>>=
 par(las=1)
 hist(postAvg[, "discordant"], breaks=50, xlim=c(0, 1), main="",
      xlab="posterior probability of discordant differential expression")
@@ -374,7 +363,7 @@ op.conc <- symbolsInteresting(rankingStatistic=postAvg[, "concordant"])
 op.disc <- symbolsInteresting(rankingStatistic=postAvg[, "discordant"])
 @ 
 
-<<conc, fig=TRUE>>=
+<<conc, fig=TRUE, eval=TRUE>>=
 par(las=1)
 graphics:::pairs(bes[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)
@@ -382,7 +371,7 @@ graphics:::pairs(bes[op.conc$order, ], pch=op.conc$pch, col=op.conc$col,
 
 or high probabilities of discordant differential expression
 
-<<disc, fig=TRUE>>=
+<<disc, fig=TRUE, eval=TRUE>>=
 graphics:::pairs(bes[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg, 
 		 upper.panel=NULL, cex=op.disc$cex)
 @ 
