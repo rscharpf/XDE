@@ -12,6 +12,13 @@ setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
             if(missing(fdrCut)) stop("must specify fdrCut (FDR threshold)")
             ##contains a fix so that intCor will work
 
+	    ##check that this works-- can comment out
+	    gS <- matrix(1, nrow=nrow(object), ncol=length(object))
+	    obj <- new("mergeExpressionSet",
+		       data=object,
+		       geneStudy=gS,
+		       notes="")
+	    
             ij <- combinations(length(object), 2)
             exprSetList <- lapply(object, exprs)
 
@@ -27,18 +34,21 @@ setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
             ##thousands of genes)
             print("approximating the null distribution for the integrative correlation...")
             ##This function will not work if there are no rownames on geneStudy ...should check for this
-            require(MergeMaid) || stop("MergeMaid package not available")
-
-            setAs("ExpressionSetList", "mergeExpressionSet",
-                  function(from, to){
-                    gS <- matrix(1, nrow=nrow(from[[1]]), ncol=length(from))
-                    rownames(gS) <- featureNames(from)
-                    new("mergeExpressionSet",
-                        data=from,
-                        geneStudy=gS,
-                        notes="")
-                  })
-            obj <- as(object, "mergeExpressionSet")
+##            setAs("ExpressionSetList", "mergeExpressionSet",
+##                  function(from, to){
+##                    gS <- matrix(1, nrow=nrow(from[[1]]), ncol=length(from))
+##                    rownames(gS) <- featureNames(from)
+##                    new("mergeExpressionSet",
+##                        data=from,
+##                        geneStudy=gS,
+##                        notes="")
+##                  })
+	    gs <- matrix(1, nrow=nrow(object), ncol=length(object))
+	    obj <- new("mergeExpressionSet",
+		       data=object,
+		       geneStudy=gS,
+		       notes="")
+##            obj <- as(object, "mergeExpressionSet")
             null <- intcorDens(obj)
             null <- do.call("cbind", null)            
 

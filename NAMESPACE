@@ -35,8 +35,6 @@ exportMethods("[", "[[", "$",
               nSamples,
               output,
               "output<-",
-              pairs,
-              ##.pca,
               pData,
               phenotypeLabel,
               "phenotypeLabel<-",
@@ -54,7 +52,6 @@ exportMethods("[", "[[", "$",
               studyCenter,
               studyNames,
               "studyNames<-",
-              .studySplit,
               thin,
               "thin<-",
               tuning,
@@ -70,7 +67,7 @@ export(calculatePosteriorAvg,
        xsScores)
 
 ##export when debugging
-##exportMethods(.pca)
+##exportMethods(.pca, .studySplit)
 ##export(.integ.norm,
 ##       .integ.cal,
 ##       .chainInitialize,

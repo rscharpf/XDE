@@ -273,7 +273,7 @@ See the \xparam{} vignette for a more detailed discussion of the
 output, burnin, and thin methods.  The \Robject{xmcm} object can be
 loaded by:
 
-<<loadObject, eval=TRUE, echo=FALSE>>=
+<<loadObject, echo=FALSE>>=
 data(xmcmc, package="XDE")
 @ 
 
@@ -298,11 +298,15 @@ class \xmcmc{} -- typically one would not need to change the directory
 in the \xmcmc{} object).  In the following code chunk, we extract the
 chain for the $c^2$ parameter:
 
-<<c2, fig=TRUE, include=TRUE, eval=TRUE>>=
+<<>>=
 pathToLogFiles <- system.file("logFiles", package="XDE")
 xmcmc@directory <- pathToLogFiles
 c2 <- xmcmc$c2
-plot.ts(c2)
+@
+
+<<c2, fig=TRUE>>=
+par(las=1)
+plot.ts(c2, ylab="c2", xlab="iterations")
 @
 
 %A default plotting method has been provided that displays the chains
@@ -310,7 +314,7 @@ plot.ts(c2)
 %requires the \R{} package \Rpackage{coda}:
 
 %FIXME
-<<chains, fig=TRUE, include=TRUE, eval=FALSE, echo=FALSE>>=
+<<chains, eval=FALSE, echo=FALSE>>=
 if(require(coda)){
 	plot(xmcmc)
 }
@@ -346,16 +350,16 @@ postAvg <- posteriorAvg(xmcmc)
 See \cite{Scharpf2007d} for a discussion of how the above posterior
 average probabilities are computed.
 
-<<histFxn, eval=TRUE>>=
-plotPosteriorAvg <- function(){
-	par(mfrow=c(2, 1), las=1)
-	hist(postAvg[, "concordant"], breaks=50, xlim=c(0, 1), main="")
-	hist(postAvg[, "discordant"], breaks=50, xlim=c(0, 1), main="")
-}
+<<postAvgFig_conc, echo=FALSE, fig=TRUE>>=
+par(las=1)
+hist(postAvg[, "concordant"], breaks=50, xlim=c(0, 1), main="",
+     xlab="posterior probability of concordant differential expression")
 @ 
 
-<<postAvgFig, eval=TRUE, echo=FALSE, fig=TRUE, include=TRUE>>=
-plotPosteriorAvg()
+<<postAvgFig_disc, echo=FALSE, fig=TRUE>>=
+par(las=1)
+hist(postAvg[, "discordant"], breaks=50, xlim=c(0, 1), main="",
+     xlab="posterior probability of discordant differential expression")
 @ 
 
 We may wish to differentially label the study-specific statistics of
@@ -370,7 +374,7 @@ op.conc <- symbolsInteresting(rankingStatistic=postAvg[, "concordant"])
 op.disc <- symbolsInteresting(rankingStatistic=postAvg[, "discordant"])
 @ 
 
-<<conc, fig=TRUE, include=TRUE, eval=TRUE>>=
+<<conc, fig=TRUE>>=
 par(las=1)
 graphics:::pairs(bes[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)
@@ -378,8 +382,9 @@ graphics:::pairs(bes[op.conc$order, ], pch=op.conc$pch, col=op.conc$col,
 
 or high probabilities of discordant differential expression
 
-<<disc, fig=TRUE, include=TRUE, eval=TRUE>>=
-graphics:::pairs(bes[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg, upper.panel=NULL, cex=op.disc$cex)
+<<disc, fig=TRUE>>=
+graphics:::pairs(bes[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg, 
+		 upper.panel=NULL, cex=op.disc$cex)
 @ 
 
 \section{\label{sec:alternatives} Alternative cross-study summaries of differential expression}
@@ -400,19 +405,19 @@ if(require(GeneMeta)){
 }
 @ 
 
-<<tstatConc, fig=TRUE, include=TRUE, eval=FALSE>>=
+<<tstatConc, eval=FALSE>>=
 graphics:::pairs(t[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
 
 @
 
-<<zConc, fig=TRUE, include=TRUE, eval=FALSE>>=
+<<zConc, eval=FALSE>>=
 graphics:::pairs(t[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
 
 @
 
-<<tstatDisc, fig=TRUE, include=TRUE, eval=FALSE>>=
+<<tstatDisc, eval=FALSE>>=
 graphics:::pairs(t[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, 
                  bg=op.disc$bg, upper.panel=NULL, cex=op.disc$cex)  
 @ 
