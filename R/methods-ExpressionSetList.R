@@ -13,11 +13,11 @@ setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
             ##contains a fix so that intCor will work
 
 	    ##check that this works-- can comment out
-	    gS <- matrix(1, nrow=nrow(object), ncol=length(object))
-	    obj <- new("mergeExpressionSet",
-		       data=object,
-		       geneStudy=gS,
-		       notes="")
+##	    gS <- matrix(1, nrow=nrow(object), ncol=length(object))
+##	    obj <- new("mergeExpressionSet",
+##		       data=object,
+##		       geneStudy=gS,
+##		       notes="")
 	    
             ij <- combinations(length(object), 2)
             exprSetList <- lapply(object, exprs)
@@ -26,7 +26,7 @@ setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
             iC <- function(ij, objList){
               i <- ij[1]
               j <- ij[2]
-              ic <- .integ.cal(objList[[i]], objList[[j]])
+              ic <- XDE:::.integ.cal(objList[[i]], objList[[j]])
             }
             emp <- apply(ij, 1, iC, exprSetList)
   
@@ -43,7 +43,8 @@ setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
 ##                        geneStudy=gS,
 ##                        notes="")
 ##                  })
-	    gs <- matrix(1, nrow=nrow(object), ncol=length(object))
+	    gS <- matrix(1, nrow=nrow(object), ncol=length(object))
+	    rownames(gS) <- featureNames(object)
 	    obj <- new("mergeExpressionSet",
 		       data=object,
 		       geneStudy=gS,
