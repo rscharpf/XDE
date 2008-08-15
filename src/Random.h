@@ -12,8 +12,10 @@ using namespace std;
 
 #define MULTIPLIER 69069
 #define SHIFT          1
-#define MODULUS    256*256*256*128
-#define INVMOD     ( (double) 1 / ((double) MODULUS)) / ((double) 2)
+#define FACTOR1    256
+#define FACTOR2    256
+#define FACTOR3    256
+#define FACTOR4    128
 #define PI         3.14159265
 
 
@@ -73,6 +75,8 @@ class Random
   double lnGamma(double x);
 
  private:
+  unsigned int modulus;
+
   unsigned int seedValue;
   void setseed();
   int haveNorm01;

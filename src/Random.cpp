@@ -1,20 +1,27 @@
 #include <iostream>
-
+#include <limits.h>
 
 #include "Random.h"
 #include "Cholesky.h"
 
-
-
 Random::Random(unsigned int seed)
 {
-  if (UINT_MAX < MODULUS*2-1)
+  unsigned int temp = UINT_MAX - 1;
+  temp /= 2;
+  temp += 1;
+  temp /= FACTOR4;
+
+  if (temp < FACTOR1*FACTOR2*FACTOR3)
     {
       cout << "Error: Implemented random number generator requires UINT_MAX to be at least " << 
-	MODULUS*2-1 << ". Your machine has UNIT_MAX=" << UINT_MAX << ". Aborting!\n";
+	FACTOR1 << "*" << FACTOR2 << "*" << FACTOR3 << "*" << FACTOR4 << "*2-1. Your machine has UNIT_MAX=" << UINT_MAX << ". Aborting!\n";
       exit(-1);
     }
 
+  modulus = FACTOR1;
+  modulus *= FACTOR2;
+  modulus *= FACTOR3;
+  modulus *= FACTOR4;
 
   seedValue = seed;
   
@@ -46,12 +53,15 @@ unsigned int Random::ChangeSeed(unsigned int seed)
 double Random::Unif01(void)
 {
   seedValue = MULTIPLIER * seedValue + SHIFT;
-  if (seedValue > MODULUS*2-1)
+  if (seedValue > modulus*2-1)
     {
-      int nn = (int) (((double) (seedValue - 1)) / ((double) (MODULUS*2)));
-      seedValue = seedValue - nn * MODULUS*2;
+      double x = ((double) (seedValue - 1)) / ((double) modulus);
+      x /= 2.0;
+      int nn = (int) x;
+      seedValue = seedValue - nn * modulus*2;
     }
-  double r = ((double) seedValue) * INVMOD;
+  double r = ((double) seedValue) / ((double) modulus);
+  r /= 2.0;
   
   return r;
 }

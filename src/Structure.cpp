@@ -1,4 +1,6 @@
 #include <strstream>
+#include <stdio.h>
+#include <string.h>
 
 #include "Structure.h"
 #include "Cholesky.h"

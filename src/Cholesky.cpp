@@ -1,5 +1,8 @@
-#include "Cholesky.h"
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 
+#include "Cholesky.h"
 
 
 //
@@ -17,8 +20,8 @@ Cholesky::Cholesky(const vector<vector<double> > &A,int &err) : N(A.size())
   err = 0;
   if(N != A[0].size())
     {
-      printf("Cholesky: Matrix must be square !");
-      exit(EXIT_FAILURE);
+      cout << "Cholesky: Matrix must be square !" << "\n";
+      exit(-1);
     }
   
   int j;
