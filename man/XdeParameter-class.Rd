@@ -48,7 +48,11 @@
   tuning parameters of the Metropolis-Hastings algorithm, options for
   changing hyperparameters from their defaults, etc.}
 \section{Objects from the Class}{
-Objects can be created by calls of the form \code{new("XdeParameter", esetList, updates, tuning, hyperparameters, output, iterations, burnin, seed, randomSeed, genes, studies, firstMcmc, specifiedInitialValues, directory, phenotypeLabel, showIterations, verbose, studyNames)}.
+Objects can be created by calls of the form \code{new("XdeParameter",
+  esetList, updates, tuning, hyperparameters, output, iterations,
+  burnin, seed, randomSeed, genes, studies, firstMcmc,
+  specifiedInitialValues, directory, phenotypeLabel, showIterations,
+  verbose, studyNames, one.delta)}.
 }
 \section{Slots}{
 	 \describe{

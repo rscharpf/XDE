@@ -1,8 +1,16 @@
-setMethod("xapply", "ExpressionSetList", function(X, FUN, ...){
-	class(X) <- "list"
-	X <- as(lapply(X, FUN, ...), "ExpressionSetList")
-	X <- as(X, "ExpressionSetList")
+setMethod("dim", "ExpressionSetList", function(x) sapply(x, dim))
+setMethod("rowttests", "ExpressionSetList", function(x, fac, tstatOnly=FALSE){
+	require(genefilter) || stop("genefilter package not available")
+	sapply(x, function(x) rowttests(x, fac, tstatOnly)$statistic)
 })
+setMethod("lapply", "ExpressionSetList", function(X, FUN, ...){
+	  X <- lapply(as(X, "list"), FUN, ...)
+	  if(all(sapply(X, class) == "ExpressionSet")){
+		  X <- as(X, "ExpressionSetList")
+	  }
+	  return(X)
+	  })
+	  
 
 ##object is a LinearXdeSet or loglinearXdeSet
 setMethod(".integrativeCorrelationFilter", "ExpressionSetList",

@@ -306,8 +306,34 @@ c2 <- xmcmc$c2
 
 <<c2, fig=TRUE, eval=TRUE>>=
 par(las=1)
-plot.ts(c2, ylab="c2", xlab="iterations")
+plot.ts(c2, ylab="c2", xlab="iterations", plot.type="single")
 @
+
+Here we extract only the parameters that are not indexed by gene and
+platform (log files for parameters indexed by gene and platform are
+typically very large):
+
+<<>>=
+getLogs <- function(object){
+	params <- output(object)[output(object) == 1]
+	params <- params[!(names(params) %in% c("nu", "phi", "DDelta", "delta", "sigma2", "diffExpressed"))]
+	names(params)
+}
+param.names <- getLogs(xmcmc)
+params <- lapply(lapply(as.list(param.names), function(name, object) eval(substitute(object$NAME_ARG, list(NAME_ARG=name))), object=xmcmc), as.ts)
+names(params) <- param.names
+
+for(i in 1:length(param.names)){
+	cat(i)
+	tmp <- as.ts(eval(substitute(xmcmc$NAME_ARG, list(NAME_ARG=param.names[i]))))
+}
+@ 
+
+<<traceplots, fig=TRUE, include=FALSE, results=hide>>=
+par(ask=FALSE)
+traceplots <- function(x, name)  plot(x, plot.type="single", col=1:ncol(x), ylab=name)
+mapply(traceplots, params, name=names(params))
+@ 
 
 \section{\label{sec:posterior} Posterior probabilities of differential expression}
 
@@ -385,7 +411,8 @@ different colors and plotting symbols for the genes that show high
 posterior probabilities of concordant differential expression.
 
 <<ssAlternatives, eval=FALSE>>=
-t <- ssStatistic(statistic="t", phenotypeLabel="adenoVsquamous", esetList=xlist)
+##t <- ssStatistic(statistic="t", phenotypeLabel="adenoVsquamous", esetList=xlist)
+tt <- rowttests(xlist, "adenoVsquamous", tstatOnly=TRUE)
 if(require(siggenes)){
   sam <- ssStatistic(statistic="sam", phenotypeLabel="adenoVsquamous", esetList=xlist)
 }
@@ -395,19 +422,19 @@ if(require(GeneMeta)){
 @ 
 
 <<tstatConc, eval=FALSE>>=
-graphics:::pairs(t[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+graphics:::pairs(tt[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
 
 @
 
 <<zConc, eval=FALSE>>=
-graphics:::pairs(t[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+graphics:::pairs(tt[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
 
 @
 
 <<tstatDisc, eval=FALSE>>=
-graphics:::pairs(t[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, 
+graphics:::pairs(tt[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, 
                  bg=op.disc$bg, upper.panel=NULL, cex=op.disc$cex)  
 @ 
 
@@ -436,7 +463,7 @@ for evaluating concordant and discordant differential expression, see
 \cite{Scharpf2007d}.
 
 <<pca, eval=FALSE>>=
-tScores <- xsScores(t, N=nSamples(xlist))
+tScores <- xsScores(tt, N=nSamples(xlist))
 samScores <- xsScores(sam, nSamples(xlist))
 zScores <- xsScores(z[, match(names(xlist), colnames(z))], N=nSamples(xlist))
 ##Concordant differential expression, we use the combined score from the random effects model directly

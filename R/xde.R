@@ -1,4 +1,36 @@
-xde <- function(paramsMcmc, esetList, outputMcmc){
+xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2){
+	if(is.null(batchSize)){
+		fit <- XDE:::xdeFit(paramsMcmc, esetList, outputMcmc)
+	} else{
+		## Tabulate running average of posterior means
+		## Remove log files after each batch
+		print("Log files automatically removed after each batch")
+		I <- iterations(paramsMcmc)/batchSize
+		iterations(paramsMcmc) <- batchSize
+		for(i in 1:I){
+			cat("Batch ", i, "\n")
+			if(i > 1){
+				firstMcmc(paramsMcmc) <- lastMcmc(fit)					
+				fit <- XDE:::xdeFit(paramsMcmc, esetList)			
+				pa.last <- calculatePosteriorAvg(fit, NCONC=NCONC)
+				pa.cum <- (pa.last*batchSize + pa.cum*(i-1)*batchSize)/(i*batchSize)
+				
+				bes.last <- calculateBayesianEffectSize(fit)
+				bes.cum <- (bes.last*batchSize + bes.cum*(i-1)*batchSize)/(i*batchSize)
+			} else{
+				fit <- XDE:::xdeFit(paramsMcmc, esetList)						
+				pa.cum <- calculatePosteriorAvg(fit, NCONC=NCONC)
+				bes.cum <- calculateBayesianEffectSize(fit)
+			}
+			unlink(directory(paramsMcmc), recursive=TRUE)			
+		}
+		bayesianEffectSize(fit) <- bes.cum
+		posteriorAvg(fit) <- pa.cum
+	}
+	return(fit)
+}
+
+xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 	if(!file.exists(directory(paramsMcmc))){
 		dir.create(directory(paramsMcmc), recursive=TRUE)
 	}

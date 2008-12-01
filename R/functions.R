@@ -88,8 +88,10 @@ calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1){
 		tmp <- t(rbind(colSums(x > 0), colSums(x < 0)))
 		colnames(tmp) <- c("#up", "#down")
 		discordant <- (tmp[, 1] * tmp[, 2]) != 0
-		concordant <- (tmp[, 1] * tmp[, 2]) == 0  ##first require no discordant signs
-		##Finally, let the number of concordant studies be user-specified
+		
+		##1) no discordant signs		
+		concordant <- (tmp[, 1] * tmp[, 2]) == 0  
+		##2) let the number of concordant studies be user-specified
 		concordant <- concordant * (rowSums(tmp) >= NCONC)
 		diffExpr <- rowSums(abs(tmp)) >= NDIFF
 		indicators <- matrix(c(concordant,

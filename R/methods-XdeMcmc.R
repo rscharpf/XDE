@@ -27,8 +27,9 @@ setMethod("$", "XdeMcmc", function(x, name) {
 	}
 	mcmc <- scan(paste(directory(x), "/", name, ".log", sep = ""))
 
-  ##################################################
+	##---------------------------------------------------------------------------
 	##Parameters indexed by gene and study
+	##---------------------------------------------------------------------------	
 	if(name %in% c("DDelta", "nu", "phi", "sigma2", "delta", "probDelta")){
 		I <- iterations(x)
 		mcmc <- array(mcmc,
@@ -40,20 +41,14 @@ setMethod("$", "XdeMcmc", function(x, name) {
 			      as.character(1:I)))
 		return(mcmc)
 	}
-
-  
 	##--------------------------------------------------
-	##Parameters indexed by gene 
-##	if(name %in% "probDelta"){
-##		mcmc <- matrix(mcmc, ncol=iterations(x))
-##		rownames(mcmc) <- featureNames(x)
-##		return(mcmc)
-##	}
 
-  ##################################################
 	##Parameters indexed by study
 	if(name %in% c("a", "b", "lambda", "l", "tau2", "t", "theta", "xi")){
-		mcmc <- matrix(mcmc, nc=length(studyNames(x)), byrow=TRUE)
+		nr <- iterations(x)
+		nc <- length(studyNames(x))
+		if(length(mcmc) < nr*nc) byrow <- FALSE else byrow <- TRUE
+		mcmc <- matrix(mcmc, nr=iterations(x), nc=length(studyNames(x)), byrow=byrow)
 		colnames(mcmc) <- studyNames(x)
 		return(mcmc)    
 	}
@@ -64,7 +59,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
 		mcmc <- matrix(mcmc, nc=1, byrow=TRUE)
 		if(name == "c2"){
 			##check for xi-inflation
-			if(median(mcmc) < 0.01){
+			if(median(mcmc, na.rm=TRUE) < 0.01){
 				warning("c2 values are small.  The estimated proportion of differentially expressed genes in a study (given by the parameter xi) is likely inflated.  See the discussion in the XDE manuscript for additional details")
 			}
 		}
@@ -142,6 +137,7 @@ setReplaceMethod("bayesianEffectSize", c("XdeMcmc", "matrix"),
 
 setMethod("calculateBayesianEffectSize", "XdeMcmc",
           function(object){
+		  trace(.standardizedDelta, browser)
 		  D <- .standardizedDelta(object)
 		  averageDelta <- apply(D, c(2, 3), "mean")
 		  averageDelta
@@ -185,9 +181,8 @@ setMethod(".standardizedDelta", "XdeMcmc",
 			  s[i, , ] <- t(apply(as.matrix(sigma[i, , ]), 1, "^", b[i, ]))
 			  s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", tau[i, ]))
 			  s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", sqrt.c2))
-##			  if(deltaProduct) dDelta[i, ,] <- as.matrix(dDelta[i, , ]) * delta
-			  if(deltaProduct) dDelta <- dDelta * delta
 		  }
+		  dDelta <- dDelta * delta
 		  D <- dDelta/s
 		  D <- aperm(D)
 		  D

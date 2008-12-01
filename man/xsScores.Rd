@@ -18,7 +18,11 @@ xsScores(statistic, N)
 }
 
 \value{
-  numeric
+
+  A matrix of cross-study scores for differential expression
+  ("diffExpressed"), concordant differential expression, and discordant
+  differential expression.
+  
 }
 
 \references{
