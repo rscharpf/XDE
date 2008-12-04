@@ -1,4 +1,5 @@
 setMethod("dim", "ExpressionSetList", function(x) sapply(x, dim))
+
 setMethod("rowttests", "ExpressionSetList", function(x, fac, tstatOnly=FALSE){
 	require(genefilter) || stop("genefilter package not available")
 	sapply(x, function(x) rowttests(x, fac, tstatOnly)$statistic)
@@ -224,14 +225,15 @@ setMethod("standardizeSamples", "ExpressionSetList",
 
 setMethod("geneCenter", "ExpressionSetList",
           function(object){
-            mean.center <- function(x){
-              xx.c <- rowMeans(exprs(x))
-              exprs(x) <- sweep(exprs(x), 1, xx.c)
-              return(x)
-            }
-            object <- lapply(object, mean.center)
-            object
-        })
+		  mean.center <- function(x){
+			  ##xx.c <- rowMeans(exprs(x))
+			  exprs(x) <- exprs(x) - rowMeans(exprs(x))
+			  ##exprs(x) <- sweep(exprs(x), 1, xx.c)
+			  return(x)
+		  }
+		  object <- lapply(object, mean.center)
+		  object
+	  })
 
 setMethod("studyCenter", "ExpressionSetList",
           function(object){

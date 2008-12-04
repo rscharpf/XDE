@@ -31,7 +31,8 @@ calculatePosteriorAvg(object, NCONC=2, NDIFF=1)
  
 2.  For each gene, compute the number of positive signs (P) and the
 number of negative signs (N) (a G x 2 matrix, where G is the number of
-genes in common)
+genes in common across all studies).  P + N is <= S, where S is the
+number of studies.
 
 3.  for a given gene, the discordant indicator is simply when P * N
 is nonzero.
