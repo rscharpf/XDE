@@ -255,7 +255,7 @@ setMethod("zeroNu", "ExpressionSetList",
             ##(could result in illegal values)
             
             params <- new("XdeParameter", phenotypeLabel=phenotypeLabel, expressionSetList=object)
-            firstMcmc <- empiricalStart(object, zeroNu=TRUE)
+            firstMcmc <- empiricalStart(object, zeroNu=TRUE, phenotypeLabel=phenotypeLabel)
             firstMcmc$A <- rep(0, length(object))
             firstMcmc$Rho <- rep(0, choose(length(object), 2))
             up <- updates(params)

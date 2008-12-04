@@ -431,8 +431,8 @@ xsScores <- function(statistic, N){
 }
 
 
-empiricalStart <- function(object, zeroNu=FALSE){
-	if(length(grep(phenotypeLabel(object), varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
+empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
+	if(length(grep(phenotypeLabel, varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
 	potential <- rep(0, 19)
 	acceptance <- rep(0, 17)
   
@@ -458,8 +458,8 @@ empiricalStart <- function(object, zeroNu=FALSE){
 		avdif <- mn1-mn0
 		avdif
 	}
-	DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel(object))
-	R <- c(cor(DDelta[, 1], DDelta[, 2]), cor(DDelta[, 1], DDelta[,3]), cor(DDelta[,2], DDelta[,3]))        
+	DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel)
+	R <- cor(DDelta)[upper.tri(cor(DDelta))]
 
 	quant <- quantile(rowMeans(DDelta), probs=c(0.1, 0.9))
 	Delta <- ifelse(rowMeans(DDelta) < quant[1] | rowMeans(DDelta) > quant[2], 1, 0)
@@ -496,7 +496,7 @@ empiricalStart <- function(object, zeroNu=FALSE){
 	Phi <- rep(1, (length(object) * nrow(object)))
 	Tau2 <- rep(1, length(object))
 	ProbDelta <- Delta
-	eenv <- new.env()
+	##eenv <- new.env()
 	linInitialValues <- list(#potential=potential, 
 					#acceptance=acceptance, 
 				 Nu=Nu, DDelta=DDelta, 

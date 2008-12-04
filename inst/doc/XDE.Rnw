@@ -207,6 +207,9 @@ parameter.)
 
 \section{\label{sec:fit} Fitting the Bayesian hierarchical model}
 
+\subsection{Starting values}
+
+\paragraph{Randomly simulated starting values}
 By default, the first iteration of the MCMC chain stored in the slot
 \texttt{firstMcmc} of the \Robject{params} are simulated randomly from
 the priors.  When the value of \texttt{burnin} is true, the output
@@ -225,6 +228,17 @@ fit <- xde(params, xlist)
 Only the first and last iterations of the MCMC are available when
 \texttt{burnin} is \texttt{TRUE}.  The output of the \Rfunction{xde}
 is an object of class \xmcmc{}.
+
+\paragraph{Empirical starting values}
+One can use empirical values for starting the chain (or specify your
+own starting values) as follows:
+
+<<empiricalStart>>=
+rho <- in
+@ 
+
+
+
 
 This object contains the last iteration from the MCMC, as well as a
 different seed that will be used if one decided that three iterations
