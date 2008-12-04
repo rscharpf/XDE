@@ -98,7 +98,6 @@ setMethod("$", "XdeMcmc", function(x, name) {
   }
   
   stop(paste("Supplied name not found.  Should be one of", .parameterNames()[2:22]))
-
 ##  eval(substitute(pData(x)$NAME_ARG, list(NAME_ARG=name)))
 })
 
@@ -137,7 +136,6 @@ setReplaceMethod("bayesianEffectSize", c("XdeMcmc", "matrix"),
 
 setMethod("calculateBayesianEffectSize", "XdeMcmc",
           function(object){
-		  trace(.standardizedDelta, browser)
 		  D <- .standardizedDelta(object)
 		  averageDelta <- apply(D, c(2, 3), "mean")
 		  averageDelta
