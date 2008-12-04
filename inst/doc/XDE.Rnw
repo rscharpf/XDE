@@ -231,10 +231,13 @@ is an object of class \xmcmc{}.
 
 \paragraph{Empirical starting values}
 One can use empirical values for starting the chain (or specify your
-own starting values) as follows:
+own starting values) by initializing an object of class XdeParameter
+and then specifying your own values for the first MCMC:
 
-<<empiricalStart>>=
-rho <- in
+<<empiricalStart, eval=FALSE>>=
+params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous", one.delta=FALSE)
+empirical <- empiricalStart(eList, phenotypeLabel="adenoVsquamous")
+firstMcmc(params) <- empirical
 @ 
 
 

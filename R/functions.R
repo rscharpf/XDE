@@ -463,7 +463,7 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 
 	quant <- quantile(rowMeans(DDelta), probs=c(0.1, 0.9))
 	Delta <- ifelse(rowMeans(DDelta) < quant[1] | rowMeans(DDelta) > quant[2], 1, 0)
-	Delta <- as.vector(Delta)
+	Delta <- as.integer(matrix(Delta, nrow=nrow(object), ncol=length(object), byrow=FALSE))
 	DDelta <- as.vector(DDelta)
 	C2 <- var(DDelta)
 
@@ -472,7 +472,7 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 	B <- rep(0.5, length(object))
 
 	##0.2 seems reasonable,  or the proportion of t-statistics > X
-	Xi <- 0.2
+	Xi <- rep(0.2, length(object))
   
 	##Start at the empirical standard deviation
 	varianceExpression <- function(eset){
@@ -495,7 +495,7 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
   
 	Phi <- rep(1, (length(object) * nrow(object)))
 	Tau2 <- rep(1, length(object))
-	ProbDelta <- Delta
+##	ProbDelta <- Delta
 	##eenv <- new.env()
 	linInitialValues <- list(#potential=potential, 
 					#acceptance=acceptance, 
@@ -504,7 +504,7 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 				 R=R, Rho=Rho, Delta=Delta,
 				 Xi=Xi, Sigma2=Sigma2, T=T, L=L, 
 				 Phi=Phi, Theta=Theta, Lambda=Lambda, 
-				 Tau2=Tau2, ProbDelta=ProbDelta)
+				 Tau2=Tau2) ##ProbDelta=ProbDelta)
 	linInitialValues
 }
 
