@@ -216,8 +216,24 @@ the priors.  When the value of \texttt{burnin} is true, the output
 from the MCMC are not saved to file and the chain can not be monitored
 for convergence. By default the value of \Robject{burnin} is TRUE and
 only the last iteration from the chain will be available (the
-parameters are not written to log files).  For instance, here we run a
-burnin of 3 iterations:
+parameters are not written to log files).  
+
+
+
+
+
+\paragraph{Empirical starting values}
+One can use empirical values for starting the chain (or specify your
+own starting values) by initializing an object of class XdeParameter
+and then specifying your own values for the first MCMC:
+
+<<empiricalStart, eval=FALSE>>=
+params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous", one.delta=FALSE)
+empirical <- empiricalStart(xlist, phenotypeLabel="adenoVsquamous")
+firstMcmc(params) <- empirical
+@ 
+
+To run a burnin of 3 iterations starting from the empircal values:
 
 <<burnin, eval=FALSE>>=
 iterations(params) <- 3
@@ -227,28 +243,13 @@ fit <- xde(params, xlist)
 
 Only the first and last iterations of the MCMC are available when
 \texttt{burnin} is \texttt{TRUE}.  The output of the \Rfunction{xde}
-is an object of class \xmcmc{}.
-
-\paragraph{Empirical starting values}
-One can use empirical values for starting the chain (or specify your
-own starting values) by initializing an object of class XdeParameter
-and then specifying your own values for the first MCMC:
-
-<<empiricalStart, eval=FALSE>>=
-params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous", one.delta=FALSE)
-empirical <- empiricalStart(eList, phenotypeLabel="adenoVsquamous")
-firstMcmc(params) <- empirical
-@ 
-
-
-
-
-This object contains the last iteration from the MCMC, as well as a
-different seed that will be used if one decided that three iterations
-were insufficient.  To run two more iterations, starting at the last
-iteration stored in the \texttt{fit} object, one should provide the
-\Robject{params}, \Robject{xlist}, and \Robject{fit} objects to the
-\Rfunction{xde} function:
+is an object of class \xmcmc{}.  The object \texttt{fit} contains the
+last iteration from the MCMC, as well as a different seed that can be
+used for initiating the next chain.  For instance, to run two
+additional iterations starting at the last iteration stored in the
+\texttt{fit} object, one should provide the \Robject{params},
+\Robject{xlist}, and \Robject{fit} objects to the \Rfunction{xde}
+function:
 
 <<moreIterations, eval=FALSE>>=
 iterations(params) <- 2
@@ -339,17 +340,8 @@ getLogs <- function(object){
 param.names <- getLogs(xmcmc)
 params <- lapply(lapply(as.list(param.names), function(name, object) eval(substitute(object$NAME_ARG, list(NAME_ARG=name))), object=xmcmc), as.ts)
 names(params) <- param.names
-
-for(i in 1:length(param.names)){
-	cat(i)
-	tmp <- as.ts(eval(substitute(xmcmc$NAME_ARG, list(NAME_ARG=param.names[i]))))
-}
-@ 
-
-<<traceplots, fig=TRUE, include=FALSE, results=hide>>=
-par(ask=FALSE)
-traceplots <- function(x, name)  plot(x, plot.type="single", col=1:ncol(x), ylab=name)
-mapply(traceplots, params, name=names(params))
+tracefxn <- function(x, name)  plot(x, plot.type="single", col=1:ncol(x), ylab=name)
+mapply(tracefxn, params, name=names(params))	
 @ 
 
 \section{\label{sec:posterior} Posterior probabilities of differential expression}

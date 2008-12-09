@@ -214,92 +214,18 @@ setMethod("show", "XdeMcmc",
 		  return()
           })
 
-##See help on plot.mcmc
-##... specificies arguments to par
 setMethod("plot", "XdeMcmc",
           function(x, y, op, verbose=FALSE, ...){
-            require(coda) || stop("Method plot for class XdeMcmc requires coda package")
-            def.par <- par(no.readonly=TRUE)
-            on.exit(def.par)
-            
-            if(missing(op)){
-              par(mfrow=c(2, 6), las=1, mar=c(0.5, 3, 2, 1), oma=c(3, 1, 1, 2))
-            } else {
-              par(mfrow=op$mfrow, las=1, mar=op$mar, oma=op$oma)
-            }
-            plotFxn <- function(x, xaxt="n", ylim=c(0, 1), ...){
-              x <- as.mcmc(x)
-              for(i in 1:ncol(x)){
-                if(i == 1){
-                  coda:::plot.mcmc(x[, i], density=FALSE, col=i,
-                                   smooth=FALSE, ylim=ylim,
-                                   auto.layout=FALSE, xaxt=xaxt, ...)
-                } else {
-                  coda:::plot.mcmc(x[, i], density=FALSE, col=i, add=TRUE,
-                                   main=NA, smooth=FALSE, auto.layout=FALSE, ylim=ylim, ...)
-                }
-              }
-            }
-
-            if(output(x)["potential"] == 1){
-              pot <- x$potential[, 2, drop=FALSE]
-              ylim <- range(pot)
-              ##            ylim[2] <- quantile(pot, probs=0.995)
-              plotFxn(pot, main="potential", ylim=ylim, ...)
-            } else {
-              if(verbose) print("potential not saved")
-            }
-
-            if(output(x)["a"] == 1){
-              a <- x$a
-              plotFxn(a, main="a", ...)
-            } else{
-              if(verbose) print("a not saved")
-            }
-
-            if(output(x)["b"] == 1){
-              b <- x$b
-              plotFxn(b, main="b", ...)
-            }
-
-            if(output(x)["l"] == 1){
-              l <- x$l
-              plotFxn(l, main="l", ...)
-            }
-
-            if(output(x)["t"] == 1){
-              t <- x$t
-              plotFxn(t, main="t", ...)
-            }
-
-            if(output(x)["gamma2"] == 1){
-              gamma2 <- as.mcmc(x$gamma2)
-              coda:::plot.mcmc(gamma2, density=FALSE, col=1, main=expression(gamma^2), smooth=FALSE, auto.layout=FALSE, xaxt="s", ...)              
-            }
-
-            if(output(x)["c2"] == 1){            
-              c2 <- as.mcmc(x$c2)
-              coda:::plot.mcmc(c2, density=FALSE, col=1, main=expression(c^2), smooth=FALSE, auto.layout=FALSE, xaxt="s", ...)
-            }
-
-            if(output(x)["tau2"] == 1){                        
-              tau2 <- x$tau2
-              plotFxn(tau2, main=expression(tau^2), xaxt="s", ylim=range(tau2), ...)
-            }
-
-            if(output(x)["xi"] == 1){                        
-		    xi <- as.mcmc(x$xi)
-		    plotFxn(xi, main=expression(xi), xaxt="s", ylim=c(0, 1), ...)
-##		    coda:::plot.mcmc(xi, density=FALSE, col=1, main=expression(xi), smooth=FALSE, auto.layout=FALSE, ...)
-            }
-
-            if(output(x)["rho"] == 1){                        
-              rho <- x$rho
-              plotFxn(rho, main=expression(rho), xaxt="s", ...)
-            }
-
-            if(output(x)["r"] == 1){                        
-              r <- x$r
-              plotFxn(r, main=expression(r), xaxt="s", ...)
-            }
+		  if(missing(y)){
+			  getLogs <- function(object){
+				  params <- output(object)[output(object) == 1]
+				  params <- params[!(names(params) %in% c("nu", "phi", "DDelta", "delta", "sigma2", "diffExpressed"))]
+				  names(params)
+			  }
+			  y <- getLogs(x)
+		  }
+		  params <- lapply(lapply(as.list(y), function(name, object) eval(substitute(object$NAME_ARG, list(NAME_ARG=name))), object=x), as.ts)
+		  names(params) <- y
+		  tracefxn <- function(x, name)  plot(x, plot.type="single", col=1:ncol(x), ylab=name)
+		  mapply(tracefxn, params, name=names(params))			  
           })

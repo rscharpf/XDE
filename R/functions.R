@@ -436,12 +436,12 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 	potential <- rep(0, 19)
 	acceptance <- rep(0, 17)
   
-
+	##order should be platforms, genes for nu, phi, sigma2, delta, and DDelta
 	if(!zeroNu){
 		meanExpression <- function(eset) rowMeans(exprs(eset))  
 		Nu <- sapply(object, meanExpression)
 		Rho <- cor(Nu)[upper.tri(cor(Nu))]
-		Nu <- as.vector(Nu)
+		Nu <- as.vector(t(Nu))
 		Gamma2 <- var(Nu)    
 	} else{
 		Nu <- as.vector(matrix(0, nrow(object), length(object)))
@@ -460,11 +460,10 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 	}
 	DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel)
 	R <- cor(DDelta)[upper.tri(cor(DDelta))]
-
 	quant <- quantile(rowMeans(DDelta), probs=c(0.1, 0.9))
 	Delta <- ifelse(rowMeans(DDelta) < quant[1] | rowMeans(DDelta) > quant[2], 1, 0)
-	Delta <- as.integer(matrix(Delta, nrow=nrow(object), ncol=length(object), byrow=FALSE))
-	DDelta <- as.vector(DDelta)
+	Delta <- matrix(Delta, nrow=nrow(object), ncol=length(object), byrow=FALSE)
+	DDelta <- as.numeric(t(DDelta))
 	C2 <- var(DDelta)
 
 	##Should we start at zero or somewhere in the middle
@@ -482,10 +481,9 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 
 	##Gamma with mean 1
 	##L and T are mean and variance, respectively
-	##
 	L <- as.numeric(colMeans(Sigma2))
 	T <- as.numeric(apply(Sigma2, 2, var))
-	Sigma2 <- as.vector(Sigma2)
+	Sigma2 <- as.numeric(t(Sigma2))
 
 	##Lambda and theta are the mean and variance
 	##respectively (as per Haakon's 10/23/2006 e-mail)
