@@ -65,8 +65,8 @@ applied to the ionizing radiation response, PNAS 2001 98: 5116-5121,
 \examples{
 
 data(expressionSetList)
-if(require(multtest)){
-  t <- ssStatistic("t", esetList=expressionSetList, phenotypeLabel="adenoVsquamous")
+if(require(siggenes)){
+  sam <- ssStatistic("sam", esetList=expressionSetList, phenotypeLabel="adenoVsquamous")
 }  
 }
 \keyword{methods}

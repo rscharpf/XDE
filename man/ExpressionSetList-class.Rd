@@ -4,6 +4,7 @@
 \alias{.integrativeCorrelationFilter,ExpressionSetList-method}
 \alias{[,ExpressionSetList-method}
 \alias{coerce,list,ExpressionSetList-method}
+\alias{dim,ExpressionSetList-method}
 \alias{featureNames,ExpressionSetList-method}
 \alias{geneCenter,ExpressionSetList-method}
 \alias{lapply,ExpressionSetList-method}
@@ -14,7 +15,6 @@
 \alias{pca,ExpressionSetList-method}
 \alias{standardizeSamples,ExpressionSetList-method}
 \alias{studyCenter,ExpressionSetList-method}
-\alias{xapply,ExpressionSetList-method}
 \alias{zeroNu,ExpressionSetList-method}
 
 \title{A class for containing a list of ExpressionSets}
@@ -55,6 +55,9 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
   \code{ExpressionSetList} class will return an error if the
   \code{featureNames} for each \code{ExpressionSet} are not identical.}
 
+\item{dim}{\code{signature(x="ExpressionSetList")} applies \code{dim} to each
+  element of the list. }
+
 \item{featureNames}{\code{signature(object = "ExpressionSetList")}
   Accessor for the \code{featureNames}}
 
@@ -87,9 +90,6 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
 \item{studyCenter}{\code{signature(object = "ExpressionSetList")}
   See \code{\link{studyCenter}}
 }
-
-\item{xapply}{\code{signature(object="ExpressionSetList")} An lapply for
-  \code{ExpressionSetList} instances.  See \code{\link{xapply}}.}
 
 \item{zeroNu}{\code{signature(object = "ExpressionSetList")}
   See \code{`\link{zeroNu}}. }

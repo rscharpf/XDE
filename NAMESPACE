@@ -1,11 +1,9 @@
 useDynLib("XDE")
 import(Biobase, methods, stats, graphics)
-##import(Biobase, coda, methods, graphics, stats)
 #MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
 ##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
 ##importMethodsFrom("MergeMaid", geneStudy, "geneStudy<-", exprs, integrative.cors, intCor, intcorDens)
 ##importFrom("MergeMaid", mergeExprs)
-##importFrom("multtest", mt.teststat)
 importFrom("genefilter", rowttests)
 exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
 exportMethods("[", "[[", "$",

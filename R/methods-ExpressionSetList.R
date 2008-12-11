@@ -3,6 +3,7 @@ setMethod("dim", "ExpressionSetList", function(x) sapply(x, dim))
 setMethod("rowttests", "ExpressionSetList", function(x, fac, tstatOnly=FALSE){
 	sapply(x, function(x) rowttests(x, fac, tstatOnly)$statistic)
 })
+
 setMethod("lapply", "ExpressionSetList", function(X, FUN, ...){
 	  X <- lapply(as(X, "list"), FUN, ...)
 	  if(all(sapply(X, class) == "ExpressionSet")){

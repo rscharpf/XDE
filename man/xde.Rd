@@ -12,7 +12,7 @@
 
 \usage{
   
-  xde(paramsMcmc, esetList, outputMcmc)
+  xde(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2)
 
 }
 
@@ -21,12 +21,24 @@
   \item{paramsMcmc}{Object of class \code{XdeParameter}}
   \item{esetList}{Object of class \code{ExpressionSetList}}
   \item{outputMcmc}{Object of class \code{XdeMcmc} (optional)}
+  \item{batchSize}{Integer or NULL.  The number of iterations written to
+  log files before summarizing the chain and then removing. Experimental.}
+  \item{NCONC}{The number of studies for which a gene must be
+  differentially expressed in the same direction to be considered as
+  concordantly differentially expressed.}
 }
 
 \details{
 
   Details for fitting the Bayesian model are discussed elsewhere (see
   citation below and XdeParameterClass vignette)
+
+  If an integer is specified for the batchSize, summary statistics for
+  the log-files are calculated for every batchSize iterations.  The log
+  files are then removed and the next iteration will start a new log
+  file.  This allows one to do many iterations without creating enormous
+  log files.  This is only reasonable to do if one has already assessed
+  convergence.
   
 }
 

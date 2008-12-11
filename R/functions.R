@@ -166,17 +166,19 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 
 	##-----------------------------------------------------------
 	##Wrapper for Welch t-statistic
-	multtestWrapper <- function(eset, classlabel, ...){
-		require(multtest) || stop("Package multtest not available")    
-		column <- grep(classlabel, colnames(pData(eset)))
-		if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
-		if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
-		if(length(column) == 1) classlabel <- pData(eset)[, column]
-		X <- exprs(eset)
-		stat <- mt.teststat(X=X, classlabel=classlabel, test="t",
-				    nonpara="n")
-		stat
-	}
+##	multtestWrapper <- function(eset, classlabel, ...){
+##		require(multtest) || stop("Package multtest not available")    
+##		column <- grep(classlabel, colnames(pData(eset)))
+##		if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
+##		if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
+##		if(length(column) == 1) classlabel <- pData(eset)[, column]
+##		X <- exprs(eset)
+##		stat <- mt.teststat(X=X, classlabel=classlabel, test="t",
+##				    nonpara="n")
+##		stat
+##	}
+	tt <- rowttests(esetList, phenotypeLabel)
+
 
 	sam.wrapper <- function(eset, classlabel, method, returnQ, gene.names){
 		require(siggenes) || stop("Package siggenes not available")              
@@ -207,7 +209,8 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 	##---------------------------------------------------------------------------
 	##Wrapper for SAM-statistic
 	stat <- switch(statistic,
-		       t=sapply(esetList, multtestWrapper, classlabel=phenotypeLabel),
+##		       t=sapply(esetList, multtestWrapper, classlabel=phenotypeLabel),
+		       t=tt,
 		       sam=sapply(esetList, sam.wrapper, classlabel=phenotypeLabel,
 		       returnQ=FALSE, method="d.stat", gene.names=featureNames(esetList), ...),
 		       z=z.wrapper(object=esetList, classlabel=phenotypeLabel, useREM=TRUE))
@@ -431,7 +434,7 @@ xsScores <- function(statistic, N){
 }
 
 
-empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
+empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE, T_THRESH=4){
 	if(length(grep(phenotypeLabel, varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
 	potential <- rep(0, 19)
 	acceptance <- rep(0, 17)
@@ -440,9 +443,19 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 	if(!zeroNu){
 		meanExpression <- function(eset) rowMeans(exprs(eset))  
 		Nu <- sapply(object, meanExpression)
-		Rho <- cor(Nu)[upper.tri(cor(Nu))]
+		Rho <- cor(Nu)
+		##order should be 1_2, 1_3, ..., 1_P, 2_3, ..., 2_P, ...
+		##R <- R[upper.tri(R)]  ##Not in the right order!		
+		cors <- list()
+		for(i in 1:(nrow(Rho)-1)) cors[[i]] <- Rho[i, -(1:i)]
+		Rho <- unlist(cors)
+
+		NuVars <- apply(Nu, 2, "var")
+		Gamma2 <- mean(NuVars)
+		S <- length(NuVars)
+		tau2.Nu <- NuVars/(prod(NuVars))^(1/S)
 		Nu <- as.vector(t(Nu))
-		Gamma2 <- var(Nu)    
+		##the prior for gamma2 is an improper uniform distribution on (0, Inf)
 	} else{
 		Nu <- as.vector(matrix(0, nrow(object), length(object)))
 		Rho <- rep(0, choose(length(object), 2))
@@ -459,25 +472,37 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 		avdif
 	}
 	DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel)
-	R <- cor(DDelta)[upper.tri(cor(DDelta))]
-	quant <- quantile(rowMeans(DDelta), probs=c(0.1, 0.9))
-	Delta <- ifelse(rowMeans(DDelta) < quant[1] | rowMeans(DDelta) > quant[2], 1, 0)
-	Delta <- matrix(Delta, nrow=nrow(object), ncol=length(object), byrow=FALSE)
+
+	require(genefilter)
+	tt <- rowttests(object, phenotypeLabel)
+	delta <- abs(tt) > T_THRESH
+	if(one.delta){
+		delta <- ifelse(rowMeans(delta) > 0.5, 1, 0)
+		delta <- matrix(delta, ncol=length(object), byrow=FALSE)
+	} 
+	R <- cor(delta*DDelta)
+	##order should be 1_2, 1_3, ..., 1_P, 2_3, ..., 2_P, ...
+	##R <- R[upper.tri(R)]  ##Not in the right order!
+	cors <- list()
+	for(i in 1:(nrow(R)-1)) cors[[i]] <- R[i, -(1:i)]
+	R <- unlist(cors)
+
+	DeltaVars <- apply(DDelta*delta, 2, "var")	
+	C2 <- mean(DeltaVars)
+	S <- length(DeltaVars)
+	tau2.Delta <- DeltaVars/(prod(DeltaVars))^(1/S)
+
+
+	##0.1 seems reasonable,  or the proportion of t-statistics > X
+	Xi <- apply(delta, 2, "mean")
+	Sigma2 <- sapply(lapply(object, exprs), rowVars)	
+	
 	DDelta <- as.numeric(t(DDelta))
-	C2 <- var(DDelta)
+	delta <- as.numeric(t(delta))
 
-	##Should we start at zero or somewhere in the middle
-	A <- rep(0.5, length(object))
-	B <- rep(0.5, length(object))
-
-	##0.2 seems reasonable,  or the proportion of t-statistics > X
-	Xi <- rep(0.2, length(object))
-  
-	##Start at the empirical standard deviation
-	varianceExpression <- function(eset){
-		apply(exprs(eset), 1, var)
-	}
-	Sigma2 <- sapply(object, varianceExpression)
+	##Should we start at zero, 1, or somewhere in the middle?
+	A <- rep(1, length(object))
+	B <- rep(1, length(object))
 
 	##Gamma with mean 1
 	##L and T are mean and variance, respectively
@@ -485,21 +510,26 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel){
 	T <- as.numeric(apply(Sigma2, 2, var))
 	Sigma2 <- as.numeric(t(Sigma2))
 
-	##Lambda and theta are the mean and variance
-	##respectively (as per Haakon's 10/23/2006 e-mail)
-	Lambda <- rep(1, length(object))
-	Theta <- rep(0.001, length(object))
-
-  
+	##sigma2*phi is variance of expression values for patients with binary phenotype = 0
+	##sigma2/phi is variance of expression values for patients with binary phenotype = 1	
 	Phi <- rep(1, (length(object) * nrow(object)))
-	Tau2 <- rep(1, length(object))
+	##Lambda and theta are the mean and variance for phi (study-specific)	
+	Lambda <- rep(1, length(object))
+	Theta <- rep(0.05, length(object))
+
+	##Tau2 is the relative scale of sigma across platforms
+	##- the product is constrained to be one
+	##- tau2 is shared by both nu and Delta
+	##Tau2 <- rep(1, length(object))
+	Tau2 <- tau2.Delta * tau2.Nu
+	
 ##	ProbDelta <- Delta
 	##eenv <- new.env()
 	linInitialValues <- list(#potential=potential, 
 					#acceptance=acceptance, 
 				 Nu=Nu, DDelta=DDelta, 
 				 A=A, B=B, C2=C2, Gamma2=Gamma2, 
-				 R=R, Rho=Rho, Delta=Delta,
+				 R=R, Rho=Rho, Delta=delta,
 				 Xi=Xi, Sigma2=Sigma2, T=T, L=L, 
 				 Phi=Phi, Theta=Theta, Lambda=Lambda, 
 				 Tau2=Tau2) ##ProbDelta=ProbDelta)

@@ -20,6 +20,7 @@
 \alias{nrow,XdeMcmc-method}
 \alias{output,XdeMcmc-method}
 \alias{plot,XdeMcmc-method}
+\alias{plot,XdeMcmc,ANY-method}
 \alias{posteriorAvg,XdeMcmc-method}
 \alias{posteriorAvg<-,XdeMcmc,matrix-method}
 \alias{seed,XdeMcmc-method}
