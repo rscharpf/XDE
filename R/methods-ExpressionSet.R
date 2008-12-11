@@ -24,7 +24,6 @@ setMethod(".studySplit", "ExpressionSet",
             }
             "%w/o%" <- function(x,y) x[!x %in% y] #--  x without y
             eset <- list()
-            require(genefilter) || stop("genefilter package not available")
             for(i in 1:nsplit){
               samples0 <- sample(group0, size=splitSize0, replace=FALSE)
               group0 <- group0 %w/o% samples0

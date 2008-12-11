@@ -1,7 +1,6 @@
 setMethod("dim", "ExpressionSetList", function(x) sapply(x, dim))
 
 setMethod("rowttests", "ExpressionSetList", function(x, fac, tstatOnly=FALSE){
-	require(genefilter) || stop("genefilter package not available")
 	sapply(x, function(x) rowttests(x, fac, tstatOnly)$statistic)
 })
 setMethod("lapply", "ExpressionSetList", function(X, FUN, ...){
@@ -210,7 +209,6 @@ setMethod("pData", "ExpressionSetList",
 
 setMethod("standardizeSamples", "ExpressionSetList",
           function(object, ...){
-            require(genefilter) || stop("package genefilter not available")
             standardizeColumns <- function(object){
               colSds <- function(x) rowSds(t(x))            
               sds <- colSds(exprs(object))
