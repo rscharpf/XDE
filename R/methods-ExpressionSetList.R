@@ -60,7 +60,7 @@ setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
 		       notes="")
 ##            obj <- as(object, "mergeExpressionSet")
             null <- intcorDens(obj)
-            null <- do.call("cbind", null)            
+            null <- do.call(cbind, null)            
 
             ##Find the cutoff, c,  at which
             ##(NULL_c)/(NULL_c + EMP_c) = 0.3
