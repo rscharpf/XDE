@@ -47,7 +47,8 @@ using namespace std;
 #include "UpdatePhiMH.h"
 #include "UpdateThetaMH.h"
 #include "UpdateLambdaMH.h"
-#include "UpdateTau2MH.h"
+#include "UpdateTau2RMH.h"
+#include "UpdateTau2RhoMH.h"
 
 #include "ReportDiffexpressed.h"
 
@@ -127,7 +128,8 @@ int main(int argc,char **argv)
   PotentialPhi potPhi(&str);
   PotentialZero potTheta;
   PotentialZero potLambda;
-  PotentialZero potTau2;
+  PotentialZero potTau2R;
+  PotentialZero potTau2Rho;
 
   //
   // Define the total potential function
@@ -151,7 +153,8 @@ int main(int argc,char **argv)
   term.push_back(&potPhi);
   term.push_back(&potTheta);
   term.push_back(&potLambda);
-  term.push_back(&potTau2);
+  term.push_back(&potTau2R);
+  term.push_back(&potTau2Rho);
   
   PotentialSum potTotal(term);
   
@@ -308,15 +311,28 @@ int main(int argc,char **argv)
   nUpdate.push_back(10);
   
   //
-  // Update for tau2
+  // Update for tau2R
   //
   
   term.resize(0);
-  term.push_back(&potTau2);
-  term.push_back(&potNu);
+  term.push_back(&potTau2R);
   term.push_back(&potDDelta);
   potSum = new PotentialSum(term);
-  update.push_back(new UpdateTau2MH(&str,potSum,0.02));
+  update.push_back(new UpdateTau2RMH(&str,potSum,0.02));
+  nUpdate.push_back(20);
+  delete potSum;
+  potSum = NULL;
+  
+  
+  //
+  // Update for tau2Rho
+  //
+  
+  term.resize(0);
+  term.push_back(&potTau2Rho);
+  term.push_back(&potNu);
+  potSum = new PotentialSum(term);
+  update.push_back(new UpdateTau2RhoMH(&str,potSum,0.02));
   nUpdate.push_back(20);
   delete potSum;
   potSum = NULL;
@@ -346,7 +362,8 @@ int main(int argc,char **argv)
   cout << "phi:    " << nUpdate[13] << " (" << update[13]->getEpsilon() << ")\n";
   cout << "theta:  " << nUpdate[14] << " (" << update[14]->getEpsilon() << ")\n";
   cout << "lambda: " << nUpdate[15] << " (" << update[15]->getEpsilon() << ")\n";
-  cout << "tau2:   " << nUpdate[16] << " (" << update[16]->getEpsilon() << ")\n";
+  cout << "tau2R:  " << nUpdate[16] << " (" << update[16]->getEpsilon() << ")\n";
+  cout << "tau2Rho:" << nUpdate[17] << " (" << update[17]->getEpsilon() << ")\n";
   cout << "\n\n";
   
   //

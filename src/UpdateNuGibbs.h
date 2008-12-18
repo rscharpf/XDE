@@ -72,7 +72,7 @@ inline int UpdateNuGibbs::update(Random &ran)
 
       for (p = 0; p < str->Q; p++)
 	{
-	  var[p][p] = str->gamma2 * str->tau2[p];
+	  var[p][p] = str->gamma2 * str->tau2Rho[p];
 	  var[p][p] *= exp(str->a[p] * log(str->sigma2[p][g]));
 	}
 
@@ -81,7 +81,7 @@ inline int UpdateNuGibbs::update(Random &ran)
 	  {
 	    var[p][q] = str->gamma2;
 	    var[p][q] *= str->rho[p][q];
-	    var[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
+	    var[p][q] *= sqrt(str->tau2Rho[p] * str->tau2Rho[q]);
 	    var[p][q] *= exp(0.5 * (str->a[q] * log(str->sigma2[q][g]) + str->a[p] * log(str->sigma2[p][g])));
 
 	    var[q][p] = var[p][q];

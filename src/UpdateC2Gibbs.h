@@ -85,7 +85,7 @@ inline int UpdateC2Gibbs::update(Random &ran)
 	      {
 		varInv[p][q] = 1;
 		if (p != q) varInv[p][q] *= str->r[p][q];
-		varInv[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
+		varInv[p][q] *= sqrt(str->tau2R[p] * str->tau2R[q]);
 		varInv[p][q] *= exp(0.5 * (str->b[q] * log(str->sigma2[q][g]) + str->b[p] * log(str->sigma2[p][g])));
 		
 		varInv[q][p] = varInv[p][q];
@@ -221,7 +221,7 @@ inline int UpdateC2Gibbs::update(Random &ran)
 	  for (p = 0; p < str->Q; p++) var[p].resize(str->Q);
 	  for (p = 0; p < str->Q; p++)
 	    {
-	      var[p][p] = str->c2 * str->tau2[p];
+	      var[p][p] = str->c2 * str->tau2R[p];
 	      var[p][p] *= exp(str->b[p] * log(str->sigma2[p][g]));
 	    }
 	  
@@ -230,7 +230,7 @@ inline int UpdateC2Gibbs::update(Random &ran)
 	      {
 		var[p][q] = str->c2;
 		var[p][q] *= str->r[p][q];
-		var[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
+		var[p][q] *= sqrt(str->tau2R[p] * str->tau2R[q]);
 		var[p][q] *= exp(0.5 * (str->b[q] * log(str->sigma2[q][g]) + str->b[p] * log(str->sigma2[p][g])));
 		
 		var[q][p] = var[p][q];

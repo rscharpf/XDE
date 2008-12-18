@@ -158,7 +158,7 @@ inline int UpdateRhoGamma2MH::update(Random &ran)
 	  {
 	    varInv[p][q] = 1;
 	    if (p != q) varInv[p][q] *= newRho[p][q];
-	    varInv[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
+	    varInv[p][q] *= sqrt(str->tau2Rho[p] * str->tau2Rho[q]);
 	    varInv[p][q] *= exp(0.5 * (str->a[q] * log(str->sigma2[q][g]) + str->a[p] * log(str->sigma2[p][g])));
 	    
 	    varInv[q][p] = varInv[p][q];
@@ -196,7 +196,7 @@ inline int UpdateRhoGamma2MH::update(Random &ran)
 	  {
 	    varInv[p][q] = 1;
 	    if (p != q) varInv[p][q] *= oldRho[p][q];
-	    varInv[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
+	    varInv[p][q] *= sqrt(str->tau2Rho[p] * str->tau2Rho[q]);
 	    varInv[p][q] *= exp(0.5 * (str->a[q] * log(str->sigma2[q][g]) + str->a[p] * log(str->sigma2[p][g])));
 	    
 	    varInv[q][p] = varInv[p][q];
