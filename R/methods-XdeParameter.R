@@ -42,7 +42,8 @@ setMethod("initialize", "XdeParameter",
 			    dir.create(directory, recursive=TRUE)
 		    }
             } else{
-		    output <- c(1, rep(0, 21))
+		    ##rep(0,22) if taus uncoupled; rep(0,21) otherwise
+		    output <- c(1, rep(0, 22))
 		    names(output) <- .parameterNames()              
             }
             .Object@tuning <- tuning
@@ -82,9 +83,11 @@ setMethod("burnin", "XdeParameter", function(object) object@burnin)
 setReplaceMethod("burnin", c("XdeParameter", "logical"), function(object, value){
 	object@burnin <- value
 	if(value) {
-		object@output[2:22] <- rep(0, 21)
+		##uncouple taus
+		object@output[2:23] <- rep(0, 22)
 	} else {
-		object@output[2:22] <- rep(1, 21)
+		##uncouple taus
+		object@output[2:23] <- rep(1, 22)
 	}
 	names(object@output) <- .parameterNames()    
 	object

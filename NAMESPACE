@@ -68,17 +68,17 @@ export(calculatePosteriorAvg,
 
 ##export when debugging
 ##exportMethods(.pca, .studySplit)
-##export(.integ.norm,
-##       .integ.cal,
-##       .chainInitialize,
-##       .hyperparametersDefault,
-##       .outputDefault,
-##       .parameterNames,
-##       .permuteClassLabels,
-##       .permutePhenotype,
-##       .tuningDefault,
-##       .updatesDefault,
-##       .xdeparameterList)
+export(.integ.norm,
+       .integ.cal,
+      .chainInitialize,
+       .hyperparametersDefault,
+       .outputDefault,
+       .parameterNames,
+       .permuteClassLabels,
+       .permutePhenotype,
+       .tuningDefault,
+       .updatesDefault)
+
 
 
 

@@ -20,7 +20,8 @@
                                         "phi",
                                         "theta",
                                         "lambda",
-                                        "tau2",
+                                        "tau2R",
+				       "tau2Rho",
                                         "probDelta",
                                         "diffExpressed")
               
@@ -48,7 +49,7 @@
             Phi <- rep(0, QQ * G*chain.length[["phi"]])
             Theta <- rep(0, QQ*chain.length[["theta"]])
             Lambda <- rep(0, QQ*chain.length[["lambda"]])
-            Tau2 <- rep(0, QQ*chain.length[["tau2"]])
+	      Tau2R <- Tau2Rho <- rep(0, QQ*chain.length[["tau2R"]])
             ProbDelta <- rep(0, G*QQ*chain.length[["probDelta"]])
             Diffexpressed <- rep(0, 3*G)
             eenv <- new.env()
@@ -70,7 +71,8 @@
                       Phi=Phi,
                       Theta=Theta,
                       Lambda=Lambda,
-                      Tau2=Tau2,
+                      Tau2R=Tau2R,
+		      Tau2Rho=Tau2Rho,
                       ProbDelta=ProbDelta,
                       Diffexpressed=Diffexpressed)
               assign("vars", x, eenv)
@@ -115,28 +117,29 @@ calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1){
 }
 
 .parameterNames <- function(){
-  c("thin",
-    "potential",
-    "acceptance",
-    "nu",
-    "DDelta",
-    "a",
-    "b",
-    "c2",
-    "gamma2",
-    "r",
-    "rho",
-    "delta",
-    "xi",
-    "sigma2",
-    "t",
-    "l",
-    "phi",
-    "theta",
-    "lambda",
-    "tau2",
-    "probDelta",
-    "diffExpressed")
+	c("thin",
+	  "potential",
+	  "acceptance",
+	  "nu",
+	  "DDelta",
+	  "a",
+	  "b",
+	  "c2",
+	  "gamma2",
+	  "r",
+	  "rho",
+	  "delta",
+	  "xi",
+	  "sigma2",
+	  "t",
+	  "l",
+	  "phi",
+	  "theta",
+	  "lambda",
+	  "tau2R",
+	  "tau2Rho",
+	  "probDelta",
+	  "diffExpressed")
 }
 
 .permutePhenotype <- function(object, seed, ...){
@@ -434,6 +437,7 @@ xsScores <- function(statistic, N){
 }
 
 
+
 empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE, T_THRESH=4){
 	if(length(grep(phenotypeLabel, varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
 	potential <- rep(0, 19)
@@ -453,7 +457,7 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE
 		NuVars <- apply(Nu, 2, "var")
 		Gamma2 <- mean(NuVars)
 		S <- length(NuVars)
-		tau2.Nu <- NuVars/(prod(NuVars))^(1/S)
+		tau2Rho <- NuVars/(prod(NuVars))^(1/S)
 		Nu <- as.vector(t(Nu))
 		##the prior for gamma2 is an improper uniform distribution on (0, Inf)
 	} else{
@@ -476,21 +480,31 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE
 	require(genefilter)
 	tt <- rowttests(object, phenotypeLabel)
 	delta <- abs(tt) > T_THRESH
+
 	if(one.delta){
 		delta <- ifelse(rowMeans(delta) > 0.5, 1, 0)
 		delta <- matrix(delta, ncol=length(object), byrow=FALSE)
-	} 
-	R <- cor(delta*DDelta)
-	##order should be 1_2, 1_3, ..., 1_P, 2_3, ..., 2_P, ...
-	##R <- R[upper.tri(R)]  ##Not in the right order!
-	cors <- list()
-	for(i in 1:(nrow(R)-1)) cors[[i]] <- R[i, -(1:i)]
-	R <- unlist(cors)
-
+	}
+	if(any(colSums(delta) == 0)){
+		##if none of the genes are differentially expressed in
+		##some of the studies, set R at 0
+		R <- rep(0, choose(S,2))
+	} else 	{
+		R <- cor(delta*DDelta)
+		##order should be 1_2, 1_3, ..., 1_P, 2_3, ..., 2_P, ...
+		##R <- R[upper.tri(R)]  ##Not in the right order!
+		cors <- list()
+		for(i in 1:(nrow(R)-1)) cors[[i]] <- R[i, -(1:i)]
+		R <- unlist(cors)
+	}
 	DeltaVars <- apply(DDelta*delta, 2, "var")	
 	C2 <- mean(DeltaVars)
 	S <- length(DeltaVars)
-	tau2.Delta <- DeltaVars/(prod(DeltaVars))^(1/S)
+	if(any(colSums(delta)==0)){
+		tau2R <- rep(1, S)
+	} else {
+		tau2R <- DeltaVars/(prod(DeltaVars))^(1/S)
+	}
 
 
 	##0.1 seems reasonable,  or the proportion of t-statistics > X
@@ -521,18 +535,14 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE
 	##- the product is constrained to be one
 	##- tau2 is shared by both nu and Delta
 	##Tau2 <- rep(1, length(object))
-	Tau2 <- tau2.Delta * tau2.Nu
-	
-##	ProbDelta <- Delta
-	##eenv <- new.env()
-	linInitialValues <- list(#potential=potential, 
-					#acceptance=acceptance, 
-				 Nu=Nu, DDelta=DDelta, 
+	##Tau2 <- tau2.Delta * tau2.Nu
+	linInitialValues <- list(Nu=Nu, DDelta=DDelta, 
 				 A=A, B=B, C2=C2, Gamma2=Gamma2, 
 				 R=R, Rho=Rho, Delta=delta,
 				 Xi=Xi, Sigma2=Sigma2, T=T, L=L, 
 				 Phi=Phi, Theta=Theta, Lambda=Lambda, 
-				 Tau2=Tau2) ##ProbDelta=ProbDelta)
+				 Tau2R=tau2R,
+				 Tau2Rho=tau2Rho)
 	linInitialValues
 }
 

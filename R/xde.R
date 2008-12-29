@@ -223,7 +223,9 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 		  Phi = as.double(firstMcmc$Phi),
 		  Theta = as.double(firstMcmc$Theta), #25
 		  Lambda = as.double(firstMcmc$Lambda),#26
-		  Tau2 = as.double(firstMcmc$Tau2),#27
+##		  Tau2 = as.double(firstMcmc$Tau2),#27  ##decoupling of taus
+		  Tau2R=as.double(firstMcmc$Tau2R),
+		  Tau2Rho=as.double(firstMcmc$Tau2Rho),
 		  param = as.double(hyperparameters(paramsMcmc)),#28
 		  nUpdate = as.integer(paramsMcmc@updates),#29
 		  epsilon = as.double(paramsMcmc@tuning),#30
