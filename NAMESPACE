@@ -77,7 +77,8 @@ export(calculatePosteriorAvg,
 ##       .permuteClassLabels,
 ##       .permutePhenotype,
 ##       .tuningDefault,
-##       .updatesDefault)
+##       .updatesDefault,
+##       xdeFit)
 
 
 

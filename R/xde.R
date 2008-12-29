@@ -115,35 +115,37 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 				      Phi = ZZ[[24]],
 				      Theta = ZZ[[25]],
 				      Lambda = ZZ[[26]],
-				      Tau2 = ZZ[[27]],
-				      param = ZZ[[28]],
-				      nUpdate = ZZ[[29]],
-				      epsilon = ZZ[[30]],
-				      output = ZZ[[31]],
-				      writeToFile = ZZ[[32]],
-				      directory = ZZ[[33]],
-				      valuePotential = ZZ[[34]],
-				      valueAcceptance = ZZ[[35]],
-				      valueNu = ZZ[[36]],
-				      valueDDelta = ZZ[[37]],
-				      valueA = ZZ[[38]],
-				      valueB = ZZ[[39]],
-				      valueC2 = ZZ[[40]],
-				      valueGamma2 = ZZ[[41]],
-				      valueR = ZZ[[42]],
-				      valueRho = ZZ[[43]],
-				      valueDelta = ZZ[[44]],
-				      valueXi = ZZ[[45]],
-				      valueSigma2 = ZZ[[46]],
-				      valueT = ZZ[[47]],
-				      valueL = ZZ[[48]],
-				      valuePhi = ZZ[[49]],
-				      valueTheta = ZZ[[50]],
-				      valueLambda = ZZ[[51]],
-				      valueTau2 = ZZ[[52]],
-				      valueProbDelta = ZZ[[53]],
-				      valueDiffexpressed=ZZ[[54]],
-				      writeDiffexpressedTofile=ZZ[[55]]),                                          
+				      Tau2R = ZZ[[27]],
+				      Tau2Rho=ZZ[[28]],
+				      param = ZZ[[29]],
+				      nUpdate = ZZ[[30]],
+				      epsilon = ZZ[[31]],
+				      output = ZZ[[32]],
+				      writeToFile = ZZ[[33]],
+				      directory = ZZ[[34]],
+				      valuePotential = ZZ[[35]],
+				      valueAcceptance = ZZ[[36]],
+				      valueNu = ZZ[[37]],
+				      valueDDelta = ZZ[[38]],
+				      valueA = ZZ[[39]],
+				      valueB = ZZ[[40]],
+				      valueC2 = ZZ[[41]],
+				      valueGamma2 = ZZ[[42]],
+				      valueR = ZZ[[43]],
+				      valueRho = ZZ[[44]],
+				      valueDelta = ZZ[[45]],
+				      valueXi = ZZ[[46]],
+				      valueSigma2 = ZZ[[47]],
+				      valueT = ZZ[[48]],
+				      valueL = ZZ[[49]],
+				      valuePhi = ZZ[[50]],
+				      valueTheta = ZZ[[51]],
+				      valueLambda = ZZ[[52]],
+				      valueTau2R = ZZ[[53]],
+				      valueTau2Rho=ZZ[[54]],
+				      valueProbDelta = ZZ[[55]],
+				      valueDiffexpressed=ZZ[[56]],
+				      writeDiffexpressedTofile=ZZ[[57]]),                                          
                   error=function(e) NULL)
 	if(is.null(TRY)){
 		stop("Problem in C wrapper to xdeLIN_main. Check arguments in .fit")
@@ -168,10 +170,11 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 			 results[[24]],
 			 results[[25]],
 			 results[[26]],
-			 results[[27]])
+			 results[[27]],
+			 results[[28]])
 	eenv <- new.env()
 	assign("vars", lastMcmc, eenv)
-	names(eenv$vars) <- names(results)[11:27]
+	names(eenv$vars) <- names(results)[11:28]
 	xmcmc <- new("XdeMcmc",
 		     studyNames=studyNames(paramsMcmc),
 		     featureNames=featureNames(esetList),
@@ -251,7 +254,8 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 		  valuePhi = as.double(firstMcmc$Phi),#49
 		  valueTheta = as.double(firstMcmc$Theta),#50
 		  valueLambda = as.double(firstMcmc$Lambda),#51
-		  valueTau2 = as.double(firstMcmc$Tau2),#52
+		  valueTau2R = as.double(firstMcmc$Tau2R),#52
+		  valueTau2Rho = as.double(firstMcmc$Tau2Rho),#52		  
 		  valueProbDelta = as.double(firstMcmc$ProbDelta),#53
 		  ##posterior mean of differential expression,  concordant differential expression, and discordant differential expression            
 		  valueDiffexpressed = as.double(firstMcmc$Diffexpressed), ##54

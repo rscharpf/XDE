@@ -55,6 +55,7 @@ setMethod("initialize", "XdeParameter",
 	    .Object@one.delta <- one.delta
 	    
             ##if firstIteration is not supplied
+##		  browser()
             if(length(firstMcmc) == 0){
 		    .Object@specifiedInitialValues <- FALSE
 		    .Object@iterations <- 1

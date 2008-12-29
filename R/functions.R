@@ -314,9 +314,9 @@ xsScores <- function(statistic, N){
 
 .outputDefault <- function(thin=1, burnin=FALSE){
 ##  if(!burnin) out <- rep(1, 22) else out <- rep(0, 22)
-	out <- rep(1, 22)
+	out <- rep(1, 23)
 	out[1] <- thin
-	out[22] <- 1  ##by default, keep a running average of the posterior statistics attached to the object (do not write to file)
+	out[23] <- 1  ##by default, keep a running average of the posterior statistics attached to the object (do not write to file)
 	names(out) <- c("thin",
 			"potential",
 			"acceptance",
@@ -336,7 +336,8 @@ xsScores <- function(statistic, N){
 			"phi",
 			"theta",
 			"lambda",
-			"tau2",
+			"tau2R",
+			"tau2Rho",
 			"p.delta",
 			"diffExpressed")
 	return(out)
@@ -387,7 +388,8 @@ xsScores <- function(statistic, N){
                           1, # phi
                           1, # theta and lambda
                           1, # lambda
-                          1) # tau2    
+                          1, # tau2R
+	       1) #tau2Rho
   names(updates) <- c("nu",
                       "Delta",
                       "a",
@@ -404,7 +406,8 @@ xsScores <- function(statistic, N){
                       "phi",
                       "thetaAndLambda",
                       "lambda",
-                      "tau2")
+                      "tau2R",
+		      "tau2Rho")
   updates
 }
 
@@ -412,27 +415,28 @@ xsScores <- function(statistic, N){
 ##Tuning parameters set as per Haakon's 10/23/2006 e-mail
 ###########################################################################
 .tuningDefault <- function(){
-  ##10/23/2006: HT
-  tuning <- c(0.01,  #1. nu Gibbs
-              0.01,  #2. Delta Gibbs
-              0.04,  #3. a
-              0.04,  #4. b
-              0.01,  #5. c2 Gibbs
-              0.01,  #6. gamma2 Gibbs
-              0.01,  #7. r and c2
-              0.01,  #8. rho and gamma2
-              0.01,  #9. delta
-              0.01,  #10. xi Gibbs
-              0.50,  #11. sigma2
-              0.10,  #12. t and l
-              0.04,  #13. l
-              0.40,  #14. phi
-              0.10,  #15. theta and lambda
-              0.02,  #16. lambda
-              0.04)  #17. tau2                
+	##10/23/2006: HT
+	tuning <- c(0.01,  #1. nu Gibbs
+		    0.01,  #2. Delta Gibbs
+		    0.04,  #3. a
+		    0.04,  #4. b
+		    0.01,  #5. c2 Gibbs
+		    0.01,  #6. gamma2 Gibbs
+		    0.01,  #7. r and c2
+		    0.01,  #8. rho and gamma2
+		    0.01,  #9. delta
+		    0.01,  #10. xi Gibbs
+		    0.50,  #11. sigma2
+		    0.10,  #12. t and l
+		    0.04,  #13. l
+		    0.40,  #14. phi
+		    0.10,  #15. theta and lambda
+		    0.02,  #16. lambda
+		    0.04,  #17. tau2R             
+		    0.04) #18. tau2Rho
   names(tuning) <- c("nu", "Delta",  "a", "b", "c2", "gamma2",
                      "rAndC2", "rhoAndGamma2", "delta", "xi", "sigma2",
-                     "tAndL", "l", "phi", "thetaAndLambda", "lambda", "tau2")
+                     "tAndL", "l", "phi", "thetaAndLambda", "lambda", "tau2R", "tau2Rho")
   return(tuning)
 }
 
