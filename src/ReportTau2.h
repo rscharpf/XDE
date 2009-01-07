@@ -1,16 +1,16 @@
-#ifndef REPORTTAU2R_H
-#define REPORTTAU2R_H
+#ifndef REPORTTAU2_H
+#define REPORTTAU2_H
 
 #include "Report.h"
 
 
-class ReportTau2R : public Report
+class ReportTau2 : public Report
 {
  public:
 
-  ReportTau2R(const string &filename);
-  ReportTau2R(double *value);
-  ~ReportTau2R(void);
+  ReportTau2(const string &filename);
+  ReportTau2(double *value);
+  ~ReportTau2(void);
 
   void report(const Structure *str);
 
@@ -23,7 +23,7 @@ class ReportTau2R : public Report
 
 
 
-inline ReportTau2R::ReportTau2R(const string &filename) : Report(filename)
+inline ReportTau2::ReportTau2(const string &filename) : Report(filename)
 {
   writeToFile = 1;
 
@@ -31,7 +31,7 @@ inline ReportTau2R::ReportTau2R(const string &filename) : Report(filename)
 }
 
 
-inline ReportTau2R::ReportTau2R(double *value) : Report()
+inline ReportTau2::ReportTau2(double *value) : Report()
 {
   writeToFile = 0;
 
@@ -43,19 +43,19 @@ inline ReportTau2R::ReportTau2R(double *value) : Report()
 
 
 
-inline ReportTau2R::~ReportTau2R(void)
+inline ReportTau2::~ReportTau2(void)
 {
   return;
 }
 
 
-inline void ReportTau2R::report(const Structure *str)
+inline void ReportTau2::report(const Structure *str)
 {
   if (writeToFile)
     {
       int q;
       for (q = 0; q < str->Q; q++)
-	out << str->tau2R[q] << " ";
+	out << str->tau2[q] << " ";
       
       out << "\n";
       out.flush();
@@ -65,7 +65,7 @@ inline void ReportTau2R::report(const Structure *str)
       int q;
       for (q = 0; q < str->Q; q++)
 	{
-	  value[nr] = str->tau2R[q];
+	  value[nr] = str->tau2[q];
 	  nr++;
 	}
     }

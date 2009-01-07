@@ -45,8 +45,7 @@ using namespace std;
 #include "UpdatePhiMH.h"
 #include "UpdateThetaMH.h"
 #include "UpdateLambdaMH.h"
-#include "UpdateTau2RMH.h"
-#include "UpdateTau2RhoMH.h"
+#include "UpdateTau2MH.h"
 
 #include "ReportDiffexpressed.h"
 
@@ -65,7 +64,7 @@ extern "C" {
 		   double *IR,double *IRho,int *IDelta,
 		   double *IXi,double *ISigma2,double *IT,
 		   double *IL,double *IPhi,double *ITheta,
-		   double *ILambda,double *ITau2R,double *ITau2Rho,double *Iparam,
+		   double *ILambda,double *ITau2,double *Iparam,
 		   int *InUpdate,double *Iepsilon,int *Ioutput,
 		   int *IwriteToFile,char **Idirectory,
 		   double *OvaluePotential,double *OvalueAcceptance,
@@ -75,7 +74,7 @@ extern "C" {
 		   double *OvalueRho,int *OvalueDelta,double *OvalueXi,
 		   double *OvalueSigma2,double *OvalueT,double *OvalueL,
 		   double *OvaluePhi,double *OvalueTheta,
-		   double *OvalueLambda,double *OvalueTau2R,double *OvalueTau2Rho,
+		   double *OvalueLambda,double *OvalueTau2,
 		   double *OvalueProbDelta,double *OvalueDiffexpressed,
 		   int *IwriteDiffexpressedTofile)
   {
@@ -131,7 +130,7 @@ extern "C" {
 
     if (*IspecifiedInitialValues)
       str.setInitialValues(INu,IDDelta,IA,IB,IC2,IGamma2,IR,IRho,IDelta,
-			   IXi,ISigma2,IT,IL,IPhi,ITheta,ILambda,ITau2R,ITau2Rho);
+			   IXi,ISigma2,IT,IL,IPhi,ITheta,ILambda,ITau2);
 
     //
     // Define potential functions for each variable
@@ -163,8 +162,7 @@ extern "C" {
 	cout << "phi:    " << nUpdate[13] << " (" << update[13]->getEpsilon() << ")\n";
 	cout << "theta:  " << nUpdate[14] << " (" << update[14]->getEpsilon() << ")\n";
 	cout << "lambda: " << nUpdate[15] << " (" << update[15]->getEpsilon() << ")\n";
-	cout << "tau2R:  " << nUpdate[16] << " (" << update[16]->getEpsilon() << ")\n";
-	cout << "tau2Rho:" << nUpdate[17] << " (" << update[17]->getEpsilon() << ")\n";
+	cout << "tau2:   " << nUpdate[16] << " (" << update[16]->getEpsilon() << ")\n";
 	cout << "\n\n";
       }
 
@@ -182,9 +180,8 @@ extern "C" {
 					 OvalueAcceptance,OvalueNu,OvalueDDelta,
 					 OvalueA,OvalueB,OvalueC2,OvalueGamma2,OvalueR,
 					 OvalueRho,OvalueDelta,OvalueXi,OvalueSigma2,OvalueT,
-					 OvalueL,OvaluePhi,OvalueTheta,OvalueLambda,OvalueTau2R,
-					 OvalueTau2Rho,OvalueProbDelta,OvalueDiffexpressed,
-					 IwriteDiffexpressedTofile,oneDelta);
+					 OvalueL,OvaluePhi,OvalueTheta,OvalueLambda,OvalueTau2,
+					 OvalueProbDelta,OvalueDiffexpressed,IwriteDiffexpressedTofile,oneDelta);
 
     //
     // run Metropolis-Hastings algorithm
@@ -226,7 +223,7 @@ extern "C" {
 
 
     str.setFinalValues(INu,IDDelta,IA,IB,IC2,IGamma2,IR,IRho,IDelta,
-		       IXi,ISigma2,IT,IL,IPhi,ITheta,ILambda,ITau2R,ITau2Rho);
+		       IXi,ISigma2,IT,IL,IPhi,ITheta,ILambda,ITau2);
     
 
     seed = ran.ChangeSeed(seed);

@@ -102,7 +102,7 @@ inline int UpdateDeltaMH::update(Random &ran)
 	    var[p].resize(str->Q);
 	  for (p = 0; p < str->Q; p++)
 	    {
-	      var[p][p] = str->c2 * str->tau2R[p];
+	      var[p][p] = str->c2 * str->tau2[p];
 	      var[p][p] *= exp(str->b[p] * log(str->sigma2[p][g]));
 	    }
 	  
@@ -111,7 +111,7 @@ inline int UpdateDeltaMH::update(Random &ran)
 	      {
 		var[p][q] = str->c2;
 		var[p][q] *= str->r[p][q];
-		var[p][q] *= sqrt(str->tau2R[p] * str->tau2R[q]);
+		var[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
 		var[p][q] *= exp(0.5 * (str->b[q] * log(str->sigma2[q][g]) + str->b[p] * log(str->sigma2[p][g])));
 		var[q][p] = var[p][q];
 	      }
@@ -227,7 +227,7 @@ inline int UpdateDeltaMH::update(Random &ran)
 	    var[pp].resize(str->Q);
 	  for (pp = 0; pp < str->Q; pp++)
 	    {
-	      var[pp][pp] = str->c2 * str->tau2R[pp];
+	      var[pp][pp] = str->c2 * str->tau2[pp];
 	      var[pp][pp] *= exp(str->b[pp] * log(str->sigma2[pp][g]));
 	    }
 	  
@@ -236,7 +236,7 @@ inline int UpdateDeltaMH::update(Random &ran)
 	      {
 		var[pp][qq] = str->c2;
 		var[pp][qq] *= str->r[pp][qq];
-		var[pp][qq] *= sqrt(str->tau2R[pp] * str->tau2R[qq]);
+		var[pp][qq] *= sqrt(str->tau2[pp] * str->tau2[qq]);
 		var[pp][qq] *= exp(0.5 * (str->b[qq] * log(str->sigma2[qq][g]) + str->b[pp] * log(str->sigma2[pp][g])));
 		var[qq][pp] = var[pp][qq];
 	      }

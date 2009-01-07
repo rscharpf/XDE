@@ -70,7 +70,7 @@ inline int UpdateDDeltaGibbs::update(Random &ran)
 	var[p].resize(str->Q);
       for (p = 0; p < str->Q; p++)
 	{
-	  var[p][p] = str->c2 * str->tau2R[p];
+	  var[p][p] = str->c2 * str->tau2[p];
 	  var[p][p] *= exp(str->b[p] * log(str->sigma2[p][g]));
 	}
 
@@ -79,7 +79,7 @@ inline int UpdateDDeltaGibbs::update(Random &ran)
 	  {
 	    var[p][q] = str->c2;
 	    var[p][q] *= str->r[p][q];
-	    var[p][q] *= sqrt(str->tau2R[p] * str->tau2R[q]);
+	    var[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
 	    var[p][q] *= exp(0.5 * (str->b[q] * log(str->sigma2[q][g]) + str->b[p] * log(str->sigma2[p][g])));
 
 	    var[q][p] = var[p][q];

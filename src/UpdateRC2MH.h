@@ -161,7 +161,7 @@ inline int UpdateRC2MH::update(Random &ran)
 	  {
 	    varInv[p][q] = 1;
 	    if (p != q) varInv[p][q] *= newR[p][q];
-	    varInv[p][q] *= sqrt(str->tau2R[p] * str->tau2R[q]);
+	    varInv[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
 	    varInv[p][q] *= exp(0.5 * (str->b[q] * log(str->sigma2[q][g]) + str->b[p] * log(str->sigma2[p][g])));
 	    
 	    varInv[q][p] = varInv[p][q];
@@ -208,7 +208,7 @@ inline int UpdateRC2MH::update(Random &ran)
 	  {
 	    varInv[p][q] = 1;
 	    if (p != q) varInv[p][q] *= oldR[p][q];
-	    varInv[p][q] *= sqrt(str->tau2R[p] * str->tau2R[q]);
+	    varInv[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
 	    varInv[p][q] *= exp(0.5 * (str->b[q] * log(str->sigma2[q][g]) + str->b[p] * log(str->sigma2[p][g])));
 	    
 	    varInv[q][p] = varInv[p][q];

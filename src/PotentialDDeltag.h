@@ -61,7 +61,7 @@ inline double PotentialDDeltag::potential(Random &ran) const
   int p;
   for (p = 0; p < str->Q; p++)
     {
-      R[p][p] = str->c2 * str->tau2R[p];
+      R[p][p] = str->c2 * str->tau2[p];
       R[p][p] *= exp(str->b[p] * log(str->sigma2[p][g]));
     }
 
@@ -70,7 +70,7 @@ inline double PotentialDDeltag::potential(Random &ran) const
       {
 	R[p][q] = str->c2;
 	R[p][q] *= str->r[p][q];
-	R[p][q] *= sqrt(str->tau2R[p] * str->tau2R[q]);
+	R[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
 	R[p][q] *= exp(0.5 * (str->b[q] * log(str->sigma2[q][g]) + str->b[p] * log(str->sigma2[p][g])));
 
 	R[q][p] = R[p][q];

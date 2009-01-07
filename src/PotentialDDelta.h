@@ -86,7 +86,7 @@ inline double PotentialDDelta::potential(Random &ran) const
 
   vector<double> vv(Q);
   for (p = 0; p < Q; p++)
-    vv[p] = str->c2 * str->tau2R[p];
+    vv[p] = str->c2 * str->tau2[p];
 
   vector<double> value(Q);
 

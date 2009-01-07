@@ -84,7 +84,7 @@ inline double PotentialNu::potential(Random &ran) const
 
   vector<double> vv(str->Q);
   for (p = 0; p < Q; p++)
-    vv[p] = str->gamma2 * str->tau2Rho[p];
+    vv[p] = str->gamma2 * str->tau2[p];
 
   vector<double> value(Q);
 
