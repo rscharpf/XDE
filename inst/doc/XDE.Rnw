@@ -283,15 +283,19 @@ iterations(params) <- 2000
 output(params)[c("potential", "acceptance", "nu", "DDelta",
                  "delta", "probDelta", "sigma2", "phi")] <- 0
 thin(params) <- 2
+directory(params) <- "logFiles"
 xmcmc <- xde(params, xlist)
-##posteriorAvg(xmcmc) <- calculatePosteriorAvg(xmcmc, NCONC=3)
+@ 
+
+<<savexmcmc, eval=FALSE, echo=FALSE, results=hide>>=
+save(xmcmc, file="~/madman/Rpacks/XDE/data/xmcmc.rda")
 @ 
 
 See the \xparam{} vignette for a more detailed discussion of the
 output, burnin, and thin methods.  The \Robject{xmcmc} object can be
 loaded by:
 
-<<loadObject, echo=FALSE, eval=TRUE>>=
+<<loadObject, echo=FALSE, eval=FALSE>>=
 data(xmcmc, package="XDE")
 @ 
 
@@ -316,7 +320,7 @@ class \xmcmc{} -- typically one would not need to change the directory
 in the \xmcmc{} object).  In the following code chunk, we extract the
 chain for the $c^2$ parameter:
 
-<<eval=TRUE>>=
+<<extractc2, eval=TRUE>>=
 pathToLogFiles <- system.file("logFiles", package="XDE")
 xmcmc@directory <- pathToLogFiles
 c2 <- xmcmc$c2
@@ -331,7 +335,7 @@ Here we extract only the parameters that are not indexed by gene and
 platform (log files for parameters indexed by gene and platform are
 typically very large):
 
-<<>>=
+<<retrieveLogs>>=
 getLogs <- function(object){
 	params <- output(object)[output(object) == 1]
 	params <- params[!(names(params) %in% c("nu", "phi", "DDelta", "delta", "sigma2", "diffExpressed"))]

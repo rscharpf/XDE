@@ -1,15 +1,15 @@
-#ifndef UPDATETAU2MH_H
-#define UPDATETAU2MH_H
+#ifndef UPDATETAU2RHOMH_H
+#define UPDATETAU2RHOMH_H
 
 #include "UpdateMultiplicativePositive.h"
 
 
-class UpdateTau2MH : public Update
+class UpdateTau2RhoMH : public Update
 {
  public:
 
-  UpdateTau2MH(Structure *str,const Potential *model,double epsilon);
-  ~UpdateTau2MH(void);
+  UpdateTau2RhoMH(Structure *str,const Potential *model,double epsilon);
+  ~UpdateTau2RhoMH(void);
 
   int update(Random &ran);
   Update *copy(void) const;
@@ -21,7 +21,7 @@ class UpdateTau2MH : public Update
 
 
 
-inline UpdateTau2MH::UpdateTau2MH(Structure *str,const Potential *model,double epsilon) : Update(epsilon)
+inline UpdateTau2RhoMH::UpdateTau2RhoMH(Structure *str,const Potential *model,double epsilon) : Update(epsilon)
 {
   this->str = str;
   this->model = model->copy();
@@ -31,7 +31,7 @@ inline UpdateTau2MH::UpdateTau2MH(Structure *str,const Potential *model,double e
 
 
 
-inline UpdateTau2MH::~UpdateTau2MH(void)
+inline UpdateTau2RhoMH::~UpdateTau2RhoMH(void)
 {
   delete model;
 
@@ -39,9 +39,9 @@ inline UpdateTau2MH::~UpdateTau2MH(void)
 }
 
 
-inline Update *UpdateTau2MH::copy(void) const
+inline Update *UpdateTau2RhoMH::copy(void) const
 {
-  Update *u = new UpdateTau2MH(str,model,epsilon);
+  Update *u = new UpdateTau2RhoMH(str,model,epsilon);
 
   return u;
 }
@@ -49,7 +49,7 @@ inline Update *UpdateTau2MH::copy(void) const
 
 
 
-inline int UpdateTau2MH::update(Random &ran)
+inline int UpdateTau2RhoMH::update(Random &ran)
 {
   int nAccept = 0;
 
@@ -69,8 +69,8 @@ inline int UpdateTau2MH::update(Random &ran)
       int i;
       for (i = 0; i < str->Q; i++)
 	{
-	  oldValues[i] = str->tau2[i];
-	  newValues[i] = str->tau2[i];
+	  oldValues[i] = str->tau2Rho[i];
+	  newValues[i] = str->tau2Rho[i];
 	}
       
       newValues[q] *= u;
@@ -90,17 +90,17 @@ inline int UpdateTau2MH::update(Random &ran)
       pot -= model->potential(ran);
       
       for (i = 0; i < str->Q; i++)
-	str->tau2[i] = newValues[i];
+	str->tau2Rho[i] = newValues[i];
       
       pot += model->potential(ran);
       for (i = 0; i < str->Q; i++)
-	str->tau2[i] = oldValues[i];
+	str->tau2Rho[i] = oldValues[i];
       
       addTry();
       if (ran.Unif01() <= exp(- pot))
 	{
 	  for (i = 0; i < str->Q; i++)
-	    str->tau2[i] = newValues[i];
+	    str->tau2Rho[i] = newValues[i];
 	  addAccept();
 	  nAccept++;
 	}

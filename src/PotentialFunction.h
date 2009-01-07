@@ -19,7 +19,8 @@ PotentialZero potL;
 PotentialPhi potPhi(&str);
 PotentialZero potTheta;
 PotentialZero potLambda;
-PotentialZero potTau2;
+PotentialZero potTau2R;
+PotentialZero potTau2Rho;
 
 //
 // Define the total potential function
@@ -43,7 +44,8 @@ term.push_back(&potL);
 term.push_back(&potPhi);
 term.push_back(&potTheta);
 term.push_back(&potLambda);
-term.push_back(&potTau2);
+term.push_back(&potTau2R);
+term.push_back(&potTau2Rho);
 
 PotentialSum potTotal(term);
 
@@ -200,15 +202,27 @@ for (i = 0; i < term.size(); i++)
      nUpdate.push_back(10);
      
      //
-     // Update for tau2
+     // Update for tau2R
      //
      
      term.resize(0);
-     term.push_back(&potTau2);
-     term.push_back(&potNu);
+     term.push_back(&potTau2R);
      term.push_back(&potDDelta);
      potSum = new PotentialSum(term);
-     update.push_back(new UpdateTau2MH(&str,potSum,0.02));
+     update.push_back(new UpdateTau2RMH(&str,potSum,0.02));
+     nUpdate.push_back(20);
+     delete potSum;
+     potSum = NULL;
+     
+     //
+     // Update for tau2Rho
+     //
+     
+     term.resize(0);
+     term.push_back(&potTau2Rho);
+     term.push_back(&potNu);
+     potSum = new PotentialSum(term);
+     update.push_back(new UpdateTau2RhoMH(&str,potSum,0.02));
      nUpdate.push_back(20);
      delete potSum;
      potSum = NULL;

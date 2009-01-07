@@ -24,7 +24,8 @@
 #include "ReportPhi.h"
 #include "ReportTheta.h"
 #include "ReportLambda.h"
-#include "ReportTau2.h"
+#include "ReportTau2R.h"
+#include "ReportTau2Rho.h"
 #include "ReportPotential.h"
 #include "ReportAcceptance.h"
 #include "ReportProbDelta.h"
@@ -319,7 +320,8 @@ void Structure::allocateSpace(void)
   xi.resize(Q);
   a.resize(Q);
   b.resize(Q);
-  tau2.resize(Q);
+  tau2R.resize(Q);
+  tau2Rho.resize(Q);
   
   sigma2.resize(Q);
   for (q = 0; q < Q; q++)
@@ -398,7 +400,10 @@ void Structure::initialiseVariables(Random &ran,int oneDelta)
   c2 = c2Max / 2.0;
   int q;
   for (q = 0; q < Q; q++)
-    tau2[q] = 1.0;
+    {
+      tau2R[q] = 1.0;
+      tau2Rho[q] = 1.0;
+    }
 
   for (q = 0; q < Q; q++)
     {
@@ -432,7 +437,7 @@ void Structure::initialiseVariables(Random &ran,int oneDelta)
 	  {
 	    Sigma[p][q] = gamma2;
 	    if (p != q) Sigma[p][q] *= rho[p][q];
-	    Sigma[p][q] *= sqrt(tau2[p] * tau2[q]);
+	    Sigma[p][q] *= sqrt(tau2Rho[p] * tau2Rho[q]);
 	    Sigma[p][q] *= exp(0.5 * (a[q] * log(sigma2[q][g]) + a[p] * log(sigma2[p][g])));
 	  }
       vector<double> zero(Q,0);
@@ -455,7 +460,7 @@ void Structure::initialiseVariables(Random &ran,int oneDelta)
 	  {
 	    R[p][q] = c2;
 	    if (p != q) R[p][q] *= r[p][q];
-	    R[p][q] *= sqrt(tau2[p] * tau2[q]);
+	    R[p][q] *= sqrt(tau2R[p] * tau2R[q]);
 	    R[p][q] *= exp(0.5 * (b[q] * log(sigma2[q][g]) + b[p] * log(sigma2[p][g])));
 	  }
       vector<double> zero(Q,0);
@@ -969,12 +974,12 @@ void Structure::setInitialValues(string &filename)
 		  double prod = 1.0;
 		  int q;
 		  for (q = 0; q < Q; q++)
-		    prod *= tau2[q];
+		    prod *= tau2R[q];
 		  for (q = 0; q < Q; q++)
-		    tau2[q] /= exp(log(prod) / Q);
+		    tau2R[q] /= exp(log(prod) / Q);
 
 		  for (q = 0; q < Q; q++)
-		    cout << "tau2[" << q+1 << "] = " << tau2[q] << "\n";
+		    cout << "tau2R[" << q+1 << "] = " << tau2R[q] << "\n";
 		}
 	      return;
 	    }
@@ -1017,7 +1022,7 @@ void Structure::setInitialValues(string &filename)
       else 
 	{
 	  char temp[120];
-	  sprintf(temp,"tau2[%d]",line - 16);
+	  sprintf(temp,"tau2R[%d]",line - 16);
 	  varName = temp;
 	}
 	  
@@ -1232,7 +1237,7 @@ void Structure::setInitialValues(string &filename)
 		  cout << " in file " << filename << ". Aborting.";
 		  exit(-1);
 		}
-	      tau2[line - 16] = value;
+	      tau2R[line - 16] = value;
 	    }
 	  
 	  if (line <= 16 && line != 7 && line != 8 && line != 9)
@@ -1245,13 +1250,17 @@ void Structure::setInitialValues(string &filename)
       double prod = 1.0;
       int q;
       for (q = 0; q < Q; q++)
-	prod *= tau2[q];
+	prod *= tau2R[q];
       for (q = 0; q < Q; q++)
-	tau2[q] /= exp(log(prod) / Q);
+	tau2R[q] /= exp(log(prod) / Q);
       
       for (q = 0; q < Q; q++)
-	cout << "tau2[" << q+1 << "] = " << tau2[q] << "\n";
+	cout << "tau2R[" << q+1 << "] = " << tau2R[q] << "\n";
     }
+
+  int q;
+  for (q = 0; q < Q; q++)
+    tau2Rho[q] = tau2R[q];
 
   return;
 }
@@ -1263,7 +1272,7 @@ void Structure::setInitialValues(double *Nu,double *DDelta,double *A,
 				 double *R,double *Rho,int *Delta,
 				 double *Xi,double *Sigma2,double *T,
 				 double *L,double *Phi,double *Theta,
-				 double *Lambda,double *Tau2)
+				 double *Lambda,double *Tau2R,double *Tau2Rho)
 {
   int nr;
 
@@ -1386,7 +1395,14 @@ void Structure::setInitialValues(double *Nu,double *DDelta,double *A,
   nr = 0;
   for (q = 0; q < Q; q++)
     {
-      tau2[q] = Tau2[nr];
+      tau2R[q] = Tau2R[nr];
+      nr++;
+    }
+
+  nr = 0;
+  for (q = 0; q < Q; q++)
+    {
+      tau2Rho[q] = Tau2Rho[nr];
       nr++;
     }
 
@@ -1401,7 +1417,8 @@ void Structure::setFinalValues(double *Nu,double *DDelta,double *A,
 			       double *R,double *Rho,int *Delta,
 			       double *Xi,double *Sigma2,double *T,
 			       double *L,double *Phi,double *Theta,
-			       double *Lambda,double *Tau2) const
+			       double *Lambda,double *Tau2R,
+			       double *Tau2Rho) const
 {
   int nr;
 
@@ -1522,7 +1539,14 @@ void Structure::setFinalValues(double *Nu,double *DDelta,double *A,
   nr = 0;
   for (q = 0; q < Q; q++)
     {
-      Tau2[nr] = tau2[q];
+      Tau2R[nr] = tau2R[q];
+      nr++;
+    }
+
+  nr = 0;
+  for (q = 0; q < Q; q++)
+    {
+      Tau2Rho[nr] = tau2Rho[q];
       nr++;
     }
 
@@ -1827,10 +1851,12 @@ ReportDiffexpressed *Structure::setReports(string &filename,int &nBetweenReport,
 	      else if (line == 19)
 		report.push_back(new ReportLambda(value));
 	      else if (line == 20)
-		report.push_back(new ReportTau2(value));
+		report.push_back(new ReportTau2R(value));
 	      else if (line == 21)
-		report.push_back(new ReportProbDelta(value,this,oneDelta));
+		report.push_back(new ReportTau2Rho(value));
 	      else if (line == 22)
+		report.push_back(new ReportProbDelta(value,this,oneDelta));
+	      else if (line == 23)
 		{
 		  reportDiffexpressed = new ReportDiffexpressed(value,this);
 		  report.push_back(reportDiffexpressed);
@@ -1854,9 +1880,10 @@ ReportDiffexpressed *Structure::setReports(int *output,int &nBetweenReport,int w
 			   double *valueR,double *valueRho,int *valueDelta,
 			   double *valueXi,double *valueSigma2,double *valueT,
 			   double *valueL,double *valuePhi,double *valueTheta,
-			   double *valueLambda,double *valueTau2,
-			   double *valueProbDelta,double *valueDiffexpressed,int *writeDiffexpressedTofile,
-			   int oneDelta)
+			   double *valueLambda,double *valueTau2R,
+			   double *valueTau2Rho,double *valueProbDelta,
+			   double *valueDiffexpressed,
+			   int *writeDiffexpressedTofile,int oneDelta)
 {
   int nr = 0;
   ReportDiffexpressed *reportDiffexpressed = NULL;
@@ -1920,7 +1947,10 @@ ReportDiffexpressed *Structure::setReports(int *output,int &nBetweenReport,int w
       if (output[nr]) report.push_back(new ReportLambda(valueLambda));
       nr++;
       
-      if (output[nr]) report.push_back(new ReportTau2(valueTau2));
+      if (output[nr]) report.push_back(new ReportTau2R(valueTau2R));
+      nr++;
+      
+      if (output[nr]) report.push_back(new ReportTau2Rho(valueTau2Rho));
       nr++;
       
       if (output[nr]) report.push_back(new ReportProbDelta(valueProbDelta,this,oneDelta));
@@ -2058,9 +2088,15 @@ ReportDiffexpressed *Structure::setReports(int *output,int &nBetweenReport,int w
       nr++;
       
       filename.empty();
-      filename = "tau2.log";
+      filename = "tau2R.log";
       filename = dir + filename;
-      if (output[nr]) report.push_back(new ReportTau2(filename));
+      if (output[nr]) report.push_back(new ReportTau2R(filename));
+      nr++;
+
+      filename.empty();
+      filename = "tau2Rho.log";
+      filename = dir + filename;
+      if (output[nr]) report.push_back(new ReportTau2Rho(filename));
       nr++;
 
       filename.empty();

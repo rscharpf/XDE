@@ -54,7 +54,7 @@ double Random::Unif01(void)
 {
   seedValue = MULTIPLIER * seedValue + SHIFT;
   if (seedValue == 0) seedValue = MULTIPLIER * seedValue + SHIFT;
-
+      
   if (seedValue > modulus*2-1)
     {
       double x = ((double) (seedValue - 1)) / ((double) modulus);

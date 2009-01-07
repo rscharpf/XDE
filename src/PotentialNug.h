@@ -60,7 +60,7 @@ inline double PotentialNug::potential(Random &ran) const
   int p;
   for (p = 0; p < str->Q; p++)
     {
-      Sigma[p][p] = str->gamma2 * str->tau2[p];
+      Sigma[p][p] = str->gamma2 * str->tau2Rho[p];
       Sigma[p][p] *= exp(str->a[p] * log(str->sigma2[p][g]));
     }
 
@@ -69,7 +69,7 @@ inline double PotentialNug::potential(Random &ran) const
       {
 	Sigma[p][q] = str->gamma2;
 	Sigma[p][q] *= str->rho[p][q];
-	Sigma[p][q] *= sqrt(str->tau2[p] * str->tau2[q]);
+	Sigma[p][q] *= sqrt(str->tau2Rho[p] * str->tau2Rho[q]);
 	Sigma[p][q] *= exp(0.5 * (str->a[q] * log(str->sigma2[q][g]) + str->a[p] * log(str->sigma2[p][g])));
 
 	Sigma[q][p] = Sigma[p][q];

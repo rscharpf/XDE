@@ -56,7 +56,8 @@ class Structure
   friend class UpdatePhiMH;
   friend class UpdateThetaMH;
   friend class UpdateLambdaMH;
-  friend class UpdateTau2MH;
+  friend class UpdateTau2RMH;
+  friend class UpdateTau2RhoMH;
 
   friend class ReportNu;
   friend class ReportDDelta;
@@ -74,7 +75,8 @@ class Structure
   friend class ReportPhi;
   friend class ReportTheta;
   friend class ReportLambda;
-  friend class ReportTau2;
+  friend class ReportTau2R;
+  friend class ReportTau2Rho;
   friend class ReportProbDelta;
   friend class ReportDiffexpressed;
 
@@ -95,13 +97,13 @@ class Structure
 			double *R,double *Rho,int *Delta,
 			double *Xi,double *Sigma2,double *T,
 			double *L,double *Phi,double *Theta,
-			double *Lambda,double *Tau2);
+			double *Lambda,double *Tau2R,double *Tau2Rho);
   void setFinalValues(double *Nu,double *DDelta,double *A,
 		      double *B,double *C2,double *Gamma2,
 		      double *R,double *Rho,int *Delta,
 		      double *Xi,double *Sigma2,double *T,
 		      double *L,double *Phi,double *Theta,
-		      double *Lambda,double *Tau2) const;
+		      double *Lambda,double *Tau2R,double *Tau2Rho) const;
 
 
   void setNumberOfUpdates(string &filename,vector<int> &nUpdate,vector<Update *> &update) const;
@@ -119,7 +121,7 @@ class Structure
 		  double *valueR,double *valueRho,int *valueDelta,
 		  double *valueXi,double *valueSigma2,double *valueT,
 		  double *valueL,double *valuePhi,double *valueTheta,
-		  double *valueLambda,double *valueTau2,
+		  double *valueLambda,double *valueTau2R,double *valueTau2Rho,
 		  double *valueProbDelta,double *valueDiffexpressed,
 		  int *writeDiffexpressedTofile,
 		  int oneDelta);
@@ -159,7 +161,8 @@ class Structure
   vector<double> b;                     // b[q]
   double c2; 
   double gamma2;
-  vector<double> tau2;                  // tau2[q]
+  vector<double> tau2R;                 // tau2R[q]
+  vector<double> tau2Rho;               // tau2Rho[q]
   vector<vector<double> > r;            // r[q1][q2]
   vector<vector<double> > rho;          // rho[q1][q2]
   vector<double> xi;                    // xi[q]
