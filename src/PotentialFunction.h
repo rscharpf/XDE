@@ -64,17 +64,17 @@ for (i = 0; i < term.size(); i++)
      Potential *potSum = NULL;
      
      //
-     // Update for nu
+     // Update for nu and tau2Rho
      //
      
-     update.push_back(new UpdateNuGibbs(&str,CHECKGIBBS,&potTotal));
+     update.push_back(new UpdateTau2RhoNuMH(&str,&potTau2Rho,0.02));
      nUpdate.push_back(1);
      
      //
-     // Update for Delta
+     // Update for Delta and tau2R
      //
      
-     update.push_back(new UpdateDDeltaGibbs(&str,CHECKGIBBS,&potTotal));
+     update.push_back(new UpdateTau2RDDeltaMH(&str,&potTau2R,0.02));
      nUpdate.push_back(1);
      
      //
@@ -214,6 +214,7 @@ for (i = 0; i < term.size(); i++)
      delete potSum;
      potSum = NULL;
      
+     
      //
      // Update for tau2Rho
      //
@@ -226,6 +227,5 @@ for (i = 0; i < term.size(); i++)
      nUpdate.push_back(20);
      delete potSum;
      potSum = NULL;
-     
      
      

@@ -29,8 +29,6 @@ using namespace std;
 #include "PotentialPhi.h"
 #include "PotentialSum.h"
 
-#include "UpdateNuGibbs.h"
-#include "UpdateDDeltaGibbs.h"
 #include "UpdateAMH.h"
 #include "UpdateBMH.h"
 #include "UpdateC2Gibbs.h"
@@ -45,6 +43,8 @@ using namespace std;
 #include "UpdatePhiMH.h"
 #include "UpdateThetaMH.h"
 #include "UpdateLambdaMH.h"
+#include "UpdateTau2RDDeltaMH.h"
+#include "UpdateTau2RhoNuMH.h"
 #include "UpdateTau2RMH.h"
 #include "UpdateTau2RhoMH.h"
 

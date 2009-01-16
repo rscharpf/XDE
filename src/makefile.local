@@ -1,0 +1,418 @@
+CXX = /usr/lib/gcc-snapshot/bin/g++ 
+BIN = ./
+LIBS = ./
+
+flags = -I. -O3
+
+all: 	$(BIN)/xdeLIN_main $(LIBS)/xdeLIN_main.so clean
+
+
+$(BIN)/xdeLIN_main:	main.o Structure.o \
+			Random.o \
+			Cholesky.o \
+			Matrix.o 
+			$(CXX) -fPIC -o $(BIN)/xdeLIN_main $(flags) main.o \
+			Structure.o Random.o Cholesky.o \
+			Matrix.o -lm
+
+$(LIBS)/xdeLIN_main.so:	diffExpressed_main.cpp \
+			Random.h \
+			Structure.h \
+			Report.h \
+			PotentialZero.h \
+			PotentialX.h \
+			PotentialNu.h \
+			PotentialDDelta.h \
+			PotentialA.h \
+			PotentialB.h \
+			PotentialR.h \
+			PotentialRho.h \
+			PotentialDelta.h \
+			PotentialXi.h \
+			PotentialSigma2.h \
+			PotentialPhi.h \
+			PotentialSum.h \
+			UpdateAMH.h \
+			UpdateBMH.h \
+			UpdateC2Gibbs.h \
+			UpdateGamma2Gibbs.h \
+			UpdateRC2MH.h \
+			UpdateRhoGamma2MH.h \
+			UpdateDeltaMH.h \
+			UpdateXiGibbs.h \
+			UpdateSigma2MH.h \
+			UpdateTMH.h \
+			UpdateLMH.h \
+			UpdatePhiMH.h \
+			UpdateThetaMH.h \
+			UpdateLambdaMH.h \
+			UpdateTau2RDDeltaMH.h \
+			UpdateTau2RhoNuMH.h \
+			UpdateTau2RMH.h \
+			UpdateTau2RhoMH.h \
+			ReportDiffexpressed.h \
+			PotentialFunction.h \
+			Random.o \
+			Cholesky.o \
+			Matrix.o
+			PKG_CXXFLAGS='-fPIC -I' \
+			PKG_LIBS='-fPIC -lm' \
+			R CMD SHLIB -o $(LIBS)/xdeLIN_main.so \
+			diffExpressed_main.cpp Structure.o \
+			Random.o Cholesky.o Matrix.o
+
+
+main.o:		main.cpp  \
+		Random.h \
+		Structure.h \
+		Report.h \
+		PotentialZero.h \
+		PotentialX.h \
+		PotentialNu.h \
+		PotentialDDelta.h \
+		PotentialA.h \
+		PotentialB.h \
+		PotentialR.h \
+		PotentialRho.h \
+		PotentialDelta.h \
+		PotentialXi.h \
+		PotentialSigma2.h \
+		PotentialPhi.h \
+		PotentialSum.h \
+		UpdateAMH.h \
+		UpdateBMH.h \
+		UpdateC2Gibbs.h \
+		UpdateGamma2Gibbs.h \
+		UpdateRC2MH.h \
+		UpdateRhoGamma2MH.h \
+		UpdateDeltaMH.h \
+		UpdateXiGibbs.h \
+		UpdateSigma2MH.h \
+		UpdateTMH.h \
+		UpdateLMH.h \
+		UpdatePhiMH.h \
+		UpdateThetaMH.h \
+		UpdateLambdaMH.h \
+		UpdateTau2RDDeltaMH.h \
+		UpdateTau2RhoNuMH.h \
+		UpdateTau2RMH.h \
+		UpdateTau2RhoMH.h \
+		ReportDiffexpressed.h
+		$(CXX) -fPIC -o main.o -c $(flags) main.cpp
+
+
+Structure.o:		Structure.cpp \
+			Structure.h \
+			Cholesky.h \
+			Potential.h \
+			Update.h \
+			ReportNu.h \
+			ReportDDelta.h \
+			ReportA.h \
+			ReportB.h \
+			ReportC2.h \
+			ReportGamma2.h \
+			ReportR.h \
+			ReportRho.h \
+			ReportDelta.h \
+			ReportXi.h \
+			ReportSigma2.h \
+			ReportT.h \
+			ReportL.h \
+			ReportPhi.h \
+			ReportTheta.h \
+			ReportLambda.h \
+			ReportTau2R.h \
+			ReportTau2Rho.h \
+			ReportPotential.h \
+			ReportAcceptance.h \
+			ReportProbDelta.h \
+			ReportDiffexpressed.h
+			$(CXX) -fPIC -o Structure.o -c $(flags) Structure.cpp
+
+
+PotentialZero.h:	Potential.h \
+			Structure.h \
+			Random.h 
+		 	touch PotentialZero.h
+
+PotententialX.h:	Potential.h \
+			PotentialXqg.h \
+			Structure.h \
+			Random.h 
+			touch PotentialX.h
+
+PotentialNu.h:		Potential.h \
+			PotentialNug.h \
+			Structure.h \
+			Random.h \
+			Matrix.h
+			touch PotentialNu.h
+
+PotentialNug.h:		Potential.h \
+			Structure.h \
+			Random.h \
+			Matrix.h
+			touch PotentialNug.h
+
+
+PotentialDDelta.h:		Potential.h \
+				PotentialDDeltag.h \
+				Structure.h \
+				Random.h \
+				Matrix.h 
+				touch PotentialDDelta.h
+
+PotentialDDeltag.h:		Potential.h \
+				Structure.h \
+				Random.h \
+				Matrix.h 
+				touch PotentialDDeltag.h
+
+PotentialA.h:			Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialA.h
+
+PotentialB.h:			Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialB.h
+
+PotentialR.h:			Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialR.h
+
+PotentialRho.h:			Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialRho.h
+
+PotentialDelta.h:		Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialDelta.h
+
+PotentialXi.h:			Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialXi.h
+
+PotentialSigma2.h:		Potential.h \
+				PotentialSigma2qg.h \
+				Structure.h \
+				Random.h
+				touch PotentialSigma2.h
+
+PotentialPhi.h:			Potential.h \
+				PotentialPhiqg.h \
+				Structure.h \
+				Random.h
+				touch PotentialPhi.h
+
+PotentialSum.h:			Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialSum.h
+
+PotentialXqg.h:			Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialXqg.h
+
+PotentialSigma2qg.h:		Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialSigma2qg.h
+
+PotentialPhiqg.h:		Potential.h \
+				Structure.h \
+				Random.h
+				touch PotentialPhiqg.h
+
+
+
+UpdateAMH.h:			Update.h
+				touch UpdateAMH.h
+
+UpdateBMH.h:			Update.h
+				touch UpdateBMH.h
+
+UpdateC2Gibbs.h:		Update.h \
+				Matrix.h
+				touch UpdateC2Gibbs.h
+
+UpdateGamma2Gibbs.h:		Update.h \
+				Matrix.h
+				touch UpdateGamma2Gibbs.h
+
+UpdateTauR2MDDeltaMH.h:		Update.h
+				touch UpdateTau2RDDeltaMH.h
+
+UpdateTau2RhoNuMH.h:		Update.h
+				touch UpdateTau2RhoNuMH.h
+
+UpdateTau2RMH.h:		UpdateMultiplicativePositive.h
+				touch UpdateTau2RMH.h
+
+UpdateTau2RhoMH.h:		UpdateMultiplicativePositive.h
+				touch UpdateTau2RhoMH.h
+
+UpdateRC2MH.h:			Update.h \
+				Cholesky.h
+				touch UpdateRC2MH.h
+
+UpdateRhoGamma2MH.h:		Update.h \
+				Cholesky.h
+				touch UpdateRhoGamma2MH.h
+
+UpdateDeltaMH.h:		Update.h \
+				PotentialDeltag.h \
+				PotentialDDeltag.h \
+				PotentialXqg.h
+				touch UpdateDeltaMH.h
+
+UpdateXiMH.h:			Update.h
+				touch UpdateXiMH.h
+
+UpdateSigma2MH.h:		UpdateMultiplicativePositive.h \
+				PotentialSigma2qg.h \
+				PotentialXqg.h \
+				PotentialNug.h \
+				PotentialDDeltag.h
+				touch UpdateSigma2MH.h
+
+UpdateTMH.h:			UpdateMultiplicativePositive.h \
+				PotentialSigma2qg.h
+				touch UpdateTMH.h
+
+UpdateLMH.h:			UpdateMultiplicativePositive.h \
+				PotentialSigma2qg.h
+				touch UpdateLMH.h
+
+UpdatePhiMH.h:			UpdateMultiplicativePositive.h \
+				PotentialPhiqg.h \
+				PotentialXqg.h 
+				touch UpdatePhiMH.h
+
+UpdateThetaMH.h:		UpdateMultiplicativePositive.h \
+				PotentialPhiqg.h
+				touch UpdateThetaMH.h
+
+UpdateLambdaMH.h:		UpdateMultiplicativePositive.h \
+				PotentialPhiqg.h
+				touch UpdateLambdaMH.h
+
+UpdateMultiplicativePositive.h:	Update.h
+				touch UpdateMultiplicativePositive.h
+
+ReportNu.h:			Report.h
+				touch ReportNu.h
+
+ReportDDelta.h:			Report.h
+				touch ReportDDelta.h
+
+ReportA.h:			Report.h
+				touch ReportA.h
+
+ReportB.h:			Report.h
+				touch ReportB.h
+
+ReportC2.h:			Report.h
+				touch ReportC2.h
+
+ReportGamma2.h:			Report.h
+				touch ReportGamma2.h
+
+ReportTau2R.h:			Report.h
+				touch ReportTau2R.h
+
+ReportTau2Rho.h:		Report.h
+				touch ReportTau2Rho.h
+
+ReportR.h:			Report.h
+				touch ReportR.h
+
+ReportRho.h:			Report.h
+				touch ReportRho.h
+
+ReportDelta.h:			Report.h
+				touch ReportDelta.h
+
+ReportXi.h:			Report.h
+				touch ReportXi.h
+
+ReportSigma2.h:			Report.h
+				touch ReportSigma2.h
+
+ReportT.h:			Report.h
+				touch ReportT.h
+
+ReportL.h:			Report.h
+				touch ReportL.h
+
+ReportPhi.h:			Report.h
+				touch ReportPhi.h
+
+ReportTheta.h:			Report.h
+				touch ReportTheta.h
+
+ReportLambda.h:			Report.h
+				touch ReportLambda.h
+
+ReportPotential.h:		Report.h \
+				Potential.h
+				touch ReportPotential.h
+
+ReportAcceptance.h:		Report.h \
+				Update.h
+				touch ReportAcceptance.h
+
+ReportProbDelta.h:		Structure.h \
+				Report.h \
+				PotentialDelta.h \
+				PotentialDDeltag.h \
+				PotentialXqg.h \
+				PotentialSum.h 
+				touch ReportProbDelta.h
+
+ReportDiffexpressed:		Structure.h \
+				Report.h 
+				touch ReportDiffexpressed.h
+
+
+Report.h:			Structure.h
+				touch Report.h
+
+
+
+Structure.h:			Random.h
+
+
+
+
+
+
+
+
+
+
+Random.o:		Random.cpp \
+			Random.h \
+			Cholesky.h
+			$(CXX) -fPIC -o Random.o -c $(flags) Random.cpp
+
+Cholesky.o:		Cholesky.cpp 
+			$(CXX) -fPIC -o Cholesky.o -c $(flags) Cholesky.cpp
+
+Matrix.o:		Matrix.h
+			$(CXX) -fPIC -o Matrix.o -c $(flags) Matrix.cpp
+
+Cholesky.h:		Matrix.h
+			touch Cholesky.h
+
+
+
+clean: 
+			rm *.o 

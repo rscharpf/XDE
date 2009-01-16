@@ -31,8 +31,6 @@ using namespace std;
 #include "PotentialPhi.h"
 #include "PotentialSum.h"
 
-#include "UpdateNuGibbs.h"
-#include "UpdateDDeltaGibbs.h"
 #include "UpdateAMH.h"
 #include "UpdateBMH.h"
 #include "UpdateC2Gibbs.h"
@@ -47,9 +45,10 @@ using namespace std;
 #include "UpdatePhiMH.h"
 #include "UpdateThetaMH.h"
 #include "UpdateLambdaMH.h"
+#include "UpdateTau2RDDeltaMH.h"
+#include "UpdateTau2RhoNuMH.h"
 #include "UpdateTau2RMH.h"
 #include "UpdateTau2RhoMH.h"
-
 #include "ReportDiffexpressed.h"
 
 int main(int argc,char **argv)
@@ -173,17 +172,17 @@ int main(int argc,char **argv)
   Potential *potSum = NULL;
   
   //
-  // Update for nu
+  // Update for nu and tau2Rho
   //
   
-  update.push_back(new UpdateNuGibbs(&str,CHECKGIBBS,&potTotal));
+  update.push_back(new UpdateTau2RhoNuMH(&str,&potTau2Rho,0.02));
   nUpdate.push_back(1);
   
   //
-  // Update for Delta
+  // Update for Delta and tau2R
   //
   
-  update.push_back(new UpdateDDeltaGibbs(&str,CHECKGIBBS,&potTotal));
+  update.push_back(new UpdateTau2RDDeltaMH(&str,&potTau2R,0.02));
   nUpdate.push_back(1);
   
   //

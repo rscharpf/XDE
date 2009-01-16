@@ -40,8 +40,6 @@ class Structure
   friend class PotentialDDeltag;
   friend class PotentialPhiqg;
 
-  friend class UpdateNuGibbs;
-  friend class UpdateDDeltaGibbs;
   friend class UpdateAMH;
   friend class UpdateBMH;
   friend class UpdateC2Gibbs;
@@ -56,6 +54,8 @@ class Structure
   friend class UpdatePhiMH;
   friend class UpdateThetaMH;
   friend class UpdateLambdaMH;
+  friend class UpdateTau2RDDeltaMH;
+  friend class UpdateTau2RhoNuMH;
   friend class UpdateTau2RMH;
   friend class UpdateTau2RhoMH;
 

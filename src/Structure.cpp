@@ -1571,7 +1571,7 @@ void Structure::setNumberOfUpdates(string &filename,vector<int> &nUpdate,vector<
   //
 
   int line;
-  for (line = 1; line <= 17; line++)
+  for (line = 1; line <= 18; line++)
     {
       int bufSize = 1000;
       char buf[bufSize];
@@ -1630,8 +1630,10 @@ void Structure::setNumberOfUpdates(string &filename,vector<int> &nUpdate,vector<
 	varName = "theta";
       else if (line == 16)
 	varName = "lambda";
-      else 
-	varName = "tau2";
+      else if (line == 17)
+	varName = "tau2R";
+      else
+	varName = "tau2Rho";
 	  
       
       if (var1[0] != '=')
@@ -1689,7 +1691,7 @@ void Structure::setNumberOfUpdates(int *InUpdate,double *Iepsilon,
 				   vector<int> &nUpdate,vector<Update *> &update)
 {
   int l;
-  for (l = 0; l < 17; l++)
+  for (l = 0; l < 18; l++)
     {
       nUpdate[l] = InUpdate[l];
       update[l]->setEpsilon(Iepsilon[l]);
