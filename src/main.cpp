@@ -345,8 +345,8 @@ int main(int argc,char **argv)
   if (argv[7][0] != '=')
     str.setNumberOfUpdates(filenameUpdate,nUpdate,update);
   cout << "Number of updates in one iteration (epsilon):\n\n";
-  cout << "nu:     " << nUpdate[0] << "\n";
-  cout << "Delta:  " << nUpdate[1] << "\n";
+  cout << "nu:     " << nUpdate[0] << " (" << update[0]->getEpsilon() << ")\n";
+  cout << "Delta:  " << nUpdate[1] << " (" << update[1]->getEpsilon() << ")\n";
   cout << "a:      " << nUpdate[2] << " (" << update[2]->getEpsilon() << ")\n";
   cout << "b:      " << nUpdate[3] << " (" << update[3]->getEpsilon() << ")\n";
   cout << "c2:     " << nUpdate[4] << "\n";

@@ -254,7 +254,7 @@ inline int UpdateTau2RhoNuMH::update(Random &ran)
 	str->tau2Rho[i] = oldValues[i];
 
 
-      cout << "UpdateTau2RhoNuMH: " << pot << "\n";
+      //      cout << "UpdateTau2RhoNuMH: " << pot << "\n";
 
       addTry();
       if (ran.Unif01() <= exp(- pot))

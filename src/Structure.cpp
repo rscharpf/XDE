@@ -1587,7 +1587,7 @@ void Structure::setNumberOfUpdates(string &filename,vector<int> &nUpdate,vector<
       char var1[bufSize];
       char var2[bufSize];
       int nRead = 0;
-      if (line == 1 || line == 2 || line == 6 || line == 9 || line == 10)
+      if (line == 6 || line == 9 || line == 10)
 	nRead = sscanf(buf,"%s",var1);
       else
 	nRead = sscanf(buf,"%s %s",var1,var2);
@@ -1653,7 +1653,7 @@ void Structure::setNumberOfUpdates(string &filename,vector<int> &nUpdate,vector<
 	  nUpdate[line - 1] = value;
 	}
 
-      if (line != 1 && line != 2 && line != 6 && line != 9 && line != 10)
+      if (line != 6 && line != 9 && line != 10)
 	{
 	  if (nRead < 2)
 	    {
