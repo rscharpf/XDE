@@ -44,7 +44,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
 	##--------------------------------------------------
 
 	##Parameters indexed by study
-	if(name %in% c("a", "b", "lambda", "l", "tau2", "t", "theta", "xi")){
+	if(name %in% c("a", "b", "lambda", "l", "tau2", "t", "theta", "xi", "tau2R", "tau2Rho")){
 		nr <- iterations(x)
 		nc <- length(studyNames(x))
 		if(length(mcmc) < nr*nc) byrow <- FALSE else byrow <- TRUE
@@ -164,13 +164,19 @@ setMethod(".standardizedDelta", "XdeMcmc",
           function(object, deltaProduct=TRUE){
 		  delta <- object$delta
 		  sqrt.c2 <- sqrt(object$c2)
-		  ##C <- sqrt(c2Log(object))
 		  sigma <- sqrt(object$sigma2)
-		  tau <- sqrt(object$tau2)
+		  if("tau2R" %in% names(output(object))){
+			  separateTau <- TRUE
+		  } else separateTau <- FALSE
+		  if(separateTau){
+			  tau <- t(sqrt(object$tau2R))
+			  ##tauRho <- t(sqrt(object$tau2Rho))
+		  } else{
+			  tau <- t(sqrt(object$tau2))
+		  }
 		  b <- object$b
 		  dDelta <- object$DDelta
 		  b <- t(b)
-		  tau <- t(tau)
 		  s <- array(NA, dim=dim(sigma))
 		  ##dDelta <- Delta
 		  P <- dim(sigma)[1]

@@ -42,10 +42,11 @@ symbolsInteresting(rankingStatistic, percentile = 0.9, colors = c("grey50", "roy
 
   data(expressionSetList)
   data(xmcmc)
-  bes <- bayesianEffectSize(xmcmc)
-  postAvg <- posteriorAvg(xmcmc)
+  pathToLogFiles <- system.file("logFiles", package="XDE")
+  load(file.path(pathToLogFiles, "BES.rda"))
+  load(file.path(pathToLogFiles, "postAvg.rda"))
   op.conc <- symbolsInteresting(rankingStatistic=postAvg[, "concordant"])
-  graphics:::pairs(bes[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+  graphics:::pairs(BES[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                    bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
 
 }

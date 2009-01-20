@@ -280,22 +280,34 @@ saved.
 <<runMoreIterations, eval=FALSE, echo=TRUE>>=
 burnin(params) <- FALSE
 iterations(params) <- 2000
-output(params)[c("potential", "acceptance", "nu", "DDelta",
-                 "delta", "probDelta", "sigma2", "phi")] <- 0
+output(params)[c("potential", "acceptance", 
+		 "diffExpressed", 
+		 "nu", ##"DDelta",
+                 ##"delta", 
+		 "probDelta", 
+		 ##"sigma2", 
+		 "phi")] <- 0
 thin(params) <- 2
 directory(params) <- "logFiles"
 xmcmc <- xde(params, xlist)
 @ 
 
 <<savexmcmc, eval=FALSE, echo=FALSE, results=hide>>=
-save(xmcmc, file="~/madman/Rpacks/XDE/data/xmcmc.rda")
+##this function should work
+postAvg <- calculatePosteriorAvg(xmcmc, NCONC=2, NDIFF=1)
+save(postAvg, file="~/madman/Rpacks/XDE/inst/logFiles/postAvg.rda")
+##put browser in .standardizedDelta to fix tau2R, ...
+BES <- calculateBayesianEffectSize(xmcmc)
+save(BES, file="~/madman/Rpacks/XDE/inst/logFiles/BES.rda")
+save(xmcmc, file="~/madman/Rpacks/XDE/data/xmcmc.RData")
+q("no")
 @ 
 
 See the \xparam{} vignette for a more detailed discussion of the
 output, burnin, and thin methods.  The \Robject{xmcmc} object can be
 loaded by:
 
-<<loadObject, echo=FALSE, eval=FALSE>>=
+<<loadObject, echo=FALSE, eval=TRUE>>=
 data(xmcmc, package="XDE")
 @ 
 
@@ -364,16 +376,14 @@ the $\delta, \Delta$, and $\sigma^2$ chains are saved, the above code
 chunk is not evaluated in this vignette.
 
 <<bes, eval=TRUE>>=
-bes <- bayesianEffectSize(xmcmc)
+load(file.path(pathToLogFiles, "BES.rda"))
+load(file.path(pathToLogFiles, "postAvg.rda"))
 @ 
 
 Posterior averages for the probability of differential expression,
 concordant differential expression, and discordant differential
-expression are stored in the \Robject{xmcmc} object:
+expression are stored in the \Robject{postAvg} object.
 
-<<postAvg, eval=TRUE>>=
-postAvg <- posteriorAvg(xmcmc)
-@ 
 
 See \cite{Scharpf2007d} for a discussion of how the above posterior
 average probabilities are computed.
@@ -404,14 +414,14 @@ op.disc <- symbolsInteresting(rankingStatistic=postAvg[, "discordant"])
 
 <<conc, fig=TRUE, eval=TRUE>>=
 par(las=1)
-graphics:::pairs(bes[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+graphics:::pairs(BES[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)
 @ 
 
 or high probabilities of discordant differential expression
 
 <<disc, fig=TRUE, eval=TRUE>>=
-graphics:::pairs(bes[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg, 
+graphics:::pairs(BES[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg, 
 		 upper.panel=NULL, cex=op.disc$cex)
 @ 
 
