@@ -92,7 +92,7 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
 }
 
 \item{zeroNu}{\code{signature(object = "ExpressionSetList")}
-  See \code{`\link{zeroNu}}. }
+  See \code{\link{zeroNu}}. }
 }
 }
 
@@ -102,7 +102,7 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
   \code{\link{XdeMcmc-class}}, \code{\link{XdeParameter-class}}
 }
 \examples{
-showClass("ExpressionSetList")
-data(expressionSetList)
+	showClass("ExpressionSetList")
+	data(expressionSetList)
 }
 \keyword{classes}
