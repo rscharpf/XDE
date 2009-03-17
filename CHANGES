@@ -1,0 +1,4 @@
+v1.3.13
+- Moved gtools from Suggests to Imports
+- Removed multiple instance of 'f' function in ExpressionSetList[ method
+

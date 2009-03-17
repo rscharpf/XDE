@@ -91,7 +91,7 @@ After reading this vignette, one should be able to
   
 \end{itemize}
 
-See \cite{Scharpf2007d} for a more detailed discussion of the Bayesian
+See \cite{Scharpf2009} for a more detailed discussion of the Bayesian
 hierarchical model
 
 \section{\label{sec:xlist} The \esetList{} Class}
@@ -175,7 +175,7 @@ attributes provided when initializing an instance of class \xparam{}
 work well in most instances.  The \xparam{} vignette provides a more
 detailed description of how the attributes can be modified, as well as
 a brief description of the Bayesian model and the algorithm for the
-MCMC.  See \cite{Scharpf2007d} for a more detailed description of the
+MCMC.  See \cite{Scharpf2009} for a more detailed description of the
 Bayesian model.
 
 The default values for our \Robject{xlist} object are obtained by
@@ -347,7 +347,7 @@ Here we extract only the parameters that are not indexed by gene and
 platform (log files for parameters indexed by gene and platform are
 typically very large):
 
-<<retrieveLogs>>=
+<<retrieveLogs, results=hide>>=
 getLogs <- function(object){
 	params <- output(object)[output(object) == 1]
 	params <- params[!(names(params) %in% c("nu", "phi", "DDelta", "delta", "sigma2", "diffExpressed"))]
@@ -385,7 +385,7 @@ concordant differential expression, and discordant differential
 expression are stored in the \Robject{postAvg} object.
 
 
-See \cite{Scharpf2007d} for a discussion of how the above posterior
+See \cite{Scharpf2009} for a discussion of how the above posterior
 average probabilities are computed.
 
 <<postAvgFig_conc, echo=FALSE, fig=TRUE, eval=TRUE>>=
@@ -483,7 +483,7 @@ elements of single study statistics in a linear fashion to obtain a
 statistic suitable for assessing differential expression.  For a more
 detailed discussion of how these cross-study summaries were generated
 for evaluating concordant and discordant differential expression, see
-\cite{Scharpf2007d}.
+\cite{Scharpf2009}.
 
 <<pca, eval=FALSE>>=
 tScores <- xsScores(tt, N=nSamples(xlist))

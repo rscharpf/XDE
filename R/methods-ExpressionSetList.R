@@ -112,16 +112,16 @@ setMethod("[", "ExpressionSetList", function(x, i, j, ..., drop = FALSE){
                  return(x)
                }
             if (!missing(j)){
-              f <- function(x, j){
+              f1 <- function(x, j){
                 x <- x[, j]
               }
-              x <- lapply(x, f, j)
+              x <- lapply(x, f1, j)
             }
             if(!missing(i)){
-              f <- function(x, i){
+              f2 <- function(x, i){
                 x <- x[i, ]
               }
-              x <- lapply(x, f, i)
+              x <- lapply(x, f2, i)
             }
             as(x, "ExpressionSetList")
           })
@@ -135,39 +135,6 @@ setMethod("featureNames", "ExpressionSetList", function(object) featureNames(obj
 setMethod("nrow", "ExpressionSetList", function(x) nrow(x[[1]]))
 setMethod("nSamples", "ExpressionSetList", function(x)  unlist(lapply(x, function(x) ncol(x))))
 
-##setMethod("qqplot", signature(x = "ExpressionSetList", y = "character"),
-##          function(x, y, plot.it = TRUE, xlab = deparse(substitute(x)), 
-##                   ylab = deparse(substitute(y)), filename = NULL,
-##                   mar = c(3, 3, 2, 2),
-##                   oma = rep(2, 4), ...){
-##            object <- x
-##            statistic <- y
-##            xlab <- statistic[1]
-##            ylab <- statistic[2]
-##
-##            x <- ssStatistic(statistic=xlab,
-##                             xdeParams=xdeParams,
-##                             esetList=esetList)
-##            y <- ssStatistic(statistic=ylab,
-##                             xdeParams=xdeParams,
-##                             esetList=esetList)
-####            if(length(statistic) < 2) stop("must specify two statistics")
-####            getStats <- function(object, method){
-####                switch(method,
-####                       t = pca(object, "t.test"),
-####                       sam = pca(object, "sam"),
-####                       d = dPosteriorMean(object))
-####              }
-##            x <- getStats(object, statistic[1])
-##            y <- getStats(object, statistic[2])
-##            if(!is.null(filename)) postscript(filename)
-##            par(las = 1, mar = mar, oma = oma)
-##            qqplot(x, y, xlab = xlab, ylab = ylab)
-##            abline(0, 1)
-##            if(!is.null(filename)) dev.off()
-##          })
-
-##pca <- function(object, x, ...){
 setMethod(".pca", "ExpressionSetList",
           function(object, x, ...){
 		  P <- length(object)

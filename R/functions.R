@@ -154,10 +154,8 @@ calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1){
 }
 
 .permuteClassLabels <- function(object, phenotype, ...){
-            ##object is an ExpressionSet (or BreastSet)
-  require(gtools) || stopifnot("gtools package not available")
-  pData(object)[, phenotype] <- permute(pData(object)[, phenotype])
-  object
+	pData(object)[, phenotype] <- permute(pData(object)[, phenotype])
+	object
 }
 
 ssStatistic <- function(statistic=c("t", "sam", "z")[1],

@@ -6,13 +6,12 @@ Description: Multi-level model for cross-study detection of differential gene ex
 Suggests: MergeMaid,
 	  siggenes, 
 	  genefilter,
-	  gtools, 
 	  MASS, 
 	  geneplotter, 
 	  RColorBrewer, 
 	  GeneMeta
 Depends: R (>= 2.6.0), Biobase, methods, graphics	
-Imports: genefilter
+Imports: genefilter, gtools
 Maintainer: Robert Scharpf <rscharpf@jhsph.edu> 
 License: LGPL-2
 Collate:  functions.R	

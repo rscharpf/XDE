@@ -5,6 +5,7 @@ import(Biobase, methods, stats, graphics)
 ##importMethodsFrom("MergeMaid", geneStudy, "geneStudy<-", exprs, integrative.cors, intCor, intcorDens)
 ##importFrom("MergeMaid", mergeExprs)
 importFrom("genefilter", rowttests)
+importFrom("gtools", permute)
 exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
 exportMethods("[", "[[", "$",
               bayesianEffectSize,
