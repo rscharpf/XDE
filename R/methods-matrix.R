@@ -2,7 +2,6 @@ setMethod("pairs", "matrix",
           function(x, ...){
             op <- par(no.readonly=TRUE)
             on.exit(par(op))
-            require(geneplotter) || stop("Package geneplotter is not available")
             require(RColorBrewer) || stop("Package RColorBrewer is not available")
             par(mfrow=c(1,1), las=1)
             panel <- function(...){
