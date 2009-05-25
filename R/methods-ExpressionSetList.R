@@ -12,7 +12,6 @@ setMethod("lapply", "ExpressionSetList", function(X, FUN, ...){
 	  return(X)
 	  })
 	  
-
 ##object is a LinearXdeSet or loglinearXdeSet
 setMethod(".integrativeCorrelationFilter", "ExpressionSetList",
           function(object, fdrCut, ...){

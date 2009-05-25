@@ -130,13 +130,14 @@ inline int UpdateRC2MH::update(Random &ran)
   // if any of the proposed new values are negative, reject the proposal
   //
 
-  int isNeg = 0;
+  //Commented by RS Monday, May 25 2009
+  /*  int isNeg = 0;
   for (p = 0; p < str->Q; p++)
     for (q = 0; q < str->Q; q++)
       isNeg += (newR[p][q] < 0.0);
 
   if (isNeg > 0)
-      return nAccept;
+  return nAccept; */
 
 
   //
