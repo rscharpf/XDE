@@ -7,3 +7,6 @@ v1.5.3
   to empiricalStart function)
 - fixed bug in reading acceptance  and potential for XdeMCMC objects
 
+v1.5.4
+- added burnin argument to calculatePosteriorAvg function
+

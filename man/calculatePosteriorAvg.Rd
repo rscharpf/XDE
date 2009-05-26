@@ -11,7 +11,7 @@
 }
 
 \usage{
-calculatePosteriorAvg(object, NCONC=2, NDIFF=1)
+calculatePosteriorAvg(object, NCONC=2, NDIFF=1, burnin=0)
 }
 
 \arguments{
@@ -21,7 +21,10 @@ calculatePosteriorAvg(object, NCONC=2, NDIFF=1)
   concordant differential expression}
   \item{NDIFF}{Integer: number of studies for which a gene must be
     up- or down-regulated to be classified as differentially expressed.
-    It is the union of concordant and discordant differential expression.}
+    It is the union of concordant and discordant differential
+    expression.}
+  \item{burnin}{Integer: number of MCMC iterations for the burnin. Posterior means
+  are computed from the MCMC samples following burnin.}
 }
 \details{
 

@@ -79,8 +79,11 @@
               eenv
           }
 
-calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1){
+calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1, burnin=0){
 	if(class(object) != "XdeMcmc") stop("object must be of class XdeMcmc")
+	if(iterations(object) < 10) stop("Too few iterations to compute posterior means")
+	ii <- which((1:iterations(object)) > burnin)
+	if(length(ii) < 1) stop("Not enough iterations after burnin to compute the posterior means")
 	D <- object$DDelta
 	d <- object$delta
 	dD <- sign(d*D)
@@ -440,7 +443,8 @@ xsScores <- function(statistic, N){
 
 
 
-empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE, T_THRESH=4){
+empiricalStart <- function(object, zeroNu=FALSE,
+			   phenotypeLabel, one.delta=FALSE, T_THRESH=4){
 	if(length(grep(phenotypeLabel, varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
 	potential <- rep(0, 19)
 	acceptance <- rep(0, 17)
@@ -479,7 +483,6 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE
 		avdif
 	}
 	DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel)
-
 	require(genefilter)
 	tt <- rowttests(object, phenotypeLabel)
 	delta <- abs(tt) > T_THRESH
