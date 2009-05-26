@@ -97,14 +97,13 @@ inline int UpdateRhoGamma2MH::update(Random &ran)
     (1 - oldRho[pp][qq] + oldRho[pp][qq] * exp(u));
   newRho[qq][pp] = newRho[pp][qq];
   
-  /*  // Commented by RS Monday, May 25 2009
   // check that potential new correlation matrix is positive definite
   //
 
   int err = 0;
   Cholesky chol(newRho,err);
   if (err != 0)
-  return nAccept; */
+  return nAccept;
 
   //
   // compute Jacobian determinant
