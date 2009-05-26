@@ -2,3 +2,8 @@ v1.3.13
 - Moved gtools from Suggests to Imports
 - Removed multiple instance of 'f' function in ExpressionSetList[ method
 
+v1.5.3
+- Corrected bug in zeroNu function (needed to pass one.delta argument
+  to empiricalStart function)
+- fixed bug in reading acceptance  and potential for XdeMCMC objects
+

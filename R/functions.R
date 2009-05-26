@@ -465,6 +465,7 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE
 	} else{
 		Nu <- as.vector(matrix(0, nrow(object), length(object)))
 		Rho <- rep(0, choose(length(object), 2))
+		tau2Rho <- rep(0, length(object))
 		Gamma2 <- 0
 	}
 
@@ -482,10 +483,9 @@ empiricalStart <- function(object, zeroNu=FALSE, phenotypeLabel, one.delta=FALSE
 	require(genefilter)
 	tt <- rowttests(object, phenotypeLabel)
 	delta <- abs(tt) > T_THRESH
-
 	if(one.delta){
-		delta <- ifelse(rowMeans(delta) > 0.5, 1, 0)
-		delta <- matrix(delta, ncol=length(object), byrow=FALSE)
+		tmp <- ifelse(rowMeans(delta) > 0.5, 1, 0)
+		delta <- matrix(tmp, nrow=length(tmp), ncol=length(object), byrow=FALSE)
 	}
 	if(any(colSums(delta) == 0)){
 		##if none of the genes are differentially expressed in

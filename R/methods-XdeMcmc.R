@@ -74,31 +74,32 @@ setMethod("$", "XdeMcmc", function(x, name) {
 		return(mcmc)    
 	}
 
-  ##################################################    
-  ##Diagnostics
-  if(name == "acceptance"){
-    mcmc <- matrix(mcmc, nc = 17, nr = iterations(x), byrow = TRUE)
-    ##Drop parameters updated by gibbs
-    mcmc <- mcmc[, -c(1, 2, 5, 6, 10)]
-    colnames(mcmc) <- c("nu", "Delta", "a", "b", "c2", "gamma2",
-                        "r", "rho", "delta", "xi", "sigma2",
-                        "t", "l", "phi", "theta", "lambda", "tau")
-    return(mcmc)
-  }
-  if(name == "potential"){
-    mcmc <- matrix(mcmc, ncol=19, byrow=TRUE)
-    colnames(mcmc) <- .parameterNames()[4:22]
-    return(mcmc)
-  }
+	##---------------------------------------------------------------------------
+	##Diagnostics
+	if(name == "acceptance"){
+		mcmc <- matrix(mcmc, nc = 18, nr = iterations(x), byrow = TRUE)
+		##Drop parameters updated by gibbs
+		##mcmc <- mcmc[, -c(1, 2, 5, 6, 10)]
+		colnames(mcmc) <- c("nu", "Delta", "a", "b", "c2", "gamma2",
+				    "r", "rho", "delta", "xi", "sigma2",
+				    "t", "l", "phi", "theta", "lambda", "tauR", "tau2Rho")
+		return(mcmc)
+	}
+	if(name == "potential"){
+		mcmc <- matrix(mcmc, ncol=20, byrow=TRUE)
+		colnames(mcmc) <- c("posterior", "likelihood_potential",
+				    .parameterNames()[4:21])
+		return(mcmc)
+	}
 
-  if(name == "diffExpressed"){
-    mcmc <- matrix(mcmc, ncol=3, byrow=FALSE)
-    colnames(mcmc) <- c("diffExpressed", "concordant", "discordant")
-    return(mcmc)
-  }
+	if(name == "diffExpressed"){
+		mcmc <- matrix(mcmc, ncol=3, byrow=FALSE)
+		colnames(mcmc) <- c("diffExpressed", "concordant", "discordant")
+		return(mcmc)
+	}
   
-  stop(paste("Supplied name not found.  Should be one of", .parameterNames()[2:22]))
-##  eval(substitute(pData(x)$NAME_ARG, list(NAME_ARG=name)))
+	stop(paste("Supplied name not found.  Should be one of", .parameterNames()[2:22]))
+	##  eval(substitute(pData(x)$NAME_ARG, list(NAME_ARG=name)))
 })
 
 ##setMethod("[", "XdeMcmc", function(x, i, j, ..., drop = FALSE){

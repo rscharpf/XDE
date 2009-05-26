@@ -212,24 +212,28 @@ setMethod("studyCenter", "ExpressionSetList",
           })
 
 setMethod("zeroNu", "ExpressionSetList",
-          function(object, ...){
-            object <- geneCenter(object)
+          function(object, phenotypeLabel, one.delta=FALSE, ...){
+		  if(missing(phenotypeLabel)) stop("must specify phenotypeLabel (character string)")
+		  object <- geneCenter(object)
             
-            ##Note that by zeroing the nu's we must specify initial
-            ##values and can not draw random samples from the prior
-            ##(could result in illegal values)
-            
-            params <- new("XdeParameter", phenotypeLabel=phenotypeLabel, expressionSetList=object)
-            firstMcmc <- empiricalStart(object, zeroNu=TRUE, phenotypeLabel=phenotypeLabel)
-            firstMcmc$A <- rep(0, length(object))
-            firstMcmc$Rho <- rep(0, choose(length(object), 2))
-            up <- updates(params)
-            up["nu"] <- 0
-            up["a"] <- 0
-            up["gamma2"] <- 0
-            up["rhoAndGamma2"] <- 0
-            updates(params) <- up
-            firstMcmc(params) <- firstMcmc
-            params
+		  ##Note that by zeroing the nu's we must specify initial
+		  ##values and can not draw random samples from the prior
+		  ##(could result in illegal values)
+		  ##            params <- new("XdeParameter", phenotypeLabel=phenotypeLabel, expressionSetList=object)
+		  params <- new("XdeParameter", esetList=object, phenotypeLabel=phenotypeLabel,
+				one.delta=one.delta)
+		  firstMcmc <- empiricalStart(object, zeroNu=TRUE, phenotypeLabel=phenotypeLabel, one.delta=one.delta)
+		  firstMcmc$A <- rep(0, length(object))
+		  firstMcmc$Rho <- rep(0, choose(length(object), 2))
+		  firstMcmc$Tau2Rho <- rep(1, length(object))	    
+		  up <- updates(params)
+		  up["nu"] <- 0
+		  up["a"] <- 0
+		  up["gamma2"] <- 0
+		  up["rhoAndGamma2"] <- 0
+		  up["tau2Rho"] <- 0
+		  updates(params) <- up
+		  firstMcmc(params) <- firstMcmc
+		  params
           })
 

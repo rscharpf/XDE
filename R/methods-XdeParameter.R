@@ -234,7 +234,7 @@ setMethod("updates", "XdeParameter", function(object)  object@updates)
 setReplaceMethod("updates", "XdeParameter",
                  function(object, value){
                    object@updates <- value
-                   names(object@updates) <- .parameterNames()[4:20]
+                   names(object@updates) <- .parameterNames()[4:21]
                    object
                  })
 
