@@ -87,10 +87,12 @@ calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1, burnin=0){
 	D <- object$DDelta
 	d <- object$delta
 	dD <- sign(d*D)
-	f <- function(x){
+	##For each mcmc iteration, assess concordance, discordance
+	myf <- function(x){
 		##define an indicator for concordance
 		##indicator for discordance
-		tmp <- t(rbind(colSums(x > 0), colSums(x < 0)))
+		tmp <- cbind(rowSums(x>0), rowSums(x < 0))
+		##tmp <- t(rbind(colSums(x > 0), colSums(x < 0)))
 		colnames(tmp) <- c("#up", "#down")
 		discordant <- (tmp[, 1] * tmp[, 2]) != 0
 		
@@ -103,21 +105,24 @@ calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1, burnin=0){
 				       discordant,
 				       diffExpr), ncol=3, byrow=FALSE)
 	}
-	I <- array(NA, c(dim(dD)[2], 3, dim(dD)[3]))
-	dimnames(I) <- list(featureNames(object),
-			    c("concordant", "discordant", "diffExpressed"),
-			    paste("iterations", 1:dim(dD)[3], sep="_"))
-	for(i in 1:dim(dD)[3]){
-		I[, , i] <- f(dD[, , i])
+##	I <- array(NA, dim=dim(dD)
+	I <- array(NA, c(dim(dD)[2], 3, dim(dD)[1]),
+		   dimnames=list(featureNames(object),
+		   c("concordant", "discordant", "diffExpressed"),
+		   paste("iter", 1:dim(dD)[1], sep="_")))
+	IT <- dim(dD)[1]
+	for(i in 1:IT){
+		I[, , i] <- myf(dD[i, , ])
 	}
-	concordant.avg <- rowMeans(I[, 1, ])
-	discordant.avg <- rowMeans(I[, 2, ])
-	diffExpressed.avg <- rowMeans(I[, 3, ])
+	concordant.avg <- rowMeans(I[, "concordant", ])
+	discordant.avg <- rowMeans(I[, "discordant", ])
+	diffExpressed.avg <- rowMeans(I[, "diffExpressed", ])
 	X <- cbind(concordant.avg, discordant.avg, diffExpressed.avg)
 	colnames(X) <- c("concordant", "discordant", "diffExpressed")
 	rownames(X) <- featureNames(object)
 	X
 }
+
 
 .parameterNames <- function(){
 	c("thin",

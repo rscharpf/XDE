@@ -198,26 +198,22 @@ setMethod(".standardizedDelta", "XdeMcmc",
 			  separateTau <- TRUE
 		  } else separateTau <- FALSE
 		  if(separateTau){
-			  tau <- t(sqrt(object$tau2R))
-			  ##tauRho <- t(sqrt(object$tau2Rho))
+			  tau <- sqrt(object$tau2R)
+			  ##tauRho <- sqrt(object$tau2Rho)
 		  } else{
-			  tau <- t(sqrt(object$tau2))
+			  tau <- sqrt(object$tau2)
 		  }
 		  b <- object$b
 		  dDelta <- object$DDelta
-		  b <- t(b)
 		  s <- array(NA, dim=dim(sigma))
 		  ##dDelta <- Delta
-		  P <- dim(sigma)[1]
+		  P <- dim(sigma)[3]
 		  ##For each platform...
-		  for(i in 1:P){
-			  s[i, , ] <- t(apply(as.matrix(sigma[i, , ]), 1, "^", b[i, ]))
-			  s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", tau[i, ]))
-			  s[i, , ] <- t(apply(as.matrix(s[i, , ]), 1, "*", sqrt.c2))
+		  for(p in 1:P){
+			  s[, , p] <- (sigma[, , p]^b[,p])*tau[, p]*as.numeric(sqrt.c2)
 		  }
 		  dDelta <- dDelta * delta
 		  D <- dDelta/s
-		  D <- aperm(D)
 		  D
           })
 
