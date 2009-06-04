@@ -10,3 +10,19 @@ v1.5.3
 v1.5.4
 - added burnin argument to calculatePosteriorAvg function
 
+v1.5.5
+- For parameters indexed by genes and platforms, the chains were read in incorrectly
+	## - The order of the vector for parameter nu_gp indexed by gene g and study p is
+	##     nu_11, nu_12, ..., nu_1P, nu_21, ..., nu_2P, nu_G1, ..., nu_GP
+	##
+	## Arrays:  the 'left subscript moves the fastest'
+	##Therefore
+	##  mcmc <- array(mcmc, dim=c(# iterations, # genes, # studies)) is equiv to
+	## For iteration 1:
+	## mcmc[1, 1, 1] <- nu_11
+	## mcmc[1, 1, 2] <- nu_12
+	## mcmc[1, 1, P] <- nu_1P
+	## mcmc[1, 2, 1] <- nu_21
+	## mcmc[1, 2, P] <- nu_2P
+
+
