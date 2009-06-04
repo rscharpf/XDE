@@ -29,44 +29,44 @@ setMethod("$", "XdeMcmc", function(x, name) {
 
 	##---------------------------------------------------------------------------
 	##Parameters indexed by gene and study
-	## - Values are written to file as one big vector
-	## - The order of the vector for parameter nu_gp indexed by gene g and study p is
-	##     nu_11, nu_12, ..., nu_1P, nu_21, ..., nu_2P, nu_G1, ..., nu_GP
 	##
-	## Arrays:  the 'left subscript moves the fastest'
-	## x <- 1:8
-	## xx <- array(x, dim=c(2,2,2))
-	## is equivalent to
-	##left subscript moving the fastest
-	##yy <- array(NA, dim=c(2,2,2))
-	##yy[1, 1, 1] <- 1
-	##yy[2, 1, 1] <- 2
-	##yy[1, 2, 1] <- 3
-	##yy[2, 2, 1] <- 4
-	##yy[1, 1, 2] <- 5
-	##yy[2, 1, 2] <- 6
-	##yy[1, 2, 2] <- 7
-	##yy[2, 2, 2] <- 8
+	## If ITER iterations were executed, there are ITER lines written to the file. 
+	## Each line is a big vector in the following order:
+	## gene1 study 1, gene 1 study2, ... , gene1 study P, gene 2 study 1, ...
+	## Or,
+	##iter1:     nu_11, nu_12, ..., nu_1P, nu_21, ..., nu_2P, nu_G1, ..., nu_GP
+	##iter2:     nu_11, nu_12, ..., nu_1P, nu_21, ..., nu_2P, nu_G1, ..., nu_GP
 	##
-	##Therefore
-	##  mcmc <- array(mcmc, dim=c(# iterations, # genes, # studies)) is equiv to
+	## for the nu parameter.
+	##
+	## For reading in arrays, the 'left subscript moves the fastest'
+	##
+	## scan() reads in the data by rows.
+	## Therefore, the fastest moving index is study, followed by genes and then the mcmc iteration. 
+	##
+	##  mcmc <- array(mcmc, dim=c(# studies, # genes, # iterations)) is equiv to
 	## For iteration 1:
 	## mcmc[1, 1, 1] <- nu_11
-	## mcmc[1, 1, 2] <- nu_12
-	## mcmc[1, 1, P] <- nu_1P
+	## mcmc[2, 1, 1] <- nu_12
+	## mcmc[P, 1, 1] <- nu_1P
 	## mcmc[1, 2, 1] <- nu_21
-	## mcmc[1, 2, P] <- nu_2P
+	## mcmc[2, 2, 1] <- nu_22
+	## ...
+	## mcmc[P, 2, 1] <- nu_2P
 	## ...
 	##---------------------------------------------------------------------------	
 	if(name %in% c("DDelta", "nu", "phi", "sigma2", "delta", "probDelta")){
 		I <- iterations(x)
 		mcmc <- array(mcmc,
-			      dim=c(iterations(x),
+			      dim=length(studyNames(x),
 			      nrow(x),
-			      length(studyNames(x))),
-			      dimnames=list(as.character(1:I),
+			      iterations(x)),
+			      dimnames=list(studyNames(x),
 			      featureNames(x),
-			      studyNames(x)))
+			      as.character(1:I)))
+		##Now transform this to an array with dimensions:
+		## iteration x features x study
+		mcmc <- aperm(mcmc)
 		return(mcmc)
 	}
 	##--------------------------------------------------
