@@ -79,4 +79,5 @@ v1.5.7 6/4/2009
 	}
 	##--------------------------------------------------
 
+v 1.5.8 Fixed bug in converting the mcmc object to an array
 

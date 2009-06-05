@@ -54,11 +54,20 @@ setMethod("$", "XdeMcmc", function(x, name) {
 	## ...
 	## mcmc[P, 2, 1] <- nu_2P
 	## ...
+	## Example:
+	##	tmp <- outer(1:10, 1:3, FUN="*")
+	##	tmp2 <- as.numeric(t(tmp))
+	##	tmp2 <- rbind(tmp2, tmp2)
+	##      ##rows are iterations
+	##	write.table(tmp2, file="tmp2.txt", sep=" ", quote=FALSE, row.names=FALSE,col.names=FALSE)
+	##	x=scan("tmp2.txt")
+	##	y=array(x, dim=c(3, 10,  2))
+	##	y <- aperm(y)
 	##---------------------------------------------------------------------------	
 	if(name %in% c("DDelta", "nu", "phi", "sigma2", "delta", "probDelta")){
 		I <- iterations(x)
 		mcmc <- array(mcmc,
-			      dim=length(studyNames(x),
+			      dim=c(length(studyNames(x)),
 			      nrow(x),
 			      iterations(x)),
 			      dimnames=list(studyNames(x),
