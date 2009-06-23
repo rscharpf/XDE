@@ -1,6 +1,9 @@
-xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2){
+xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2, center=TRUE){
 	if(is.null(batchSize)){
-		fit <- XDE:::xdeFit(paramsMcmc, esetList, outputMcmc)
+		fit <- xdeFit(paramsMcmc=paramsMcmc,
+			      esetList=esetList,
+			      outputMcmc=outputMcmc,
+			      center=center)
 	} else{
 		## Tabulate running average of posterior means
 		## Remove log files after each batch
@@ -11,14 +14,18 @@ xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2){
 			cat("Batch ", i, "\n")
 			if(i > 1){
 				firstMcmc(paramsMcmc) <- lastMcmc(fit)					
-				fit <- XDE:::xdeFit(paramsMcmc, esetList)			
+				fit <- xdeFit(paramsMcmc=paramsMcmc,
+					      esetList=esetList,
+					      center=center)			
 				pa.last <- calculatePosteriorAvg(fit, NCONC=NCONC)
 				pa.cum <- (pa.last*batchSize + pa.cum*(i-1)*batchSize)/(i*batchSize)
 				
 				bes.last <- calculateBayesianEffectSize(fit)
 				bes.cum <- (bes.last*batchSize + bes.cum*(i-1)*batchSize)/(i*batchSize)
 			} else{
-				fit <- XDE:::xdeFit(paramsMcmc, esetList)						
+				fit <- xdeFit(paramsMcmc=paramsMcmc,
+					      esetList=esetList,
+					      center=center)						
 				pa.cum <- calculatePosteriorAvg(fit, NCONC=NCONC)
 				bes.cum <- calculateBayesianEffectSize(fit)
 			}
@@ -30,7 +37,7 @@ xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2){
 	return(fit)
 }
 
-xdeFit <- function(paramsMcmc, esetList, outputMcmc){
+xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 	if(!file.exists(directory(paramsMcmc))){
 		dir.create(directory(paramsMcmc), recursive=TRUE)
 	}
@@ -39,7 +46,6 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 	}
 	##stop("argument esetList must have class ExpresssionSetList")
 	if(class(paramsMcmc) != "XdeParameter") stop("paramsMcmc must be an object of class XdeParameter")
-
 	##if outputMcmc is present, use the seed stored in outputMcmc for
 	##beginning the MCMC (prevents simulating from the same seed as the
 	##previous run).  Furthermore, start the chain using the value of
@@ -53,12 +59,13 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 			stop("Argument 'outputMcmc' must be an object of class XdeMcmc")
 		}
 	}
-  
-	studyMean <- function(x) abs(mean(as.vector(exprs(x)))) > 0.1
-	overall.means <- sapply(esetList, studyMean)
-	if(any(overall.means)){
-		print("Replacing expression matrices in esetList with mean-centered matrices...")
-		esetList <- studyCenter(esetList)
+	if(center){
+		studyMean <- function(x) abs(mean(as.numeric(exprs(x)))) > 0.1
+		overall.means <- sapply(esetList, studyMean)
+		if(any(overall.means)){
+			print("Replacing expression matrices in esetList with mean-centered matrices...")
+			esetList <- studyCenter(esetList)
+		}
 	}
 	##Convert expression to vector
 	f <- function(x)  x <- as.vector(t(exprs(x)))
@@ -89,92 +96,91 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 				expression.vector=expression.vector,
 				psi=psi)
 	TRY <- tryCatch(results <- .C("xdeLIN_main",
-				      seed = ZZ[[1]],
-				      showIterations = ZZ[[2]],
-				      nIt = ZZ[[3]],
-				      oneDelta=ZZ[[4]],  ##if zero, prior model A (multiple delta) is used				
-				      Q = ZZ[[5]],
-				      G = ZZ[[6]],
-				      S = ZZ[[7]],
-				      x = ZZ[[8]],
-				      Psi = ZZ[[9]],
-				      specifiedInitialValues = ZZ[[10]],
-				      Nu = ZZ[[11]],
-				      DDelta = ZZ[[12]], 
-				      A = ZZ[[13]],
-				      B = ZZ[[14]],
-				      C2 = ZZ[[15]],
-				      Gamma2 = ZZ[[16]],
-				      R = ZZ[[17]],
-				      Rho = ZZ[[18]],
-				      Delta = ZZ[[19]],
-				      Xi = ZZ[[20]],
-				      Sigma2 = ZZ[[21]],
-				      T = ZZ[[22]],
-				      L = ZZ[[23]],
-				      Phi = ZZ[[24]],
-				      Theta = ZZ[[25]],
-				      Lambda = ZZ[[26]],
-				      Tau2R = ZZ[[27]],
-				      Tau2Rho=ZZ[[28]],
-				      param = ZZ[[29]],
-				      nUpdate = ZZ[[30]],
-				      epsilon = ZZ[[31]],
-				      output = ZZ[[32]],
-				      writeToFile = ZZ[[33]],
-				      directory = ZZ[[34]],
-				      valuePotential = ZZ[[35]],
-				      valueAcceptance = ZZ[[36]],
-				      valueNu = ZZ[[37]],
-				      valueDDelta = ZZ[[38]],
-				      valueA = ZZ[[39]],
-				      valueB = ZZ[[40]],
-				      valueC2 = ZZ[[41]],
-				      valueGamma2 = ZZ[[42]],
-				      valueR = ZZ[[43]],
-				      valueRho = ZZ[[44]],
-				      valueDelta = ZZ[[45]],
-				      valueXi = ZZ[[46]],
-				      valueSigma2 = ZZ[[47]],
-				      valueT = ZZ[[48]],
-				      valueL = ZZ[[49]],
-				      valuePhi = ZZ[[50]],
-				      valueTheta = ZZ[[51]],
-				      valueLambda = ZZ[[52]],
-				      valueTau2R = ZZ[[53]],
-				      valueTau2Rho=ZZ[[54]],
-				      valueProbDelta = ZZ[[55]],
-				      valueDiffexpressed=ZZ[[56]],
-				      writeDiffexpressedTofile=ZZ[[57]]),                                          
+				      seed = ZZ[["seed"]],
+				      showIterations = ZZ[["showIterations"]],
+				      nIt = ZZ[["nIt"]],
+				      oneDelta=ZZ[["one.delta"]],  ##if zero, prior model A (multiple delta) is used				
+				      Q = ZZ[["Q"]],
+				      G = ZZ[["G"]],
+				      S = ZZ[["S"]],
+				      x = ZZ[["x"]],
+				      Psi = ZZ[["Psi"]],
+				      specifiedInitialValues = ZZ[["specifiedInitialValues"]],
+				      Nu = ZZ[["Nu"]],
+				      DDelta = ZZ[["DDelta"]], 
+				      A = ZZ[["A"]],
+				      B = ZZ[["B"]],
+				      C2 = ZZ[["C2"]],
+				      Gamma2 = ZZ[["Gamma2"]],
+				      R = ZZ[["R"]],
+				      Rho = ZZ[["Rho"]],
+				      Delta = ZZ[["Delta"]],
+				      Xi = ZZ[["Xi"]],
+				      Sigma2 = ZZ[["Sigma2"]],
+				      T = ZZ[["T"]],
+				      L = ZZ[["L"]],
+				      Phi = ZZ[["Phi"]],
+				      Theta = ZZ[["Theta"]],
+				      Lambda = ZZ[["Lambda"]],
+				      Tau2R = ZZ[["Tau2R"]],
+				      Tau2Rho=ZZ[["Tau2Rho"]],
+				      param = ZZ[["param"]],
+				      nUpdate = ZZ[["nUpdate"]],
+				      epsilon = ZZ[["epsilon"]],
+				      output = ZZ[["output"]],
+				      writeToFile = ZZ[["writeToFile"]],
+				      directory = ZZ[["directory"]],
+				      valuePotential = ZZ[["valuePotential"]],
+				      valueAcceptance = ZZ[["valueAcceptance"]],
+				      valueNu = ZZ[["valueNu"]],
+				      valueDDelta = ZZ[["valueDDelta"]],
+				      valueA = ZZ[["valueA"]],
+				      valueB = ZZ[["valueB"]],
+				      valueC2 = ZZ[["valueC2"]],
+				      valueGamma2 = ZZ[["valueGamma2"]],
+				      valueR = ZZ[["valueR"]],
+				      valueRho = ZZ[["valueRho"]],
+				      valueDelta = ZZ[["valueDelta"]],
+				      valueXi = ZZ[["valueXi"]],
+				      valueSigma2 = ZZ[["valueSigma2"]],
+				      valueT = ZZ[["valueT"]],
+				      valueL = ZZ[["valueL"]],
+				      valuePhi = ZZ[["valuePhi"]],
+				      valueTheta = ZZ[["valueTheta"]],
+				      valueLambda = ZZ[["valueLambda"]],
+				      valueTau2R = ZZ[["valueTau2R"]],
+				      valueTau2Rho=ZZ[["valueTau2Rho"]],
+				      valueProbDelta = ZZ[["valueProbDelta"]],
+				      valueDiffexpressed=ZZ[["valueDiffexpressed"]],
+				      writeDiffexpressedTofile=ZZ[["writeDiffexpressedTofile"]]),                                          
                   error=function(e) NULL)
 	if(is.null(TRY)){
 		stop("Problem in C wrapper to xdeLIN_main. Check arguments in .fit")
 	}
 	##The data can be stored more efficiently in environments?
-
 	##If writeToFile or burnin is TRUE, we only collect the last
 	##iteration of the chain
-	lastMcmc <- list(results[[11]],
-			 results[[12]],
-			 results[[13]],
-			 results[[14]],
-			 results[[15]],
-			 results[[16]],
-			 results[[17]],
-			 results[[18]],
-			 results[[19]],
-			 results[[20]],
-			 results[[21]],
-			 results[[22]],
-			 results[[23]],
-			 results[[24]],
-			 results[[25]],
-			 results[[26]],
-			 results[[27]],
-			 results[[28]])
+	index <- match(c("Nu",
+			 "DDelta",
+			 "A",
+			 "B",
+			 "C2",
+			 "Gamma2",
+			 "R",
+			 "Rho",
+			 "Delta",
+			 "Xi",
+			 "Sigma2",
+			 "T",
+			 "L",
+			 "Phi",
+			 "Theta",
+			 "Lambda",
+			 "Tau2R",
+			 "Tau2Rho"), names(results))
+	lastMcmc <- results[index]
 	eenv <- new.env()
-	assign("vars", lastMcmc, eenv)
-	names(eenv$vars) <- names(results)[11:28]
+	eenv[["vars"]] <- lastMcmc
 	xmcmc <- new("XdeMcmc",
 		     studyNames=studyNames(paramsMcmc),
 		     featureNames=featureNames(esetList),
@@ -185,20 +191,23 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc){
 		     lastMcmc=eenv,
 		     posteriorAvg=NULL,
 		     bayesianEffectSize=NULL)
-	if(!burnin(paramsMcmc)){
-		##paramsMcmc has directory where chains are stored, number of iterations, etc
-		i <- match(c("c2", "sigma2", "tau2", "b"), names(output(paramsMcmc)))
-		##xmcmc@posteriorAvg <- xmcmc$diffExpressed
-		##if(nrow(xmcmc@posteriorAvg) == ZZ$G){
-		##	rownames(xmcmc@posteriorAvg) <- featureNames(esetList)
-		##}
-	} 
+##	if(!burnin(paramsMcmc)){
+##		##paramsMcmc has directory where chains are stored, number of iterations, etc
+##		##i <- match(c("c2", "sigma2", "tau2", "b"), names(output(paramsMcmc)))
+##		##xmcmc@posteriorAvg <- xmcmc$diffExpressed
+##		##if(nrow(xmcmc@posteriorAvg) == ZZ$G){
+##		##	rownames(xmcmc@posteriorAvg) <- featureNames(esetList)
+##		##}
+##	} 
 	xmcmc
 }
 
 
-.xdeparameterlist <- function(paramsMcmc, esetList, firstMcmc,
-                              expression.vector, psi){
+.xdeparameterlist <- function(paramsMcmc,
+			      esetList,
+			      firstMcmc,
+                              expression.vector,
+			      psi){
 	ZZ <-list(seed = as.integer(seed(paramsMcmc)),#1
 		  showIterations = as.integer(paramsMcmc@showIterations),
 		  nIt = as.integer(iterations(paramsMcmc)),

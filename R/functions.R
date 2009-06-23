@@ -40,7 +40,6 @@
             Gamma2 <- rep(0, chain.length[["gamma2"]])
             Rho <- rep(0, QQ*(QQ-1)/2*chain.length[["rho"]])
             R <- rep(0, QQ*(QQ-1)/2*chain.length[["r"]])              
-##            Delta <- rep(0, G*chain.length[["delta"]])
             Delta <- rep(0, G*QQ*chain.length[["delta"]])
             Xi <- rep(0, QQ*chain.length[["xi"]])
             Sigma2 <- rep(0, QQ * G*chain.length[["sigma2"]])
@@ -151,14 +150,14 @@ calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1, burnin=0){
 }
 
 .permutePhenotype <- function(object, seed, ...){
-  if(missing(seed)){
-    seed <- sample(0:100000, 1)
-    set.seed(seed)
-    print(paste("Seed", seed))
-  }
-  print(paste("permuting phenotypeLabel", phenotypeLabel(object)))
-  object@data <- lapply(object, .permuteClassLabels, phenotype=phenotypeLabel(object))
-  object
+	if(missing(seed)){
+		seed <- sample(0:100000, 1)
+		set.seed(seed)
+		print(paste("Seed", seed))
+	}
+	print(paste("permuting phenotypeLabel", phenotypeLabel(object)))
+	object@data <- lapply(object, .permuteClassLabels, phenotype=phenotypeLabel(object))
+	object
 }
 
 .permuteClassLabels <- function(object, phenotype, ...){
@@ -323,29 +322,7 @@ xsScores <- function(statistic, N){
 	out <- rep(1, 23)
 	out[1] <- thin
 	out[23] <- 1  ##by default, keep a running average of the posterior statistics attached to the object (do not write to file)
-	names(out) <- c("thin",
-			"potential",
-			"acceptance",
-			"nu",
-			"deltaDelta",
-			"a",
-			"b",
-			"c2",
-			"gamma2",
-			"r",
-			"rho",
-			"delta",
-			"xi",
-			"sigma2",
-			"t",
-			"l",
-			"phi",
-			"theta",
-			"lambda",
-			"tau2R",
-			"tau2Rho",
-			"p.delta",
-			"diffExpressed")
+	names(out) <- .parameterNames()
 	return(out)
 }
 ##Number of platforms (P)

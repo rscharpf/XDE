@@ -85,7 +85,9 @@ Objects can be created by calls of the form \code{new("XdeParameter",
       name of the binary covariate used for differential expression }
     \item{\code{verbose}:}{Object of class \code{logical} }
     \item{\code{studyNames}:}{Object of class \code{character}. Names of
-    the datasets}
+      the datasets}
+    \item{\code{one.delta}:}{Logical.  If TRUE, a gene is assumed to be
+      differentially in all studies or none of the studies.}
   }
 }
 \section{Methods}{

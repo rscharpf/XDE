@@ -12,7 +12,7 @@
 
 \usage{
   
-  xde(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2)
+  xde(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2, center=TRUE)
 
 }
 
@@ -26,6 +26,7 @@
   \item{NCONC}{The number of studies for which a gene must be
   differentially expressed in the same direction to be considered as
   concordantly differentially expressed.}
+\item{center}{Logical.  If TRUE, each study is centered to have mean zero.}
 }
 
 \details{
