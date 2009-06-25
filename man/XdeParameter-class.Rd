@@ -51,7 +51,7 @@
 Objects can be created by calls of the form \code{new("XdeParameter",
   esetList, updates, tuning, hyperparameters, output, iterations,
   burnin, seed, randomSeed, genes, studies, firstMcmc,
-  specifiedInitialValues, directory, phenotypeLabel, showIterations,
+  specifiedInitialValues, directory, phenotypeLabel, seed, showIterations,
   verbose, studyNames, one.delta)}.
 }
 \section{Slots}{
