@@ -88,3 +88,7 @@ v 1.5.9 committed 6/22/2009
 
 v 1.5.10 committed 6/25/2009
 * fix warning:  added seed to XdeParameter-class man page 
+
+v 1.5.11 committed 7/23/2009
+
+* updated the elements of expressionSetList -- elements now have protocolData slots
