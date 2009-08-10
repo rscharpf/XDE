@@ -4,7 +4,7 @@
 \documentclass{article}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage[authoryear,round]{natbib}
+\usepackage[authoryear,round,numbers]{natbib}
 \usepackage{hyperref}
 \usepackage[mathcal]{euscript}
 

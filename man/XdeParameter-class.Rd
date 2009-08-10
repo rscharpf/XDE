@@ -74,6 +74,8 @@ Objects can be created by calls of the form \code{new("XdeParameter",
     \item{\code{notes}:}{Object of class \code{character}. }
     \item{\code{firstMcmc}:}{Object of class \code{environment}. Values
       for the first iteration of the MCMC }
+    \item{\code{seed}:}{Object of class \code{integer}.  Seed used for
+    simulating random numbers.}    
     \item{\code{showIterations}:}{Object of class \code{logical}.
       Whether to show the MCMC iteration when fitting the model}
     \item{\code{specifiedInitialValues}:}{Object of class

@@ -82,13 +82,23 @@ v1.5.7 6/4/2009
 v 1.5.8 Fixed bug in converting the mcmc object to an array
 
 v 1.5.9 committed 6/22/2009
-
-* updated the elements of expressionSetList -- elements now have scanDates() slots
-* fixed documentation errors
+  o updated the elements of expressionSetList -- elements now have scanDates() slots
+  o fixed documentation errors
 
 v 1.5.10 committed 6/25/2009
-* fix warning:  added seed to XdeParameter-class man page 
+  o fix warning:  added seed to XdeParameter-class man page 
+
 
 v 1.5.11 committed 7/23/2009
+  o updated the elements of expressionSetList -- elements now have
+    protocolData slots
 
-* updated the elements of expressionSetList -- elements now have protocolData slots
+
+v 1.5.12 committed 8/10/2009
+  o try to fix compile errors on gewurz: option authoryear and natbib
+    not working. Trying:
+        \usepackage[authoryear,round,numbers]{natbib} 
+
+  o added seed to man/XdeParameter-class slots
+  o updated vignettes / pdf
+  o added NEWS file
