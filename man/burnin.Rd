@@ -20,6 +20,7 @@ burnin(object)
 \author{R. Scharpf}
 \seealso{\code{\link{XdeParameter-class}}}
 \examples{
+\dontrun{
 data(expressionSetList)
 params <- new("XdeParameter", phenotypeLabel="adenoVsquamous",
               esetList=expressionSetList)
@@ -31,6 +32,7 @@ burnin(params) <- FALSE
 output(params)[2:22]
 burnin(params) <- TRUE
 output(params)[2:22]
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

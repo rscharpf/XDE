@@ -27,10 +27,10 @@ setMethod("initialize", "XdeParameter",
 		  }
 		  ##check that phenotypeLabel is in each ExpressionSet
 		  if(!(all(sapply(esetList, function(x, label){ label %in% varLabels(x)}, label=phenotypeLabel)))){
-		    stop("supplied phenotypeLabel must be present in all ExpressionSets")
-            } else{
-		    .Object@phenotypeLabel <- phenotypeLabel
-            }
+			  stop("supplied phenotypeLabel must be present in all ExpressionSets")
+		  } else{
+			  .Object@phenotypeLabel <- phenotypeLabel
+		  }
 		  if(length(studyNames) != length(esetList)){
 			  studyNames <- paste("study", 1:length(esetList), sep="")
 		  }

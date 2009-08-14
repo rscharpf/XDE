@@ -39,7 +39,7 @@ empiricalStart(object, zeroNu = FALSE, phenotypeLabel, one.delta=FALSE, T_THRESH
   \code{\link{ExpressionSetList-class}}}
 
 \examples{
-
+library(XDE)
 data(expressionSetList)
 eList <- studyCenter(expressionSetList)
 empirical <- empiricalStart(eList, phenotypeLabel="adenoVsquamous", T_THRESH=3)
