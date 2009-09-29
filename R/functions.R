@@ -30,8 +30,9 @@
             ##starting values for the chain will be used.
             G <- nrow(object)
             QQ <- length(object)
-            potential <- rep(0, 19*chain.length[["potential"]])
-            acceptance <- rep(0, 17*chain.length[["acceptance"]])
+            potential <- rep(0, 20*chain.length[["potential"]])
+	      ##acceptance <- rep(0, 17*chain.length[["acceptance"]])
+	      acceptance <- rep(0, 18*chain.length[["acceptance"]])
             Nu <- rep(0, G*QQ*chain.length[["nu"]])
             DDelta <- rep(0, G*QQ*chain.length[["deltaDelta"]])
             A <- rep(0, QQ*chain.length[["a"]])

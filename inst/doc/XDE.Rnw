@@ -4,7 +4,7 @@
 \documentclass{article}
 \usepackage{amsmath}
 \usepackage{graphicx}
-\usepackage[authoryear,round,numbers]{natbib}
+\usepackage{natbib}
 \usepackage{hyperref}
 \usepackage[mathcal]{euscript}
 
@@ -492,6 +492,9 @@ zScores <- xsScores(z[, match(names(xlist), colnames(z))], N=nSamples(xlist))
 ##Concordant differential expression, we use the combined score from the random effects model directly
 zScores[, "concordant"] <- z[, "zSco"]
 @
+
+%\section{Assessing Goodness of Fit}
+
 
 \section{Session Information}
 

@@ -95,8 +95,9 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 				firstMcmc=firstMcmc,
 				expression.vector=expression.vector,
 				psi=psi)
+	
 	TRY <- tryCatch(results <- .C("xdeLIN_main",
-				      seed = ZZ[["seed"]],
+	tmp <- list(seed = ZZ[["seed"]],
 				      showIterations = ZZ[["showIterations"]],
 				      nIt = ZZ[["nIt"]],
 				      oneDelta=ZZ[["one.delta"]],  ##if zero, prior model A (multiple delta) is used				
@@ -241,7 +242,7 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 		  param = as.double(hyperparameters(paramsMcmc)),#28
 		  nUpdate = as.integer(paramsMcmc@updates),#29
 		  epsilon = as.double(paramsMcmc@tuning),#30
-		  output = as.integer(paramsMcmc@output),#31 (should have length 22)
+		  output = as.integer(paramsMcmc@output),#31 (should have length 23)
 		  ##do not write to file if running burnin
 		  writeToFile = as.integer(!paramsMcmc@burnin), #32
 		  directory = as.character(paramsMcmc@directory), #,#33
