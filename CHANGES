@@ -108,3 +108,6 @@ v 1.5.13 committed 9/29/2009
 
 v 1.5.14 committed 10/02/2009
   o removed debugging code from xde.R
+
+v 1.5.15 committed 10/02/2009
+  o resurrected old copy of xde.R
