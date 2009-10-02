@@ -105,3 +105,6 @@ v 1.5.12 committed 8/10/2009
 
 v 1.5.13 committed 9/29/2009
   o removed authoryear option from natbib in Sweave fileg
+
+v 1.5.14 committed 10/02/2009
+  o removed debugging code from xde.R
