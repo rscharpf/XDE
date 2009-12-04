@@ -4,6 +4,8 @@ import(Biobase, methods, stats, graphics)
 ##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
 ##importMethodsFrom("MergeMaid", geneStudy, "geneStudy<-", exprs, integrative.cors, intCor, intcorDens)
 ##importFrom("MergeMaid", mergeExprs)
+importClassesFrom(MergeMaid, mergeExpressionSet)
+importMethodsFrom(MergeMaid, pairwise.cors, intCor)
 importFrom("genefilter", rowttests)
 importFrom("gtools", permute)
 exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
@@ -25,8 +27,7 @@ exportMethods("[", "[[", "$",
               hyperparameters,
               "hyperparameters<-",
               initialize,
-              .integrativeCorrelationFilter,
-              iterations,
+             iterations,
               "iterations<-",
 	      lapply,
               lastMcmc,

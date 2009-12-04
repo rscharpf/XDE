@@ -14,3 +14,9 @@ USER VISIBLE CHANGES
      o Different update for correlation matrix to improve mixing.
        We propose and accept/reject elements of the correlation matrix one
        at a time.  
+
+        **************************************************
+        *                                                *
+        *              1.7 SERIES NEWS                   *
+        *                                                *
+        **************************************************

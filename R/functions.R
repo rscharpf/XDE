@@ -227,45 +227,6 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 	return(stat)
 }
 
-.integ.norm<-function(x){
-  xm<-mean(x,na.rm = TRUE)
-  ss<-sum((x-xm)*(x-xm),na.rm = TRUE)
-  return((x-xm)/sqrt(ss))
-}
-
-##.integ.cal <- .integ.cal ##From MergeMaid.R
-.integ.cal<-function(mat1,mat2,method=NULL){
-  rn<-rownames(mat1)
-  integ<-rep(0,nrow(mat1))
-
-  m1<- t(apply(mat1,1,.integ.norm))
-  m2<- t(apply(mat2,1,.integ.norm))
-
-  sziicor=function(index){
-    x<-m1[index,]
-    y<-m2[index,]
-  
-    A<-m1[-index,]
-    B<-m2[-index,]
-    nammx=function(indx){
-      aa=A[indx,]
-      sum(aa*x,na.rm = TRUE)
-    }
-    rx=sapply(1:(nrow(m1)-1),nammx)
-  
-    nammy=function(indy){
-      bb=B[indy,]
-      sum(bb*y,na.rm = TRUE)
-    }
-    ry=sapply(1:(nrow(m2)-1),nammy)
-  
-    integ[index]<-cor(rx,ry,use="pairwise.complete.obs")
-  }
-  ans=sapply(1:(nrow(mat1)),sziicor)
-  names(ans)=rn
-  return(ans)
-}
-
 symbolsInteresting <- function(rankingStatistic, percentile=0.9, 
                                colors=c("grey50", "royalblue"),
                                symbols=c(".", "o"),

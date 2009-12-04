@@ -111,3 +111,8 @@ v 1.5.14 committed 10/02/2009
 
 v 1.5.15 committed 10/02/2009
   o resurrected old copy of xde.R
+
+v 1.7.1 committed 12/04/2009
+  o  added integrativeCorrelationFilter
+       - returns a TRUE/FALSE matrix for each gene x study-pair
+  o import MergeMaid
