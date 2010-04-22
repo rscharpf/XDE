@@ -1,0 +1,22 @@
+        **************************************************
+        *                                                *
+        *              1.5 SERIES NEWS                   *
+        *                                                *
+        **************************************************
+
+USER VISIBLE CHANGES
+
+     o Decoupled the priors for nu and Delta
+
+       - tau_nu and tau_Delta
+
+
+     o Different update for correlation matrix to improve mixing.
+       We propose and accept/reject elements of the correlation matrix one
+       at a time.  
+
+        **************************************************
+        *                                                *
+        *              1.7 SERIES NEWS                   *
+        *                                                *
+        **************************************************

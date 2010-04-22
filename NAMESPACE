@@ -1,0 +1,96 @@
+useDynLib("XDE")
+import(Biobase, methods, stats, graphics)
+#MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
+##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
+##importMethodsFrom("MergeMaid", geneStudy, "geneStudy<-", exprs, integrative.cors, intCor, intcorDens)
+##importFrom("MergeMaid", mergeExprs)
+importClassesFrom(MergeMaid, mergeExpressionSet)
+importMethodsFrom(MergeMaid, pairwise.cors, intCor)
+importFrom("genefilter", rowttests)
+importFrom("gtools", permute)
+exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
+exportMethods("[", "[[", "$",
+              bayesianEffectSize,
+              "bayesianEffectSize<-",
+              burnin,
+              "burnin<-",
+              calculateBayesianEffectSize,
+              firstMcmc,
+              "firstMcmc<-",
+              coerce,
+	      dim,
+              directory,
+              "directory<-",
+              featureData,              
+              featureNames,
+              geneCenter,
+              hyperparameters,
+              "hyperparameters<-",
+              initialize,
+             iterations,
+              "iterations<-",
+	      lapply,
+              lastMcmc,
+              "lastMcmc<-",
+              notes,
+              nrow,
+              nSamples,
+              output,
+              "output<-",
+              pData,
+              phenotypeLabel,
+              "phenotypeLabel<-",
+              plot,
+              posteriorAvg,
+	      "posteriorAvg<-",
+              savedIterations,
+              seed,
+	      "seed<-",
+              show,
+              showIterations,
+              "showIterations<-",
+              .standardizedDelta,
+              standardizeSamples,
+              studyCenter,
+              studyNames,
+              "studyNames<-",
+              thin,
+              "thin<-",
+              tuning,
+              "tuning<-",
+              updates,
+              "updates<-",
+              zeroNu)
+export(calculatePosteriorAvg,
+       empiricalStart,
+       ssStatistic,
+       symbolsInteresting,
+       xde,
+       xsScores)
+
+##export when debugging
+##exportMethods(.pca, .studySplit)
+##export(.integ.norm,
+##       .integ.cal,
+##      .chainInitialize,
+##       .hyperparametersDefault,
+##       .outputDefault,
+##       .parameterNames,
+##       .permuteClassLabels,
+##       .permutePhenotype,
+##       .tuningDefault,
+##       .updatesDefault,
+##       xdeFit)
+
+
+
+
+
+
+
+              
+              
+              
+
+              
+              

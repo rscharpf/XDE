@@ -1,0 +1,118 @@
+v1.3.13
+- Moved gtools from Suggests to Imports
+- Removed multiple instance of 'f' function in ExpressionSetList[ method
+
+v1.5.3
+- Corrected bug in zeroNu function (needed to pass one.delta argument
+  to empiricalStart function)
+- fixed bug in reading acceptance  and potential for XdeMCMC objects
+
+v1.5.4
+- added burnin argument to calculatePosteriorAvg function
+
+v1.5.5 6/4/2009
+- For parameters indexed by genes and platforms, the chains were read in incorrectly
+	## - The order of the vector for parameter nu_gp indexed by gene g and study p is
+	##     nu_11, nu_12, ..., nu_1P, nu_21, ..., nu_2P, nu_G1, ..., nu_GP
+	##
+	## Arrays:  the 'left subscript moves the fastest'
+	##Therefore
+	##  mcmc <- array(mcmc, dim=c(# iterations, # genes, # studies)) is equiv to
+	## For iteration 1:
+	## mcmc[1, 1, 1] <- nu_11
+	## mcmc[1, 1, 2] <- nu_12
+	## mcmc[1, 1, P] <- nu_1P
+	## mcmc[1, 2, 1] <- nu_21
+	## mcmc[1, 2, P] <- nu_2P
+
+v1.5.6 6/4/2009
+- Fixed bugs in functions calculatePosteriorAvg and calculateBayesianEffectSize
+
+v1.5.7 6/4/2009
+- The chains were actually read in correctly prior to v.1.5.5.
+   Changes the comments below in methods-XdeMcmc.
+
+- Note that we're returning aperm(mcmc) for parameters indexed by
+   genes and platforms, so the changes in "bug" fix 1.5.6 still work
+
+	##---------------------------------------------------------------------------
+	##Parameters indexed by gene and study
+	##
+	## If ITER iterations were executed, there are ITER lines written to the file. 
+	## Each line is a big vector in the following order:
+	## gene1 study 1, gene 1 study2, ... , gene1 study P, gene 2 study 1, ...
+	## Or,
+	##iter1:     nu_11, nu_12, ..., nu_1P, nu_21, ..., nu_2P, nu_G1, ..., nu_GP
+	##iter2:     nu_11, nu_12, ..., nu_1P, nu_21, ..., nu_2P, nu_G1, ..., nu_GP
+	##
+	## for the nu parameter.
+	##
+	## For reading in arrays, the 'left subscript moves the fastest'
+	##
+	## scan() reads in the data by rows.
+	## Therefore, the fastest moving index is study, followed by genes and then the mcmc iteration. 
+	##
+	##  mcmc <- array(mcmc, dim=c(# studies, # genes, # iterations)) is equiv to
+	## For iteration 1:
+	## mcmc[1, 1, 1] <- nu_11
+	## mcmc[2, 1, 1] <- nu_12
+	## mcmc[P, 1, 1] <- nu_1P
+	## mcmc[1, 2, 1] <- nu_21
+	## mcmc[2, 2, 1] <- nu_22
+	## ...
+	## mcmc[P, 2, 1] <- nu_2P
+	## ...
+	##---------------------------------------------------------------------------	
+	if(name %in% c("DDelta", "nu", "phi", "sigma2", "delta", "probDelta")){
+		I <- iterations(x)
+		mcmc <- array(mcmc,
+			      dim=length(studyNames(x),
+			      nrow(x),
+			      iterations(x)),
+			      dimnames=list(studyNames(x),
+			      featureNames(x),
+			      as.character(1:I)))
+		##Now transform this to an array with dimensions:
+		## iteration x features x study
+		mcmc <- aperm(mcmc)
+		return(mcmc)
+	}
+	##--------------------------------------------------
+
+v 1.5.8 Fixed bug in converting the mcmc object to an array
+
+v 1.5.9 committed 6/22/2009
+  o updated the elements of expressionSetList -- elements now have scanDates() slots
+  o fixed documentation errors
+
+v 1.5.10 committed 6/25/2009
+  o fix warning:  added seed to XdeParameter-class man page 
+
+
+v 1.5.11 committed 7/23/2009
+  o updated the elements of expressionSetList -- elements now have
+    protocolData slots
+
+
+v 1.5.12 committed 8/10/2009
+  o try to fix compile errors on gewurz: option authoryear and natbib
+    not working. Trying:
+        \usepackage[authoryear,round,numbers]{natbib} 
+
+  o added seed to man/XdeParameter-class slots
+  o updated vignettes / pdf
+  o added NEWS file
+
+v 1.5.13 committed 9/29/2009
+  o removed authoryear option from natbib in Sweave fileg
+
+v 1.5.14 committed 10/02/2009
+  o removed debugging code from xde.R
+
+v 1.5.15 committed 10/02/2009
+  o resurrected old copy of xde.R
+
+v 1.7.1 committed 12/04/2009
+  o  added integrativeCorrelationFilter
+       - returns a TRUE/FALSE matrix for each gene x study-pair
+  o import MergeMaid
