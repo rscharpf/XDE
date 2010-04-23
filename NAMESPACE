@@ -1,13 +1,19 @@
 useDynLib("XDE")
-import(Biobase, methods, stats, graphics)
+import(Biobase, methods)
 #MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
 ##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
 ##importMethodsFrom("MergeMaid", geneStudy, "geneStudy<-", exprs, integrative.cors, intCor, intcorDens)
 ##importFrom("MergeMaid", mergeExprs)
-importClassesFrom(MergeMaid, mergeExpressionSet)
-importMethodsFrom(MergeMaid, pairwise.cors, intCor)
-importFrom("genefilter", rowttests)
+importClassesFrom("MergeMaid", mergeExpressionSet)
+importMethodsFrom("MergeMaid", intCor, intcorDens, pairwise.cors)
+importMethodsFrom("genefilter", rowttests)
+importFrom("genefilter", rowSds, rowVars)
 importFrom("gtools", permute)
+importFrom("graphics", legend, pairs, par, plot, smoothScatter)
+importFrom("grDevices", colorRampPalette)
+importFrom("stats", as.ts, cor, median, princomp, quantile, rnorm, runif,
+           var)
+importFrom("utils", str)
 exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
 exportMethods("[", "[[", "$",
               bayesianEffectSize,
