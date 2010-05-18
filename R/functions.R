@@ -401,7 +401,9 @@ empiricalStart <- function(object, zeroNu=FALSE,
 		##order should be 1_2, 1_3, ..., 1_P, 2_3, ..., 2_P, ...
 		##R <- R[upper.tri(R)]  ##Not in the right order!		
 		cors <- list()
-		for(i in 1:(nrow(Rho)-1)) cors[[i]] <- Rho[i, -(1:i)]
+		if(nrow(Rho) > 1){
+			for(i in 1:(nrow(Rho)-1)) cors[[i]] <- Rho[i, -(1:i)]
+		} else cors[[1]] <- Rho
 		Rho <- unlist(cors)
 
 		NuVars <- apply(Nu, 2, "var")
@@ -416,7 +418,6 @@ empiricalStart <- function(object, zeroNu=FALSE,
 		tau2Rho <- rep(0, length(object))
 		Gamma2 <- 0
 	}
-
 	averageDifference <- function(eset, classLabel){
 		## limma would be an easy way to fit a linear model to each gene
 		phenoColumn <- grep(classLabel, names(pData(eset)))
@@ -443,7 +444,9 @@ empiricalStart <- function(object, zeroNu=FALSE,
 		##order should be 1_2, 1_3, ..., 1_P, 2_3, ..., 2_P, ...
 		##R <- R[upper.tri(R)]  ##Not in the right order!
 		cors <- list()
-		for(i in 1:(nrow(R)-1)) cors[[i]] <- R[i, -(1:i)]
+		if(nrow(R) > 1){
+			for(i in 1:(nrow(R)-1)) cors[[i]] <- R[i, -(1:i)]
+		} else cors[[1]] <- R
 		R <- unlist(cors)
 	}
 	DeltaVars <- apply(DDelta*delta, 2, "var")	
@@ -454,32 +457,25 @@ empiricalStart <- function(object, zeroNu=FALSE,
 	} else {
 		tau2R <- DeltaVars/(prod(DeltaVars))^(1/S)
 	}
-
-
 	##0.1 seems reasonable,  or the proportion of t-statistics > X
 	Xi <- apply(delta, 2, "mean")
 	Sigma2 <- sapply(lapply(object, exprs), rowVars)	
-	
 	DDelta <- as.numeric(t(DDelta))
 	delta <- as.numeric(t(delta))
-
 	##Should we start at zero, 1, or somewhere in the middle?
 	A <- rep(1, length(object))
 	B <- rep(1, length(object))
-
 	##Gamma with mean 1
 	##L and T are mean and variance, respectively
 	L <- as.numeric(colMeans(Sigma2))
 	T <- as.numeric(apply(Sigma2, 2, var))
 	Sigma2 <- as.numeric(t(Sigma2))
-
 	##sigma2*phi is variance of expression values for patients with binary phenotype = 0
 	##sigma2/phi is variance of expression values for patients with binary phenotype = 1	
 	Phi <- rep(1, (length(object) * nrow(object)))
 	##Lambda and theta are the mean and variance for phi (study-specific)	
 	Lambda <- rep(1, length(object))
 	Theta <- rep(0.05, length(object))
-
 	##Tau2 is the relative scale of sigma across platforms
 	##- the product is constrained to be one
 	##- tau2 is shared by both nu and Delta
@@ -499,10 +495,88 @@ empiricalStart <- function(object, zeroNu=FALSE,
 
 
 
+computeGOF <- function(object,
+		       nus,
+		       Delta,
+		       delta,
+		       sigma2,
+		       phi,
+		       firstIteration,
+		       lastIteration,
+		       by=2){
+	results <- list()
+	avgM.k <- list()
+	m.k <- 0
+	##already thinned by 10
+	I <- seq(firstIteration, lastIteration, by=by)
+	NN <- length(I)
+	for(p in seq(along=object)){
+		cat("Study ", p, "\n")
+		for(i in I){
+			if(i %% 10 == 0) cat(i, " ")
+			nus.1 <- nus[i, , ]
+			Delta.1 <- Delta[i, , ]
+			delta.1 <- delta[i, , ]
+			sigma2.1 <- sigma2[i, , ]
+			phi.1 <- phi[i, , ]
+			sigma.1 <- sqrt(sigma2.1/phi.1)
+			sigma.0 <- sqrt(sigma2.1*phi.1)		
+			##	trace(goodnessOfFit, browser)
+			by <- 1/round(ncol(object[[p]])^0.4, 1)
+			qtls <- qnorm(seq(0, 1, by=by), mean=0, sd=1)
+			results[[p]] <- .goodnessOfFit(x=exprs(object[[p]]),
+						      nus=nus.1[,p],
+						      delta=delta.1[,p],
+						      Delta=Delta.1[,p],
+						      sigma.0=sigma.0[, p],
+						      sigma.1=sigma.1[, p],
+						      psi=psi[[p]],
+						      qtls=qtls)
+			m.k <- results[[p]]$m.k + m.k
+		}
+		m.k <- m.k/NN
+		avgM.k[[p]] <- m.k
+		m.k <- 0
+		cat("\n")
+	}
+	pvals <- R.b <- list()
+	for(p in 1:4){
+		n.p.k <- ncol(object[[p]])*1/ncol(avgM.k[[p]])
+		tmp <- ((avgM.k[[p]] - n.p.k)/sqrt(n.p.k))^2
+		R.b[[p]] <- rowSums(tmp)
+		pvals[[p]] <- -log10(1-pchisq(R.b[[p]], df=ncol(tmp)-1))
+	}
+	goodnessOfFit_results <- list(R.b, pvals)
+	goodnessOfFit_results
+}
 
+.goodnessOfFit <- function(x, nus, delta, Delta, sigma.0, sigma.1, psi, qtls){
+	Psi <- matrix(psi, nrow=nrow(x), ncol=ncol(x), byrow=TRUE)	
+	mus <- nus + delta * (2*Psi - 1)*Delta	
+	sigma <- sigma.0*(1-Psi) + sigma.1 * Psi
+	m.k <- matrix(NA, nrow(x), length(qtls[-1]))
 
-
-
-
-
-
+	##x <- exprs(object[[p]]) - mean(as.numeric(exprs(object[[p]])))
+	x <- x-mean(as.numeric(x))
+	z <- (x-mus)/sigma
+	##determine bins by the inverse distribution function evaluated at theta.
+	##
+	##because we have a different mean and variance for psi=0,
+	##psi=1, I standardized the x-values by theta and then
+	##calculated the inverse quantiles
+	R.b <- rep(NA, nrow(z))
+	for(i in 1:nrow(z)){
+		m.k[i, ] <- as.numeric(table(cut(as.numeric(z[i, ]), breaks=qtls, labels=seq(along=qtls[-1]))))
+		n.p.k <- ncol(z)*1/length(qtls[-1])
+		R.b[i] <- sum(((m.k[i, ] - n.p.k)/sqrt(n.p.k))^2)
+	}
+	pvals <- -log10(1-pchisq(R.b, df=ncol(m.k)-1))
+	pvals[is.infinite(pvals)] <- 16
+	require(genefilter)
+	sds0 <- rowSds(z[, psi==0])
+	sds1 <- rowSds(z[, psi==1])
+	n0 <- sum(psi==0)
+	n1 <- sum(psi==1)
+	sds <- (sds0*(n0-1) + sds1*(n1-1))/(n0+n1-2)
+	return(list(pvals=pvals, R.b=R.b, sds=sds, z=z, m.k=m.k))
+}

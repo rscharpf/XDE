@@ -116,3 +116,7 @@ v 1.7.1 committed 12/04/2009
   o  added integrativeCorrelationFilter
        - returns a TRUE/FALSE matrix for each gene x study-pair
   o import MergeMaid
+
+v 1.9.1 committed 05/18/2010
+  o changed empiricalStart function so that it is possible to use
+  empirical values for a single study
