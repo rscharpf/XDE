@@ -23,9 +23,11 @@ validityMethod <- function(object){
 		return(FALSE)
 	} else return(TRUE)
 }
-
 setClass("ExpressionSetList", representation("list"),
          validity=validityMethod)
+
+
+
 
 ##output of MCMC -- only the posterior averages
 setClass("XdeMcmc", ##contains="ExpressionSetList",

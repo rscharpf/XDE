@@ -30,6 +30,7 @@ exportMethods("[", "[[", "$",
               featureData,              
               featureNames,
               geneCenter,
+##	      goodnessOfFit,	      
               hyperparameters,
               "hyperparameters<-",
               initialize,
@@ -74,19 +75,7 @@ export(calculatePosteriorAvg,
        xde,
        xsScores)
 
-##export when debugging
-##exportMethods(.pca, .studySplit)
-##export(.integ.norm,
-##       .integ.cal,
-##      .chainInitialize,
-##       .hyperparametersDefault,
-##       .outputDefault,
-##       .parameterNames,
-##       .permuteClassLabels,
-##       .permutePhenotype,
-##       .tuningDefault,
-##       .updatesDefault,
-##       xdeFit)
+#export(.goodnessOfFit, computeGOF)
 
 
 
