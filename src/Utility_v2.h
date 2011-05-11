@@ -4,7 +4,7 @@
 
 
 inline int qg2index(const int q,const int g,const int Q,const int G) {
-  int index = q * G + g;
+  int index = g * Q + q;
   
   return index;
 }
