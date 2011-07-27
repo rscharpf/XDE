@@ -15,7 +15,7 @@
 
 
 int main(void) {
-  unsigned int seed = 1784378;
+  unsigned int seed = 17843781;
   Random ran(seed);
 
   // initialise fixed hyper-parameters
@@ -23,10 +23,10 @@ int main(void) {
   int G = 1000;
   int Q = 4;
   int *S = (int *) calloc(Q,sizeof(int));
-  S[0] = 40;
-  S[1] = 40;
-  S[2] = 40;
-  S[3] = 40;
+  S[0] = 10;
+  S[1] = 10;
+  S[2] = 10;
+  S[3] = 10;
   int sumS = S[0] + S[1] + S[2] + S[3];
 
   double alphaA = 1.0;
@@ -62,16 +62,30 @@ int main(void) {
   double *tau2Rho = (double *) calloc(Q,sizeof(double));
   int q;
   for (q = 0; q < Q; q++)
-    tau2Rho[q] = 0.25;
+    tau2Rho[q] = 1.0;
   double *tau2R = (double *) calloc(Q,sizeof(double));
   for (q = 0; q < Q; q++)
-    tau2R[q] = 0.25;
+    tau2R[q] = 1.0;
   double *a = (double *) calloc(Q,sizeof(double));
-  for (q = 0; q < Q; q++)
-    a[q] = 1.0;
+  for (q = 0; q < Q; q++) {
+    double u = ran.Unif01();
+    if (u < pA0)
+      a[q] = 0.0;
+    else if (u < pA0 + pA1)
+      a[q] = 1.0;
+    else
+      a[q] = ran.Unif01();
+  }
   double *b = (double *) calloc(Q,sizeof(double));
-  for (q = 0; q < Q; q++)
-    b[q] = 0.0;
+  for (q = 0; q < Q; q++) {
+    double u = ran.Unif01();
+    if (u < pB0)
+      b[q] = 0.0;
+    else if (u < pB0 + pB1)
+      b[q] = 1.0;
+    else
+      b[q] = ran.Unif01();
+  }
 
   double *l = (double *) calloc(Q,sizeof(double));
   double *t = (double *) calloc(Q,sizeof(double));
@@ -181,18 +195,90 @@ int main(void) {
 	Delta[k] = 0.0;
     }
   }
-   
+
+
+  double *x = (double *) calloc(Q * G * sumS,sizeof(double));
+  for (g = 0; g < G; g++)
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      
+      double var0 = sigma2[kqg] * phi[kqg];
+      double var1 = sigma2[kqg] / phi[kqg];
+      double mm = nu[kqg];
+
+      if (delta[kqg] != 0) {
+	int s;
+	for (s = 0; s < S[q]; s++) {
+	  double mean;
+	  double var;
+	  int kqs = qs2index(q,s,Q,S);
+	  if (psi[kqs] == 0) {
+	    mean = mm - Delta[kqg];
+	    var = var0;
+	  }
+	  else {
+	    mean = mm + Delta[kqg];
+	    var = var1;
+	  }
+
+	  int kqgs = qgs2index(q,g,s,Q,G,S);
+	  x[kqgs] = mean + sqrt(var) * ran.Norm01();
+	}
+      }
+      else {
+	int s;
+	double mean = mm;
+	for (s = 0; s < S[q]; s++) {
+	  int kqs = qs2index(q,s,Q,S);
+	  double var = psi[kqs] == 0 ? var0 : var1;
+	  
+	  int kqgs = qgs2index(q,g,s,Q,G,S);
+	  x[kqgs] = mean + sqrt(var) * ran.Norm01();
+	}
+      }
+    }
+
+  
   // run Metropolis-Hastings updates
 
   int nIt = 10000;
   for (k = 0; k < nIt; k++) {
-    int nTry = Q;
+    int nTry = Q * 10;
     int nAccept = 0;
-
     double epsilonA = 0.05;
-    updateA(&seed,epsilonA,nTry,&nAccept,a,Q,G,pA0,pA1,alphaA,betaA,
-	    nu,gamma2,rho,tau2Rho,sigma2);
-    cout << nTry << " " << nAccept << endl;
+    updateA(&seed,nTry,&nAccept,epsilonA,a,Q,G,nu,gamma2,rho,sigma2,tau2Rho,
+	    pA0,pA1,alphaA,betaA);
+    cout << "updateA: " << nTry << " " << nAccept << endl;
+
+
+    nTry = Q * 10;
+    nAccept = 0;
+    double epsilonB = 0.05;
+    updateB(&seed,nTry,&nAccept,epsilonB,b,Q,G,delta,Delta,c2,r,sigma2,tau2R,
+	    pB0,pB1,alphaB,betaB);
+    cout << "updateB: " << nTry << " " << nAccept << endl;
+
+
+
+    nTry = 1 * 10;
+    nAccept = 0;
+    double epsilonTau2RhoNu = 0.02;
+    updateTau2RhoNu(&seed,nTry,&nAccept,epsilonTau2RhoNu,tau2Rho,
+		    nu,Q,G,S,x,psi,delta,Delta,gamma2,rho,sigma2,
+		    phi,a);
+    cout << "updateTau2RhoNu: " << nTry << " " << nAccept << endl;
+
+
+    nTry = 1 * 10;
+    nAccept = 0;
+    double epsilonTau2RDDelta = 0.02;
+    updateTau2RDDelta(&seed,nTry,&nAccept,epsilonTau2RDDelta,tau2R,
+		      Delta,Q,G,S,x,psi,nu,delta,c2,r,sigma2,
+		      phi,b);
+    cout << "updateTau2RDDelta: " << nTry << " " << nAccept << endl;
+
+
+
   }
   
   return 0;
