@@ -2,7 +2,7 @@ CXX = /usr/bin/g++
 BIN = ./
 LIBS = ./
 
-flags = -I. -O3
+flags = -I. -g
 
 
 all:	$(BIN)/xdeTest Rinterface_v2.o
@@ -37,3 +37,6 @@ Potential_v2.h:		Random.h Matrix.h Utility_v2.h
 
 Update_v2.h:		Random.h Potential_v2.h
 			touch Update_v2.h
+
+Utility_v2.h:		Matrix.h
+			touch Utility_v2.h
