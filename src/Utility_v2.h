@@ -10,7 +10,7 @@ inline int qg2index(int q,int g,int Q,int G) {
 }
 
 
-inline int qs2index(int q,int s,int Q,const int *S) {
+inline int sq2index(int s,int q,const int *S,int Q) {
   int index = 0;
   int p;
   for (p = 0; p < q; p++)
@@ -22,11 +22,15 @@ inline int qs2index(int q,int s,int Q,const int *S) {
 }
 
 
-inline int qgs2index(int q,int g,int s,int Q,int G,const int *S) {
-  int index = 0;
+inline int sqg2index(int s,int q,int g,const int *S,int Q,int G) {
+  int sumS = 0;
+  int p;
+  for (p = 0; p < Q; p++)
+    sumS += S[p];
+  int index = g * sumS;
 
+  index += sq2index(s,q,S,Q);
   
-
   return index;
 }
 
@@ -65,7 +69,7 @@ inline void makeSigma(std::vector<std::vector<double> > &Sigma,const int Q,
 
 
 inline void makeSigma(std::vector<std::vector<double> > &Sigma,
-		      const vector<int> &on,const int Q,
+		      const std::vector<int> &on,const int Q,
 		      const double gamma2,const double *tau2,
 		      const double *a,const double *sigma2g,
 		      const double *r) {
@@ -96,8 +100,8 @@ inline void makeSigma(std::vector<std::vector<double> > &Sigma,
 	    int k = qq2index(q1,q2,Q);
 	    Sigma[k1][k2] = r[k] * (sqrt(Sigma[k1][k1] * Sigma[k2][k2]));
 
-	    k2++;
 	  }
+	  k2++;
 	}
       }
       
@@ -130,29 +134,26 @@ inline double nuGibbs(double *nu,int Q,int G,const int *S,double gamma2,
     // define prior mean
     //
     
-    std::vector<double> Mean(Q);
-    int q;
-    for (q = 0; q < Q; q++) Mean[q] = 0.0;
+    std::vector<double> Mean(Q,0.0);
 	  
     //
     // compute extra linear and quadratic terms
     //
 
-    std::vector<double> lin;
-    std::vector<double> quad;
-    lin.resize(Q);
-    quad.resize(Q);
+    std::vector<double> lin(Q,0.0);
+    std::vector<double> quad(Q,0.0);
     int s;
+    int q;
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       double var0 = sigma2[kqg] * phi[kqg];
       double var1 = sigma2[kqg] / phi[kqg];
       for (s = 0; s < S[q]; s++) {
-	int kqs = qs2index(q,s,Q,S);
-	double variance = psi[kqs] == 0 ? var0 : var1;
+	int ksq = sq2index(s,q,S,Q);
+	double variance = psi[ksq] == 0 ? var0 : var1;
 	quad[q] += 1.0 / variance;
-	int kqgs = qgs2index(q,g,s,Q,G,S);
-	lin[q] += (x[kqgs] - delta[kqg] * (2.0 * psi[kqs] - 1.0) * 
+	int ksqg = sqg2index(s,q,g,S,Q,G);
+	lin[q] += (x[ksqg] - delta[kqg] * (2.0 * psi[ksq] - 1.0) * 
 		   Delta[kqg]) / variance;
       }
     }
@@ -170,14 +171,14 @@ inline double nuGibbs(double *nu,int Q,int G,const int *S,double gamma2,
     }
 	  
     double detPosterior = 1.0 /inverse(varInv,var);
-    std::vector<double> mean;
+    std::vector<double> mean(Q,0.0);
     matrixMult(var,Mean,mean);
 	  
     //
     // Draw new values
     //
     
-    std::vector<double> vv(Q);
+    std::vector<double> vv(Q,0.0);
     vv = ran.MultiGaussian(var,mean);
     for (q = 0; q < Q; q++) {
       int k = qg2index(q,g,Q,G);
@@ -207,7 +208,7 @@ inline double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
     //
 
     int dim = 0;
-    vector<int> on(Q,0);
+    std::vector<int> on(Q,0);
     int q;
     for (q = 0; q < Q; q++) {
       int index = qg2index(q,g,Q,G);
@@ -225,37 +226,35 @@ inline double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
       // define prior mean
       //
       
-      std::vector<double> Mean(dim);
-      int k;
-      for (k = 0; k < dim; k++) Mean[k] = 0.0;
-      
+      std::vector<double> Mean(dim,0.0);
+
       //
       // compute extra linear and quadratic terms
       //
       
-      vector<double> mean(dim,0.0);
+      std::vector<double> mean(dim,0.0);
       
-      std::vector<double> lin;
-      std::vector<double> quad;
-      lin.resize(dim);
-      quad.resize(dim);
+      std::vector<double> lin(dim,0.0);
+      std::vector<double> quad(dim,0.0);
       int s;
-      k = 0;
-      for (q = 0; q < Q; q++)  if (on[q] == 1) {
-	  int index = qg2index(q,g,Q,G);
-	  double var0 = sigma2[index] * phi[index];
-	  double var1 = sigma2[index] / phi[index];
+      int k = 0;
+      for (q = 0; q < Q; q++) {
+	if (on[q] == 1) {
+	  int kqg = qg2index(q,g,Q,G);
+	  double var0 = sigma2[kqg] * phi[kqg];
+	  double var1 = sigma2[kqg] / phi[kqg];
 	  int s;
 	  for (s = 0; s < S[q]; s++)
 	    {
-	      double variance = psi[index] == 0 ? var0 : var1;
+	      int ksq = sq2index(s,q,S,Q);
+	      double variance = psi[ksq] == 0 ? var0 : var1;
 	      quad[k] += 1.0 / variance;
-	      int xIndex = qgs2index(q,g,s,Q,G,S);
-	      lin[k] += (2.0 * psi[index] - 1.0) * 
-		(x[xIndex] - nu[index]) / variance;
+	      int xIndex = sqg2index(s,q,g,S,Q,G);
+	      lin[k] += (2.0 * psi[ksq] - 1.0) * (x[xIndex] - nu[kqg]) / variance;
 	    }
 	  k++;
 	}
+      }
       
       //
       // Update parameters based on available observations 
@@ -280,7 +279,7 @@ inline double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
       for (q = 0; q < Q; q++) {
 	if (on[q] == 1) {
 	  int index = qg2index(q,g,Q,G);
-	  Delta[k] = vv[q];
+	  Delta[index] = vv[k];
 	  k++;
 	}
       }
