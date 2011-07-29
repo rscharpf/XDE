@@ -15,7 +15,7 @@
 
 
 int main(void) {
-  unsigned int seed = 17843781;
+  unsigned int seed = 17843783;
   Random ran(seed);
 
   // initialise fixed hyper-parameters
@@ -23,10 +23,10 @@ int main(void) {
   int G = 1000;
   int Q = 4;
   int *S = (int *) calloc(Q,sizeof(int));
-  S[0] = 10;
-  S[1] = 10;
-  S[2] = 10;
-  S[3] = 10;
+  S[0] = 200;
+  S[1] = 200;
+  S[2] = 200;
+  S[3] = 200;
   int sumS = S[0] + S[1] + S[2] + S[3];
 
   double alphaA = 1.0;
@@ -50,9 +50,9 @@ int main(void) {
   // initialise clicinal variables
 
 
-  int *psi = (int *) calloc(Q * sumS,sizeof(int));
+  int *psi = (int *) calloc(sumS,sizeof(int));
   int k;
-  for (k = 0; k < Q * sumS; k++)
+  for (k = 0; k < sumS; k++)
     psi[k] = (ran.Unif01() <= 0.5);
 
   // Initialise parameters to be simulated
@@ -75,6 +75,8 @@ int main(void) {
       a[q] = 1.0;
     else
       a[q] = ran.Unif01();
+
+    a[q] = 0.5;
   }
   double *b = (double *) calloc(Q,sizeof(double));
   for (q = 0; q < Q; q++) {
@@ -85,6 +87,8 @@ int main(void) {
       b[q] = 1.0;
     else
       b[q] = ran.Unif01();
+
+    b[q] = 0.5;
   }
 
   double *l = (double *) calloc(Q,sizeof(double));
@@ -166,13 +170,12 @@ int main(void) {
   
   
   int *delta = (int *) calloc(Q * G,sizeof(int));
-  int oneDelta = 1;
-  double xi = 0.2;
+  int oneDelta = 0;
+  double xi = 0.5;
   for (g = 0; g < G; g++) {
-    int on = (ran.Unif01() <= xi);
-    
     int q;
     for (q = 0; q < Q; q++) {
+      int on = (ran.Unif01() <= xi);
       int k = qg2index(q,g,Q,G);
       delta[k] = on;
     }
@@ -181,23 +184,37 @@ int main(void) {
 
   double *Delta = (double *) calloc(Q * G,sizeof(double));
   for (g = 0; g < G; g++) {
-    std::vector<std::vector<double> > Sigma;
-    makeSigma(Sigma,Q,c2,tau2R,b,sigma2 + Q * g,r);
-    std::vector<double> zero(Q,0.0);
-    std::vector<double> rr(ran.MultiGaussian(Sigma,zero));
-    
+    int nOn = 0;
+    vector<int> on(Q,0);
     int q;
     for (q = 0; q < Q; q++) {
       int k = qg2index(q,g,Q,G);
-      if (delta[k] == 1)
-	Delta[k] = rr[q];
-      else
-	Delta[k] = 0.0;
+      if (delta[k] == 1) {
+	nOn++;
+	on[q] = 1;
+      }
+    }
+    
+    if (nOn > 0) {
+      std::vector<std::vector<double> > Sigma;
+      makeSigma(Sigma,on,Q,c2,tau2R,b,sigma2 + Q * g,r);
+      std::vector<double> zero(Q,0.0);
+      std::vector<double> rr(ran.MultiGaussian(Sigma,zero));
+      
+      int k = 0;
+      int q;
+      for (q = 0; q < Q; q++) {
+	if (on[q] == 1) {
+	  int kqg = qg2index(q,g,Q,G);
+	  Delta[kqg] = rr[k];
+	  k++;
+	}
+      }
     }
   }
 
 
-  double *x = (double *) calloc(Q * G * sumS,sizeof(double));
+  double *x = (double *) calloc(G * sumS,sizeof(double));
   for (g = 0; g < G; g++)
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
@@ -211,8 +228,8 @@ int main(void) {
 	for (s = 0; s < S[q]; s++) {
 	  double mean;
 	  double var;
-	  int kqs = qs2index(q,s,Q,S);
-	  if (psi[kqs] == 0) {
+	  int ksq = sq2index(s,q,S,Q);
+	  if (psi[ksq] == 0) {
 	    mean = mm - Delta[kqg];
 	    var = var0;
 	  }
@@ -221,24 +238,23 @@ int main(void) {
 	    var = var1;
 	  }
 
-	  int kqgs = qgs2index(q,g,s,Q,G,S);
-	  x[kqgs] = mean + sqrt(var) * ran.Norm01();
+	  int ksqg = sqg2index(s,q,g,S,Q,G);
+	  x[ksqg] = mean + sqrt(var) * ran.Norm01();
 	}
       }
       else {
 	int s;
 	double mean = mm;
 	for (s = 0; s < S[q]; s++) {
-	  int kqs = qs2index(q,s,Q,S);
+	  int kqs = sq2index(s,q,S,Q);
 	  double var = psi[kqs] == 0 ? var0 : var1;
 	  
-	  int kqgs = qgs2index(q,g,s,Q,G,S);
-	  x[kqgs] = mean + sqrt(var) * ran.Norm01();
+	  int ksqg = sqg2index(s,q,g,S,Q,G);
+	  x[ksqg] = mean + sqrt(var) * ran.Norm01();
 	}
       }
     }
 
-  
   // run Metropolis-Hastings updates
 
   int nIt = 10000;
@@ -246,9 +262,12 @@ int main(void) {
     int nTry = Q * 10;
     int nAccept = 0;
     double epsilonA = 0.05;
+
+
     updateA(&seed,nTry,&nAccept,epsilonA,a,Q,G,nu,gamma2,rho,sigma2,tau2Rho,
 	    pA0,pA1,alphaA,betaA);
     cout << "updateA: " << nTry << " " << nAccept << endl;
+    cout << "a: " << a[0] << " " << a[1] << " " << a[2] << " " << a[3] << endl;
 
 
     nTry = Q * 10;
@@ -257,8 +276,8 @@ int main(void) {
     updateB(&seed,nTry,&nAccept,epsilonB,b,Q,G,delta,Delta,c2,r,sigma2,tau2R,
 	    pB0,pB1,alphaB,betaB);
     cout << "updateB: " << nTry << " " << nAccept << endl;
-
-
+    cout << "b: " << b[0] << " " << b[1] << " " << b[2] << " " << b[3] << endl;
+    
 
     nTry = 1 * 10;
     nAccept = 0;
@@ -268,7 +287,7 @@ int main(void) {
 		    phi,a);
     cout << "updateTau2RhoNu: " << nTry << " " << nAccept << endl;
 
-
+    
     nTry = 1 * 10;
     nAccept = 0;
     double epsilonTau2RDDelta = 0.02;
@@ -276,9 +295,20 @@ int main(void) {
 		      Delta,Q,G,S,x,psi,nu,delta,c2,r,sigma2,
 		      phi,b);
     cout << "updateTau2RDDelta: " << nTry << " " << nAccept << endl;
+    
+
+    nTry = 1;
+    nAccept = 0;
+    updateNu(&seed,&nAccept,nu,Q,G,S,x,psi,delta,Delta,gamma2,rho,sigma2,
+	     phi,tau2Rho,a);
+    cout << "updateNu: " << nTry << " " << nAccept << endl;
 
 
-
+    nTry = 1;
+    nAccept = 0;
+    updateDelta(&seed,&nAccept,Delta,Q,G,S,x,psi,nu,delta,c2,r,sigma2,
+		phi,tau2R,b);
+    cout << "updateDelta: " << nTry << " " << nAccept << endl;
   }
   
   return 0;

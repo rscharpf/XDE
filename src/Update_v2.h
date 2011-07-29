@@ -388,6 +388,7 @@ inline void updateTau2RhoNu(unsigned int *seed,
       pot -= potentialTau2Rho();
       pot += potentialTau2Rho();
 
+
       if (ran.Unif01() <= exp(- pot)) {
 	int q;
 	for (q = 0; q < Q; q++)
@@ -438,7 +439,7 @@ inline void updateTau2RDDelta(unsigned int *seed,
 			      const double *phi,
 			      const double *b) {
   Random ran(*seed);
-  
+
   if (Q > 1) {
     int k;
     for (k = 0; k < nTry; k++) {
@@ -493,24 +494,16 @@ inline void updateTau2RDDelta(unsigned int *seed,
 	for (q = 0; q < Q; q++)
 	  tau2R[q] = newValues[q];
 
-	int g;
-	for (q = 0; q < Q; q++)
-	  for (g = 0; g < G; g++) {
-	    int index = qg2index(q,g,Q,G);
-	    if (delta[index] == 1)
-	      Delta[index] = newDDelta[index];
-	  }
+	int k;
+	for (k = 0; k < Q * G; k++)
+	  Delta[k] = newDDelta[k];
 	
 	(*nAccept)++;
       }
-      else {
-	int q,g;
-	for (q = 0; q < Q; q++)
-	  for (g = 0; g < G; g++) {
-	    int index = qg2index(q,g,Q,G);
-	    if (delta[index] == 1)
-	      Delta[index] = newDDeltaOldTau2[index];
-	  }
+      else { 
+	int k;
+	for (k = 0; k < Q * G; k++)
+	  Delta[k] = newDDeltaOldTau2[k];
       }
 
       free(newDDelta);
@@ -527,6 +520,68 @@ inline void updateTau2RDDelta(unsigned int *seed,
 
 
 
+inline void updateNu(unsigned int *seed,
+		     int *nAccept,
+		     double *nu,
+		     int Q,
+		     int G,
+		     const int *S,
+		     const double *x,
+		     const int *psi,
+		     const int *delta,
+		     const double *Delta,
+		     double gamma2,
+		     const double *rho,
+		     const double *sigma2,
+		     const double *phi,
+		     const double *tau2Rho,
+		     const double *a) {
+  Random ran(*seed);
   
+  //
+  // propose new values for nu from full conditionals
+  //
+  
+  nuGibbs(nu,Q,G,S,gamma2,tau2Rho,a,rho,sigma2,
+	  phi,psi,x,delta,Delta,ran);
+  (*nAccept)++;
+
+  *seed = ran.ChangeSeed(*seed);
+
+  return;
+}
+
+
+
+
+  
+inline void updateDelta(unsigned int *seed,
+			int *nAccept,
+			double *Delta,
+			int Q,
+			int G,
+			const int *S,
+			const double *x,
+			const int *psi,
+			const double *nu,
+			const int *delta,
+			double c2,
+			const double *r,
+			const double *sigma2,
+			const double *phi,
+			const double *tau2R,
+			const double *b) {
+  Random ran(*seed);
+
+  DeltaGibbs(Delta,Q,G,S,c2,tau2R,b,r,sigma2,phi,psi,x,delta,nu,ran);
+  (*nAccept)++;
+
+  *seed = ran.ChangeSeed(*seed);
+
+  return;
+}
+
+
+
 
 #endif

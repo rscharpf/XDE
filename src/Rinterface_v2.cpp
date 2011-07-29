@@ -119,5 +119,61 @@ extern "C" {
 
 
 
+  void updateNu(int *seed,
+		int *nAccept,
+		double *nu,
+		int *Q,
+		int *G,
+		const int *S,
+		const double *x,
+		const int *psi,
+		const int *delta,
+		const double *Delta,
+		double *gamma2,
+		const double *rho,
+		const double *sigma2,
+		const double *phi,
+		const double *tau2Rho,
+		const double *a) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateNu(&seedU,nAccept,nu,*Q,*G,S,x,psi,delta,Delta,*gamma2,
+	     rho,sigma2,phi,tau2Rho,a);
+    
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+
+  void updateDelta(int *seed,
+		   int *nAccept,
+		   double *Delta,
+		   int *Q,
+		   int *G,
+		   const int *S,
+		   const double *x,
+		   const int *psi,
+		   const double *nu,
+		   const int *delta,
+		   double *c2,
+		   const double *r,
+		   const double *sigma2,
+		   const double *phi,
+		   const double *tau2R,
+		   const double *b) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateDelta(&seedU,nAccept,Delta,*Q,*G,S,x,psi,nu,delta,*c2,
+		r,sigma2,phi,tau2R,b);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+
 } // extern "C"
     
