@@ -309,6 +309,48 @@ int main(void) {
     updateDelta(&seed,&nAccept,Delta,Q,G,S,x,psi,nu,delta,c2,r,sigma2,
 		phi,tau2R,b);
     cout << "updateDelta: " << nTry << " " << nAccept << endl;
+
+  
+    nTry = 5;
+    nAccept = 0;
+    updateC2(&seed,nTry,&nAccept,&c2,Q,G,delta,Delta,r,sigma2,tau2R,b,c2Max);
+    cout << "updateC2: " << nTry << " " << nAccept << endl;
+    cout << "c2: " << c2 << endl;
+
+
+    nTry = 1;
+    nAccept = 0;
+    updateGamma2(&seed,&nAccept,&gamma2,Q,G,nu,rho,sigma2,tau2Rho,a);
+    cout << "updateC2: " << nTry << " " << nAccept << endl;
+    cout << "gamma2: " << gamma2 << endl;
+
+
+    nTry = 5;
+    nAccept = 0;
+    double epsilonRC2 = 0.01;
+    updateRC2(&seed,nTry,&nAccept,epsilonRC2,r,&c2,Q,G,delta,Delta,sigma2,
+	      tau2R,b,nuR,c2Max);
+    cout << "updateRC2: " << nTry << " " << nAccept << endl;
+    cout << "c2: " << c2 << endl;
+
+
+    nTry = 5;
+    nAccept = 0;
+    double epsilonRhoGamma2 = 0.01;
+    updateRhoGamma2(&seed,nTry,&nAccept,epsilonRhoGamma2,rho,&gamma2,
+		    Q,G,nu,sigma2,tau2Rho,a,nuRho);
+    cout << "updateRhoGamma2: " << nTry << " " << nAccept << endl;
+    cout << "gamma2: " << gamma2 << endl;
+
+
+    nTry = 5 * Q * G;
+    nAccept = 0;
+    double epsilonSigma2 = 0.5;
+    updateSigma2(&seed,nTry,&nAccept,epsilonSigma2,sigma2,Q,G,S,x,psi,nu,
+		 delta,Delta,c2,gamma2,r,rho,phi,t,l,tau2R,tau2Rho,a,b);
+    cout << "updateSigma2: " << nTry << " " << nAccept << endl;
+
+
   }
   
   return 0;

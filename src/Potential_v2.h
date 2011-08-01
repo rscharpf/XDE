@@ -269,6 +269,78 @@ inline double potentialB(int Q,
 }
 
 
+inline double potentialR(int Q,
+			 const double *r,
+			 double nuR) {
+  unsigned int seed = 1;
+  Random ran(seed);
+
+  vector<vector<double> > rMatrix;
+  rMatrix.resize(Q);
+  int qq = 0;
+  int p,q;
+  for (p = 0; p < Q; p++) {
+    rMatrix[p].resize(Q);
+    for (q = 0; q < Q; q++) {
+      rMatrix[p][q] = r[qq];
+      qq++;
+    }
+  }
+
+  double pot = ran.PotentialCorrelationStandardInverseWishart(nuR,rMatrix);
+  
+  return pot;
+}
+
+
+inline double potentialRho(int Q,
+			   const double *rho,
+			   double nuRho) {
+  unsigned int seed = 1;
+  Random ran(seed);
+  
+  vector<vector<double> > rhoMatrix;
+  rhoMatrix.resize(Q);
+  int qq = 0;
+  int p,q;
+  for (p = 0; p < Q; p++) {
+    rhoMatrix[p].resize(Q);
+    for (q = 0; q < Q; q++) {
+      rhoMatrix[p][q] = rho[qq];
+      qq++;
+    }
+  }
+  
+  double pot = ran.PotentialCorrelationStandardInverseWishart(nuRho,rhoMatrix);
+  
+  return pot;
+}
+
+
+
+inline double potentialSigma2qg(int q,
+				int g,
+				int Q,
+				int G,
+				const double *sigma2,
+				const double *l,
+				const double *t) {
+  unsigned int seed = 1;
+  Random ran(seed);
+  
+  double param2 = l[q] / t[q];
+  double param1 = l[q] * param2;
+
+  int kqg = qg2index(q,g,Q,G);
+  double pot = ran.PotentialGamma(param1,param2,sigma2[kqg]);
+  
+  return pot;
+}
+
+
+
+
+
 inline double potentialC2(void) {
   return 0.0;
 }
@@ -280,16 +352,9 @@ inline double potentialGamma2(void) {
 
 
 
-
-
-
-
-
 inline double potentialTau2Rho(void) {
   return 0.0;
 }
-
-
 
 
 inline double potentialTau2R(void) {
