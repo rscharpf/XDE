@@ -6,7 +6,7 @@
 #include "Random.h"
 #include "Potential_v2.h"
 #include "Utility_v2.h"
-
+#include "Cholesky.h"
 
 /*
 // order of variables:
@@ -45,7 +45,10 @@
    double pB0,
    double pB1,
    double alphaB,
-   double betaB
+   double betaB,
+   double nuR,
+   double nuRho,
+   double c2Max
 */
 
 inline void updateA(unsigned int *seed,
@@ -580,6 +583,777 @@ inline void updateDelta(unsigned int *seed,
 
   return;
 }
+
+
+
+
+inline void updateC2(unsigned int *seed,
+		     int nTry,
+		     int *nAccept,
+		     double *c2,
+		     int Q,
+		     int G,
+		     const int *delta,
+		     const double *Delta,
+		     const double *r,
+		     const double *sigma2,
+		     const double *tau2R,
+		     const double *b,
+		     double c2Max) {
+  Random ran(*seed);
+
+  int k;
+  for (k = 0; k < nTry; k++) {
+    (*nAccept)++;
+
+    //
+    // set prior parameters
+    //
+    
+    double s = -1.0;
+    double lambda = 0.0;
+    
+    //
+    // update parameters based on available observations
+    //
+    
+    int g;
+    for (g = 0; g < G; g++)
+      {
+	int nOn = 0;
+	vector<int> on(Q,0);
+	int q;
+	for (q = 0; q < Q; q++) {
+	  int kqg = qg2index(q,g,Q,G);
+	  on[q] = delta[kqg];
+	  nOn += delta[kqg];
+	}
+	
+	if (nOn >= 1)
+	  {
+	    vector<vector<double> > varInv;
+	    makeSigma(varInv,on,Q,1.0,tau2R,b,sigma2 + g * Q,r);
+	    
+	    //
+	    // pick out the elements of Delta that are active
+	    //
+	    
+	    vector<double> DeltaActive(nOn,0.0);
+	    int qq = 0;
+	    for (q = 0; q < Q; q++)
+	      {
+		if (on[q] == 1)
+		  {
+		    int kqg = qg2index(q,g,Q,G);
+		    DeltaActive[qq] = Delta[kqg];
+		    qq++;
+		  }
+	      }
+	    
+	    vector<vector<double> > var;
+	    inverse(varInv,var);
+	    
+	    double value = quadratic(var,DeltaActive);
+	    lambda += 0.5 * value;
+	    s += 0.5 * nOn;
+	  }
+      }
+    
+    //
+    // Draw new value
+    //
+    
+    double newValue;
+    if (s > 0.0) // there exist at least one delta == 1
+      {
+	int nTry = 0;
+	do
+	  {
+	    nTry++;
+	    newValue = ran.InverseGamma(s,lambda);
+	  }
+	while (newValue > c2Max && nTry < 100);
+	if (nTry == 100) {
+	  newValue = *c2;   // propose an unchanged value!
+	  (*nAccept)--;
+	}
+      }
+    else if (s == 0.0)
+      {
+	double fmax;
+	if (lambda < c2Max)
+	  fmax = exp(-1.0)/lambda;
+	else
+	  fmax = exp(-lambda/c2Max) / c2Max;
+	int nTry = 0;
+	int accept = 0;
+	do
+	  {
+	    nTry++;
+	    newValue = c2Max * ran.Unif01();
+	    double alpha = (exp(-lambda/newValue)/newValue) / fmax;
+	    accept = (ran.Unif01() <= alpha);
+	  }
+	while (accept == 0 && nTry < 100);
+	if (nTry == 100) {
+	  newValue = *c2;   // propose an unchanged value!
+	  (*nAccept)--;
+	}
+      }
+    else if (s == -0.5)
+      {
+	double fmax;
+	if (lambda < 0.5 * c2Max)
+	  fmax = exp(-0.5)/sqrt(2*lambda);
+	else
+	  fmax = exp(-lambda/c2Max) / sqrt(c2Max);
+	int nTry = 0;
+	int accept = 0;
+	do 
+	  {
+	    nTry++;
+	    newValue = c2Max * ran.Unif01();
+	    double alpha = (exp(-lambda/newValue)/sqrt(newValue)) / fmax;
+	    accept = (ran.Unif01() < alpha);
+	  }
+	while (accept == 0 && newValue < 100);
+	if (nTry == 100) {
+	  newValue = *c2;   // propose an unchanged value!
+	  (*nAccept)--;
+	}
+      }
+    else
+      newValue = c2Max * ran.Unif01();
+    
+    //
+    // Set new value
+    //
+    
+    *c2 = newValue;
+  }
+
+  *seed = ran.ChangeSeed(*seed);
+
+  return;
+}
+
+
+
+
+inline void updateGamma2(unsigned int *seed,
+			 int *nAccept,
+			 double *gamma2,
+			 int Q,
+			 int G,
+			 const double *nu,
+			 const double *rho,
+			 const double *sigma2,
+			 const double *tau2Rho,
+			 const double *a) {
+  Random ran(*seed);
+
+  //
+  // set prior parameters
+  //
+
+  double s = -1.0;
+  double lambda = 0.0;
+
+  //
+  // update parameters based on available observations
+  //
+
+  int g;
+  for (g = 0; g < G; g++)
+    {
+      vector<vector<double> > varInv;
+      makeSigma(varInv,Q,1.0,tau2Rho,a,sigma2 + g * Q,rho);
+      
+      vector<vector<double> > var;
+      inverse(varInv,var);
+
+      vector<double> nuActive(Q,0.0);
+      int q;
+      for (q = 0; q < Q; q++) {
+	int kqg = qg2index(q,g,Q,G);
+	nuActive[q] = nu[kqg];
+      }
+      
+      double value = quadratic(var,nuActive);
+      lambda += 0.5 * value;
+      s += 0.5 * Q;
+    }
+  
+  //
+  // Draw new value
+  //
+  
+  double newValue = ran.InverseGamma(s,lambda);
+  
+  //
+  // Set new value
+  //
+  
+  *gamma2 = newValue;
+
+  (*nAccept)++;
+
+  *seed = ran.ChangeSeed(*seed);
+
+  return;
+}
+
+
+
+
+
+inline void updateRC2(unsigned int *seed,
+		      int nTry,
+		      int *nAccept,
+		      double epsilon,
+		      double *r,
+		      double *c2,
+		      int Q,
+		      int G,
+		      const int *delta,
+		      const double *Delta,
+		      const double *sigma2,
+		      const double *tau2R,
+		      const double *b,
+		      double nuR,
+		      double c2Max) {
+  Random ran(*seed);
+
+  int k;
+  for (k = 0; k < nTry; k++) {
+    vector<vector<double> > oldR;
+    vector<vector<double> > newR;
+    oldR.resize(Q);
+    newR.resize(Q);
+    int p,q;
+    for (p = 0; p < Q; p++)
+      {
+	oldR[p].resize(Q);
+	newR[p].resize(Q);
+	for (q = 0; q < Q; q++)
+	  {
+	    int kqq = qq2index(p,q,Q);
+	    oldR[p][q] = r[kqq];
+	    newR[p][q] = r[kqq];
+	  }
+      }
+    
+    //
+    // propose new values for r
+    //  
+    
+    double pot = 0.0;
+    double u = epsilon * ran.Norm01();
+    
+    //
+    // draw what element to change
+    //
+    
+    vector<double> prob(Q);
+    for (p = 0; p < Q; p++)
+      prob[p] = 1.0 / ((double) Q);
+    int pp = ran.Discrete(prob);
+    prob.resize(Q - 1);
+    for (p = 0; p < Q - 1; p++)
+      prob[p] = 1.0 / ((double) (Q - 1));
+    
+    int qq = ran.Discrete(prob);
+    qq += (qq >= pp);
+    
+    //
+    // compute potential new correlation value
+    //
+    
+    newR[pp][qq] = oldR[pp][qq] * exp(u) / 
+      (1 - oldR[pp][qq] + oldR[pp][qq] * exp(u));
+    newR[qq][pp] = newR[pp][qq];
+    double *newRVector = (double *) calloc(Q * Q,sizeof(double));
+    qq = 0;
+    for (p = 0; p < Q; p++)
+      for (q = 0; q < Q; q++) {
+	newRVector[qq] = newR[p][q];
+	qq++;
+      }    
+
+    //
+    // check that potential new correlation matrix is positive definite
+    //
+    
+    int err = 0;
+    Cholesky chol(newR,err);
+    if (err == 0) {
+      
+      //
+      // compute Jacobian determinant
+      //
+      
+      double y = oldR[pp][qq];
+      double xtilde = log(y) - log(1.0 - y) + u;
+      double pot1;
+      if (xtilde <= 0.0)
+	pot1 = - log(1.0 + exp(xtilde));
+      else
+	pot1 = - xtilde - log(1.0 + exp(- xtilde));
+      double potdytildedxtilde = - xtilde - 2.0 * pot1;
+      
+      double potdxtildedy = log(1.0 - y) + log(y);
+      
+      pot += potdytildedxtilde + potdxtildedy;
+      
+      //
+      // if any of the proposed new values are negative, reject the proposal
+      //
+      
+      int isNeg = 0;
+      for (p = 0; p < Q; p++)
+	for (q = 0; q < Q; q++)
+	  isNeg += (newR[p][q] < 0.0);
+      
+      if (isNeg == 0) {
+
+	//
+	// propose new value for c2
+	//
+	
+	double oldC2 = *c2;
+	double newC2;
+	
+	double s = -1.0;
+	double lambda = 0.0;
+	
+	int g;
+	for (g = 0; g < G; g++)
+	  {
+	    int nOn = 0;
+	    vector<int> on(Q,0);
+	    for (q = 0; q < Q; q++) {
+	      int kqg = qg2index(q,g,Q,G);
+	      on[q] = delta[kqg];
+	      nOn += delta[kqg];
+	    }
+
+	    vector<vector<double> > varInv;
+	    makeSigma(varInv,on,Q,1.0,tau2R,b,sigma2 + g * Q,newRVector);
+	    
+	    vector<vector<double> > var;
+	    inverse(varInv,var);
+      
+	    //
+	    // pick out elements of Delta that are active
+	    //
+
+	    vector<double> DeltaActive(nOn,0.0);
+	    int qq = 0;
+	    for (q = 0; q < Q; q++)
+	      {
+		if (on[q] == 1)
+		  {
+		    int kqg = qg2index(q,g,Q,G);
+		    DeltaActive[qq] = Delta[kqg];
+		    qq++;
+		  }
+	      }
+	    
+	    double value = quadratic(var,DeltaActive);
+	    lambda += 0.5 * value;
+	    s += 0.5 * nOn;
+	  }
+	
+	if (s > 0.0)
+	  {
+	    newC2 = ran.InverseGamma(s,lambda);
+	    pot -= ran.PotentialInverseGamma(s,lambda,newC2);
+	  }
+	else
+	  {
+	    newC2 = c2Max * ran.Unif01();
+	    pot -= - log(1.0 / c2Max);
+	  }
+  
+	//
+	// compute potential for inverse proposal for c2
+	//
+	
+	s = -1.0;
+	lambda = 0.0;
+	
+	for (g = 0; g < G; g++)
+	  {
+	    int nOn = 0;
+	    vector<int> on(Q,0);
+	    for (q = 0; q < Q; q++) {
+	      int kqg = qg2index(q,g,Q,G);
+	      on[q] = delta[kqg];
+	      nOn += delta[kqg];
+	    }
+
+	    vector<vector<double> > varInv;
+	    makeSigma(varInv,on,Q,1.0,tau2R,b,sigma2 + g * Q,r);
+
+	    vector<vector<double> > var;
+	    inverse(varInv,var);
+      
+	    //
+	    // pick out elements of Delta that are active
+	    //
+
+	    vector<double> DeltaActive(nOn,0.0);
+	    int qq = 0;
+	    for (q = 0; q < Q; q++)
+	      {
+		if (on[q] == 1)
+		  {
+		    int kqg = qg2index(q,g,Q,G);
+		    DeltaActive[qq] = Delta[kqg];
+		    qq++;
+		  }
+	      }
+
+	    double value = quadratic(var,DeltaActive);
+	    lambda += 0.5 * value;
+	    s += 0.5 * nOn;
+	  }
+	
+	if (s > 0.0)
+	  pot += ran.PotentialInverseGamma(s,lambda,oldC2);
+	else
+	  pot += - log(1.0 / c2Max);
+  
+	//
+	// compute potentials for new and old states
+	//
+	
+	if (newC2 < c2Max) { // otherwise do not accept
+	  pot -= potentialR(Q,r,nuR);
+	  pot -= potentialC2();
+	  pot -= potentialDDelta(Q,G,delta,Delta,*c2,b,r,tau2R,sigma2);
+
+	  pot += potentialR(Q,newRVector,nuR);
+	  pot += potentialC2();
+	  pot += potentialDDelta(Q,G,delta,Delta,newC2,b,newRVector,tau2R,sigma2);
+	  
+	  if (ran.Unif01() <= exp(- pot)) {
+	    (*nAccept)++;
+	    
+	    *c2 = newC2;
+	    int kk;
+	    for (kk = 0; kk < Q * Q; kk++)
+	      r[kk] = newRVector[kk];
+	  }
+	}
+      }
+    }
+    
+    free(newRVector);
+  }
+  
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+inline void updateRhoGamma2(unsigned int *seed,
+			    int nTry,
+			    int *nAccept,
+			    double epsilon,
+			    double *rho,
+			    double *gamma2,
+			    int Q,
+			    int G,
+			    const double *nu,
+			    const double *sigma2,
+			    const double *tau2Rho,
+			    const double *a,
+			    double nuRho) {
+  Random ran(*seed);
+
+  int k;
+  for (k = 0; k < nTry; k++) {
+    vector<vector<double> > oldRho;
+    vector<vector<double> > newRho;
+    oldRho.resize(Q);
+    newRho.resize(Q);
+    int p,q;
+    for (p = 0; p < Q; p++)
+      {
+	oldRho[p].resize(Q);
+	newRho[p].resize(Q);
+	for (q = 0; q < Q; q++)
+	  {
+	    int kqq = qq2index(p,q,Q);
+	    oldRho[p][q] = rho[kqq];
+	    newRho[p][q] = rho[kqq];
+	  }
+      }
+    
+    double pot = 0.0;
+    double u = epsilon * ran.Norm01();
+    
+    //
+    // draw what element to change
+    //
+    
+    vector<double> prob(Q);
+    for (p = 0; p < Q; p++)
+      prob[p] = 1.0 / ((double) Q);
+    int pp = ran.Discrete(prob);
+    prob.resize(Q - 1);
+    for (p = 0; p < Q - 1; p++)
+      prob[p] = 1.0 / ((double) (Q - 1));
+    
+    int qq = ran.Discrete(prob);
+    qq += (qq >= pp);
+    
+    //
+    // compute potential new correlation value
+    //
+    
+    newRho[pp][qq] = oldRho[pp][qq] * exp(u) / 
+      (1 - oldRho[pp][qq] + oldRho[pp][qq] * exp(u));
+    newRho[qq][pp] = newRho[pp][qq];
+    double *newRhoVector = (double *) calloc(Q * Q,sizeof(double));
+    qq = 0;
+    for (p = 0; p < Q; p++)
+      for (q = 0; q < Q; q++) {
+	newRhoVector[qq] = newRho[p][q];
+	qq++;
+      }    
+    
+    // check that potential new correlation matrix is positive definite
+    //
+    
+    int err = 0;
+    Cholesky chol(newRho,err);
+    if (err == 0) {
+
+      //
+      // compute Jacobian determinant
+      //
+      
+      double y = oldRho[pp][qq];
+      double xtilde = log(y) - log(1.0 - y) + u;
+      double pot1;
+      if (xtilde <= 0.0)
+	pot1 = - log(1.0 + exp(xtilde));
+      else
+	pot1 = - xtilde - log(1.0 + exp(- xtilde));
+      double potdytildedxtilde = - xtilde - 2.0 * pot1;
+      
+      double potdxtildedy = log(1.0 - y) + log(y);
+      
+      pot += potdytildedxtilde + potdxtildedy;
+      
+      //
+      // if any of the proposed new values are negative, reject the proposal
+      //
+      
+      int isNeg = 0;
+      for (p = 0; p < Q; p++)
+	for (q = 0; q < Q; q++)
+	  isNeg += (newRho[p][q] < 0.0);
+
+      if (isNeg == 0) {
+	
+	//
+	// propose new values for gamma2
+	//
+	
+	double oldGamma2 = *gamma2;
+	double newGamma2;
+	
+	double s = -1.0;
+	double lambda = 0.0;
+	int g;
+	for (g = 0; g < G; g++) {
+	  vector<vector<double> > varInv;
+	  makeSigma(varInv,Q,1.0,tau2Rho,a,sigma2 + g * Q,newRhoVector);
+
+	  vector<vector<double> > var;
+	  inverse(varInv,var);
+      
+	  vector<double> nuActive(Q,0.0);
+	  for (q = 0; q < Q; q++) {
+	    int kqg = qg2index(q,g,Q,G);
+	    nuActive[q] = nu[kqg];
+	  }
+	  
+	  double value = quadratic(var,nuActive);
+	  lambda += 0.5 * value;
+	  s += 0.5 * Q;
+	}
+	
+	newGamma2 = ran.InverseGamma(s,lambda);
+	pot -= ran.PotentialInverseGamma(s,lambda,newGamma2);
+	
+	//
+	// compute potential for inverse proposal for gamma2
+	//
+	
+	s = -1.0;
+	lambda = 0.0;
+	for (g = 0; g < G; g++) {
+	  vector<vector<double> > varInv;
+	  makeSigma(varInv,Q,1.0,tau2Rho,a,sigma2 + g * Q,rho);
+	  
+	  vector<vector<double> > var;
+	  inverse(varInv,var);
+      
+	  vector<double> nuActive(Q);
+	  for (q = 0; q < Q; q++) {
+	    int kqg = qg2index(q,g,Q,G);
+	    nuActive[q] = nu[kqg];
+	  }
+	  
+	  double value = quadratic(var,nuActive);
+	  lambda += 0.5 * value;
+	  s += 0.5 * Q;
+	}
+	
+	pot += ran.PotentialInverseGamma(s,lambda,oldGamma2);
+	
+	//
+	// compute potential for new and old states
+	//
+	
+	pot -= potentialRho(Q,rho,nuRho);
+	pot -= potentialGamma2();
+	pot -= potentialNu(Q,G,nu,*gamma2,a,rho,tau2Rho,sigma2);
+
+	pot += potentialRho(Q,newRhoVector,nuRho);
+	pot += potentialGamma2();
+	pot += potentialNu(Q,G,nu,newGamma2,a,newRhoVector,tau2Rho,sigma2);
+
+	if (ran.Unif01() <= exp(- pot))
+	  {
+	    (*nAccept)++;
+	    
+	    *gamma2 = newGamma2;
+	    int kk;
+	    for (kk = 0; kk < Q * Q; kk++)
+	      rho[kk] = newRhoVector[kk];
+	  }
+      }
+    }
+    
+    free(newRhoVector);
+  }
+    
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+
+inline void updateSigma2(unsigned int *seed,
+			 int nTry,
+			 int *nAccept,
+			 double epsilon,
+			 double *sigma2,
+			 int Q,
+			 int G,
+			 const int *S,
+			 const double *x,
+			 const int *psi,
+			 const double *nu,
+			 const int *delta,
+			 const double *Delta,
+			 double c2,
+			 double gamma2,
+			 const double *r,
+			 const double *rho,
+			 const double *phi,
+			 const double *t,
+			 const double *l,
+			 const double *tau2R,
+			 const double *tau2Rho,
+			 const double *a,
+			 const double *b) {
+  Random ran(*seed);
+
+  int k;
+  for (k = 0; k < nTry; k++) {
+
+    //
+    // propose new value
+    //
+
+    int q = (int) (ran.Unif01() * Q);
+    int g = (int) (ran.Unif01() * G);
+
+    double upper = 1.0 + epsilon;
+    double lower = 1.0 / upper;
+    double u = lower + (upper - lower) * ran.Unif01();
+
+    int kqg = qg2index(q,g,Q,G);
+    double oldValue = sigma2[kqg];
+    double newValue = oldValue * u;
+
+    double pot = - log(1.0 / u);
+
+    //
+    // subtract potential for old state
+    //
+
+    std::vector<int> on(Q,0);
+    int qq;
+    for (qq = 0; qq < Q; qq++) {
+      int index = qg2index(qq,g,Q,G);
+      on[qq] = delta[index];
+    }
+
+    pot -= potentialSigma2qg(q,g,Q,G,sigma2,l,t);
+    pot -= potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
+    pot -= potentialNug(Q,nu + g * Q,gamma2,a,rho,tau2Rho,sigma2 + g * Q);
+    pot -= potentialDDeltag(Q,on,Delta + g * Q,c2,b,r,tau2R,sigma2 + g * Q);
+
+    //
+    // add potential for new state
+    //
+
+    sigma2[kqg] = newValue;
+    pot += potentialSigma2qg(q,g,Q,G,sigma2,l,t);
+    pot += potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
+    pot += potentialNug(Q,nu + g * Q,gamma2,a,rho,tau2Rho,sigma2 + g * Q);
+    pot += potentialDDeltag(Q,on,Delta + g * Q,c2,b,r,tau2R,sigma2 + g * Q);
+    sigma2[kqg] = oldValue;
+
+    //
+    // accept or reject proposal
+    //
+
+    if (ran.Unif01() <= exp(- pot)) {
+      sigma2[kqg] = newValue;
+      (*nAccept)++;
+    }
+  }
+    
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

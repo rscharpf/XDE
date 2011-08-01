@@ -35,7 +35,7 @@ Cholesky.h:		Matrix.h
 Potential_v2.h:		Random.h Matrix.h Utility_v2.h
 			touch Potential_v2.h
 
-Update_v2.h:		Random.h Potential_v2.h
+Update_v2.h:		Random.h Potential_v2.h Cholesky.h
 			touch Update_v2.h
 
 Utility_v2.h:		Matrix.h
