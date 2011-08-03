@@ -171,11 +171,13 @@ int main(void) {
   
   int *delta = (int *) calloc(Q * G,sizeof(int));
   int oneDelta = 0;
-  double xi = 0.5;
+  double *xi = (double *) calloc(Q,sizeof(double));
+  for (q = 0; q < Q; q++)
+    xi[q] = 0.5;
   for (g = 0; g < G; g++) {
     int q;
+    int on = (ran.Unif01() <= xi[0]);
     for (q = 0; q < Q; q++) {
-      int on = (ran.Unif01() <= xi);
       int k = qg2index(q,g,Q,G);
       delta[k] = on;
     }
@@ -257,6 +259,9 @@ int main(void) {
 
   // run Metropolis-Hastings updates
 
+  for (q = 0; q < Q; q++) 
+    xi[q] = 0.01;
+
   int nIt = 10000;
   for (k = 0; k < nIt; k++) {
     int nTry = Q * 10;
@@ -306,7 +311,7 @@ int main(void) {
 
     nTry = 1;
     nAccept = 0;
-    updateDelta(&seed,&nAccept,Delta,Q,G,S,x,psi,nu,delta,c2,r,sigma2,
+    updateDDelta(&seed,&nAccept,Delta,Q,G,S,x,psi,nu,delta,c2,r,sigma2,
 		phi,tau2R,b);
     cout << "updateDelta: " << nTry << " " << nAccept << endl;
 
@@ -349,6 +354,50 @@ int main(void) {
     updateSigma2(&seed,nTry,&nAccept,epsilonSigma2,sigma2,Q,G,S,x,psi,nu,
 		 delta,Delta,c2,gamma2,r,rho,phi,t,l,tau2R,tau2Rho,a,b);
     cout << "updateSigma2: " << nTry << " " << nAccept << endl;
+
+
+    nTry = 5 * Q * G;
+    nAccept = 0;
+    double epsilonPhi = 0.5;
+    updatePhi(&seed,nTry,&nAccept,epsilonPhi,phi,Q,G,S,x,psi,nu,
+	      delta,Delta,sigma2,theta,lambda);
+    cout << "updatePhi: " << nTry << " " << nAccept << endl;
+
+
+    nTry = 5 * Q;
+    nAccept = 0;
+    double epsilonTheta = 0.1;
+    updateTheta(&seed,nTry,&nAccept,epsilonTheta,theta,Q,G,phi,lambda);
+    cout << "updateTheta: " << nTry << " " << nAccept << endl;
+
+
+    nTry = 5 * Q;
+    nAccept = 0;
+    double epsilonLambda = 0.1;
+    updateLambda(&seed,nTry,&nAccept,epsilonLambda,lambda,Q,G,phi,theta);
+    cout << "updateLambda: " << nTry << " " << nAccept << endl;
+
+
+    nTry = 5 * Q;
+    nAccept = 0;
+    double epsilonT = 0.1;
+    updateT(&seed,nTry,&nAccept,epsilonT,t,Q,G,sigma2,l);
+    cout << "updateT: " << nTry << " " << nAccept << endl;
+
+
+    nTry = 5 * Q;
+    nAccept = 0;
+    double epsilonL = 0.1;
+    updateL(&seed,nTry,&nAccept,epsilonT,l,Q,G,sigma2,t);
+    cout << "updateL: " << nTry << " " << nAccept << endl;
+
+
+    nTry = Q;
+    nAccept = 0;
+    updateXi(&seed,&nAccept,xi,Q,G,delta,alphaXi,betaXi);
+    cout << "updateXi: " << nTry << " " << nAccept << endl;
+    cout << "xi: " << xi[0] << " " << xi[1] << " " << 
+      xi[2] << " " << xi[3] << endl;
 
 
   }
