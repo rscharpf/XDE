@@ -2,6 +2,8 @@
 #define Update_V2_H
 
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 #include "Random.h"
 #include "Potential_v2.h"
@@ -46,6 +48,8 @@
    double pB1,
    double alphaB,
    double betaB,
+   double alphaXi,
+   double betaXi,
    double nuR,
    double nuRho,
    double c2Max
@@ -558,29 +562,29 @@ inline void updateNu(unsigned int *seed,
 
 
   
-inline void updateDelta(unsigned int *seed,
-			int *nAccept,
-			double *Delta,
-			int Q,
-			int G,
-			const int *S,
-			const double *x,
-			const int *psi,
-			const double *nu,
-			const int *delta,
-			double c2,
-			const double *r,
-			const double *sigma2,
-			const double *phi,
-			const double *tau2R,
-			const double *b) {
+inline void updateDDelta(unsigned int *seed,
+			 int *nAccept,
+			 double *Delta,
+			 int Q,
+			 int G,
+			 const int *S,
+			 const double *x,
+			 const int *psi,
+			 const double *nu,
+			 const int *delta,
+			 double c2,
+			 const double *r,
+			 const double *sigma2,
+			 const double *phi,
+			 const double *tau2R,
+			 const double *b) {
   Random ran(*seed);
-
+  
   DeltaGibbs(Delta,Q,G,S,c2,tau2R,b,r,sigma2,phi,psi,x,delta,nu,ran);
   (*nAccept)++;
-
+  
   *seed = ran.ChangeSeed(*seed);
-
+  
   return;
 }
 
@@ -1347,6 +1351,651 @@ inline void updateSigma2(unsigned int *seed,
 
 
 
+
+
+
+inline void updatePhi(unsigned int *seed,
+		      int nTry,
+		      int *nAccept,
+		      double epsilon,
+		      double *phi,
+		      int Q,
+		      int G,
+		      const int *S,
+		      const double *x,
+		      const int *psi,
+		      const double *nu,
+		      const int *delta,
+		      const double *Delta,
+		      const double *sigma2,
+		      const double *theta,
+		      const double *lambda) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    
+    //
+    // propose new value
+    //
+    
+    int q = (int) (ran.Unif01() * Q);
+    int g = (int) (ran.Unif01() * G);
+    
+    double upper = 1.0 + epsilon;
+    double lower = 1.0 / upper;
+    double u = lower + (upper - lower) * ran.Unif01();
+
+    int kqg = qg2index(q,g,Q,G);
+    double oldValue = phi[kqg];
+    double newValue = oldValue * u;
+    
+    double pot = - log(1.0 / u);
+    
+    //
+    // subtract potential for old state
+    //
+    
+    pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
+    pot -= potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
+
+    //
+    // add potential for new state
+    //
+
+    phi[kqg] = newValue;
+    pot += potentialPhiqg(q,g,Q,G,phi,lambda,theta);
+    pot += potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
+    phi[kqg] = oldValue;
+
+    //
+    // accept or reject proposal
+    //
+
+    if (ran.Unif01() <= exp(- pot)) {
+      phi[kqg] = newValue;
+      (*nAccept)++;
+    }
+  }
+    
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+
+inline void updateTheta(unsigned int *seed,
+			int nTry,
+			int *nAccept,
+			double epsilon,
+			double *theta,
+			int Q,
+			int G,
+			const double *phi,
+			const double *lambda) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    
+    //
+    // propose new value
+    //
+    
+    int q = (int) (ran.Unif01() * Q);
+    
+    double upper = 1.0 + epsilon;
+    double lower = 1.0 / upper;
+    double u = lower + (upper - lower) * ran.Unif01();
+
+    double oldValue = theta[q];
+    double newValue = oldValue * u;
+    
+    double pot = - log(1.0 / u);
+    
+    //
+    // subtract potential for old state
+    //
+    
+    pot -= potentialTheta();
+    int g;
+    for (g = 0; g < G; g++)
+      pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
+    
+    //
+    // add potential for new state
+    //
+
+    theta[q] = newValue;
+    pot += potentialTheta();
+    for (g = 0; g < G; g++)
+      pot += potentialPhiqg(q,g,Q,G,phi,lambda,theta);
+    theta[q] = oldValue;
+
+    //
+    // accept or reject proposal
+    //
+
+    if (ran.Unif01() <= exp(- pot)) {
+      theta[q] = newValue;
+      (*nAccept)++;
+    }
+  }
+    
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+
+inline void updateLambda(unsigned int *seed,
+			int nTry,
+			int *nAccept,
+			double epsilon,
+			double *lambda,
+			int Q,
+			int G,
+			const double *phi,
+			const double *theta) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    
+    //
+    // propose new value
+    //
+    
+    int q = (int) (ran.Unif01() * Q);
+    
+    double upper = 1.0 + epsilon;
+    double lower = 1.0 / upper;
+    double u = lower + (upper - lower) * ran.Unif01();
+
+    double oldValue = lambda[q];
+    double newValue = oldValue * u;
+    
+    double pot = - log(1.0 / u);
+    
+    //
+    // subtract potential for old state
+    //
+    
+    pot -= potentialLambda();
+    int g;
+    for (g = 0; g < G; g++)
+      pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
+    
+    //
+    // add potential for new state
+    //
+
+    lambda[q] = newValue;
+    pot += potentialLambda();
+    for (g = 0; g < G; g++)
+      pot += potentialPhiqg(q,g,Q,G,phi,lambda,theta);
+    lambda[q] = oldValue;
+
+    //
+    // accept or reject proposal
+    //
+
+    if (ran.Unif01() <= exp(- pot)) {
+      lambda[q] = newValue;
+      (*nAccept)++;
+    }
+  }
+    
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+
+inline void updateT(unsigned int *seed,
+		    int nTry,
+		    int *nAccept,
+		    double epsilon,
+		    double *t,
+		    int Q,
+		    int G,
+		    const double *sigma2,
+		    const double *l) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    
+    //
+    // propose new value
+    //
+    
+    int q = (int) (ran.Unif01() * Q);
+    
+    double upper = 1.0 + epsilon;
+    double lower = 1.0 / upper;
+    double u = lower + (upper - lower) * ran.Unif01();
+
+    double oldValue = t[q];
+    double newValue = oldValue * u;
+    
+    double pot = - log(1.0 / u);
+    
+    //
+    // subtract potential for old state
+    //
+    
+    pot -= potentialT();
+    int g;
+    for (g = 0; g < G; g++)
+      pot -= potentialSigma2qg(q,g,Q,G,sigma2,l,t);
+    
+    //
+    // add potential for new state
+    //
+
+    t[q] = newValue;
+    pot += potentialT();
+    for (g = 0; g < G; g++)
+      pot += potentialSigma2qg(q,g,Q,G,sigma2,l,t);
+    t[q] = oldValue;
+
+    //
+    // accept or reject proposal
+    //
+
+    if (ran.Unif01() <= exp(- pot)) {
+      t[q] = newValue;
+      (*nAccept)++;
+    }
+  }
+    
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+inline void updateL(unsigned int *seed,
+		    int nTry,
+		    int *nAccept,
+		    double epsilon,
+		    double *l,
+		    int Q,
+		    int G,
+		    const double *sigma2,
+		    const double *t) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    
+    //
+    // propose new value
+    //
+    
+    int q = (int) (ran.Unif01() * Q);
+    
+    double upper = 1.0 + epsilon;
+    double lower = 1.0 / upper;
+    double u = lower + (upper - lower) * ran.Unif01();
+
+    double oldValue = l[q];
+    double newValue = oldValue * u;
+    
+    double pot = - log(1.0 / u);
+    
+    //
+    // subtract potential for old state
+    //
+    
+    pot -= potentialL();
+    int g;
+    for (g = 0; g < G; g++)
+      pot -= potentialSigma2qg(q,g,Q,G,sigma2,l,t);
+    
+    //
+    // add potential for new state
+    //
+
+    l[q] = newValue;
+    pot += potentialL();
+    for (g = 0; g < G; g++)
+      pot += potentialSigma2qg(q,g,Q,G,sigma2,l,t);
+    l[q] = oldValue;
+
+    //
+    // accept or reject proposal
+    //
+
+    if (ran.Unif01() <= exp(- pot)) {
+      l[q] = newValue;
+      (*nAccept)++;
+    }
+  }
+    
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+inline void updateXi(unsigned int *seed,
+		     int *nAccept,
+		     double *xi,
+		     int Q,
+		     int G,
+		     const int *delta,
+		     double alphaXi,
+		     double betaXi) {
+  Random ran(*seed);
+  
+  int q;
+  for (q = 0; q < Q; q++) {
+    //
+    // set prior parameters
+    //
+    
+    double alpha = alphaXi;
+    double beta = betaXi;
+    
+    //
+    // update parameters based on available observations
+    //
+    
+    int g;
+    for (g = 0; g < G; g++) {
+      int kqg = qg2index(q,g,Q,G);
+      if (delta[kqg] == 1)
+	alpha += 1.0;
+      else
+	beta += 1.0;
+    }
+    
+    //
+    // Draw new value
+    //
+    
+    double newValue = ran.Beta(alpha,beta);
+    xi[q] = newValue;
+    (*nAccept)++;
+  }
+  
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+
+inline void updateXi_onedelta(unsigned int *seed,
+			      int *nAccept,
+			      double *xi,
+			      int Q,
+			      int G,
+			      const int *delta,
+			      double alphaXi,
+			      double betaXi) {
+  Random ran(*seed);
+  
+  int q,g;
+  for (g = 0; g < G; g++) {
+    int nOn = 0;
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      nOn += delta[kqg];
+    }
+    if (nOn != 0 && nOn != Q) {
+      cout << "Error found in function \"updateXi_onedelta\":" << endl;
+      cout << "All delta's for any gene must be equal." << endl;
+      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
+	endl;
+      cout << "Aborting." << endl;
+      exit(-1);
+    }
+  }
+
+  double alpha = alphaXi;
+  double beta = betaXi;
+  
+  //
+  // update parameters based on available observations
+  //
+  
+  for (g = 0; g < G; g++) {
+    int kqg = qg2index(0,g,Q,G);
+    if (delta[kqg] == 1)
+      alpha += 1.0;
+    else
+      beta += 1.0;
+  }
+    
+  //
+  // Draw new value
+  //
+  
+  double newValue = ran.Beta(alpha,beta);
+  for (q = 0; q < Q; q++)
+    xi[q] = newValue;
+  (*nAccept)++;
+  
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+/*
+
+inline void updateDeltaDDelta(unsigned int *seed,
+			      int nTry,
+			      int *nAccept,
+			      int *delta,
+			      double *Delta,
+			      int Q,
+			      int G,
+			      const int *delta,
+			      double alphaXi,
+			      double betaXi) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    int q = (int) (ran.Unif01() * Q);
+    int g = (int) (ran.Unif01() * G);
+
+    int kqg = qg2index(q,g,Q,G);
+    int oldDelta = delta[kqg];
+    int newDelta = 1 - oldDelta;
+	  
+    //
+    // compute prior covariance matrix for Delta
+    //
+    
+    std::vector<int> on(Q,0);
+    int qq;
+    for (qq = 0; qq < Q; qq++) {
+      int index = qg2index(qq,g,Q,G);
+      on[qq] = delta[index];
+    }
+    on[q] = 1;
+    int dim = 0;
+    for (qq = 0; qq < Q; qq++)
+      dim += on[qq];
+
+    std::vector<std::vector<double> > var;
+    makeSigma(var,on,Q,c2,tau2R,b,sigma2 + g * Q,r);
+    
+    //
+    // define prior mean
+    //
+    
+    std::vector<double> mean(dim,0.0);
+    
+    //
+    // compute extra linear and quadratic terms
+    //
+
+    std::vector<double> mean(dim,0.0);
+    
+    std::vector<double> lin(dim,0.0);
+    std::vector<double> quad(dim,0.0);
+    int s;
+    int kk = 0;
+    for (qq = 0; qq < Q; qq++) {
+	if (on[qq] == 1) {
+	  int kqg = qg2index(qq,g,Q,G);
+	  double var0 = sigma2[kqg] * phi[kqg];
+	  double var1 = sigma2[kqg] / phi[kqg];
+	  int s;
+	  for (s = 0; s < S[q]; s++)
+	    {
+	      int ksq = sq2index(s,qq,S,Q);
+	      double variance = psi[ksq] == 0 ? var0 : var1;
+	      quad[kk] += 1.0 / variance;
+	      int xIndex = sqg2index(s,q,g,S,Q,G);
+	      lin[kk] += (2.0 * psi[ksq] - 1.0) * (x[xIndex] - nu[kqg]) / variance;
+	    }
+	  kk++;
+	}
+    }
+ 
+
+
+
+	  
+	  vector<vector<double> > var0;
+	  inverse(var,var0);
+	  vector<double> mean0(str->Q);
+	  for (pp = 0; pp < str->Q; pp++)
+	    mean0[pp] = mean[pp];
+	  
+	  int s;
+	  for (qq = 0; qq < str->Q; qq++)
+	    {
+	      if (qq != q && str->delta[qq][g] == 1)
+		{
+		  double v0 = str->sigma2[qq][g] * str->phi[qq][g];
+		  double v1 = str->sigma2[qq][g] / str->phi[qq][g];
+		  
+		  for (s = 0; s < str->S[qq]; s++)
+		    {
+		      double variance = str->psi[qq][s] == 0 ? v0 : v1;
+		      var0[qq][qq] += 1.0 / variance;
+		      mean0[qq] += (2.0 * str->psi[qq][s] - 1.0) * (str->x[qq][g][s] - str->nu[qq][g]) / variance;
+		    }
+		}
+	    }
+	  
+	  vector<vector<double> > var0Inv;
+	  inverse(var0,var0Inv);
+	  vector<double> mean0Mult;
+	  matrixMult(var0Inv,mean0,mean0Mult);
+	  
+	  //
+	  // Update parameters for delta[q][g]=1
+	  //
+	  
+	  double v0 = str->sigma2[q][g] * str->phi[q][g];
+	  double v1 = str->sigma2[q][g] / str->phi[q][g];
+	  
+	  for (s = 0; s < str->S[q]; s++)
+	    {
+	      double variance = str->psi[q][s] == 0 ? v0 : v1;
+	      var0[q][q] += 1.0 / variance;
+	      mean0[q] += (2.0 * str->psi[q][s] - 1.0) * (str->x[q][g][s] - str->nu[q][g]) / variance;
+	    }
+	  
+	  vector<vector<double> > var1Inv;
+	  inverse(var0,var1Inv);
+	  vector<double> mean1Mult;
+	  matrixMult(var1Inv,mean0,mean1Mult);
+	  
+	  //
+	  // Draw new values for Delta[g]
+	  
+	  vector<double> newDDelta(str->Q);
+	  if (newDelta == 0)
+	    newDDelta = ran.MultiGaussian(var0Inv,mean0Mult);
+	  else
+	    newDDelta = ran.MultiGaussian(var1Inv,mean1Mult);
+	  
+	  vector<double> oldDDelta(str->Q);
+	  for (qq = 0; qq < str->Q; qq++)
+	    oldDDelta[qq] = str->Delta[qq][g];
+	  
+	  //
+	  // compute acceptance probability
+	  //
+	  
+	  double pot = 0.0;
+	  if (newDelta == 0)
+	    {
+	      pot -= ran.PotentialMultiGaussian(var0Inv,mean0Mult,newDDelta);
+	      pot += ran.PotentialMultiGaussian(var1Inv,mean1Mult,oldDDelta);
+	    }
+	  else
+	    {
+	      pot -= ran.PotentialMultiGaussian(var1Inv,mean1Mult,newDDelta);
+	      pot += ran.PotentialMultiGaussian(var0Inv,mean0Mult,oldDDelta);
+	    }
+	  
+	  pot -= model[g]->potential(ran);
+	  
+	  str->delta[q][g] = newDelta;
+	  for (qq = 0; qq < str->Q; qq++)
+	    str->Delta[qq][g] = newDDelta[qq];
+	  
+	  pot += model[g]->potential(ran);
+	  
+	  str->delta[q][g] = oldDelta;
+	  for (qq = 0; qq < str->Q; qq++)
+	    str->Delta[qq][g] = oldDDelta[qq];
+	  
+	  if (ran.Unif01() <= exp(- pot))
+	    {
+	      addAccept();
+	      nAccept++;
+	      str->delta[q][g] = newDelta;
+	      for (qq = 0; qq < str->Q; qq++)
+		str->Delta[qq][g] = newDDelta[qq];
+	    }
+	}
+   
+
+
+  }
+  
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+*/
 
 
 

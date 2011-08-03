@@ -339,6 +339,27 @@ inline double potentialSigma2qg(int q,
 
 
 
+inline double potentialPhiqg(int q,
+			     int g,
+			     int Q,
+			     int G,
+			     const double *phi,
+			     const double *lambda,
+			     const double *theta) {
+  unsigned int seed = 1;
+  Random ran(seed);
+  
+  double param2 = lambda[q] / theta[q];
+  double param1 = lambda[q] * param2;
+
+  int kqg = qg2index(q,g,Q,G);
+  double pot = ran.PotentialGamma(param1,param2,phi[kqg]);
+  
+  return pot;
+}
+
+
+
 
 
 inline double potentialC2(void) {
@@ -358,6 +379,26 @@ inline double potentialTau2Rho(void) {
 
 
 inline double potentialTau2R(void) {
+  return 0.0;
+}
+
+
+inline double potentialT(void) {
+  return 0.0;
+}
+
+
+inline double potentialL(void) {
+  return 0.0;
+}
+
+
+inline double potentialTheta(void) {
+  return 0.0;
+}
+
+
+inline double potentialLambda(void) {
   return 0.0;
 }
 

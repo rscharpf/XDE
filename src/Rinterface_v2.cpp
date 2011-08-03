@@ -147,26 +147,26 @@ extern "C" {
 
 
 
-  void updateDelta(int *seed,
-		   int *nAccept,
-		   double *Delta,
-		   int *Q,
-		   int *G,
-		   const int *S,
-		   const double *x,
-		   const int *psi,
-		   const double *nu,
-		   const int *delta,
-		   double *c2,
-		   const double *r,
-		   const double *sigma2,
-		   const double *phi,
-		   const double *tau2R,
-		   const double *b) {
+  void updateDDelta(int *seed,
+		    int *nAccept,
+		    double *Delta,
+		    int *Q,
+		    int *G,
+		    const int *S,
+		    const double *x,
+		    const int *psi,
+		    const double *nu,
+		    const int *delta,
+		    double *c2,
+		    const double *r,
+		    const double *sigma2,
+		    const double *phi,
+		    const double *tau2R,
+		    const double *b) {
     unsigned int seedU = (unsigned int) *seed;
     
-    updateDelta(&seedU,nAccept,Delta,*Q,*G,S,x,psi,nu,delta,*c2,
-		r,sigma2,phi,tau2R,b);
+    updateDDelta(&seedU,nAccept,Delta,*Q,*G,S,x,psi,nu,delta,*c2,
+		 r,sigma2,phi,tau2R,b);
 
     *seed = (int) seedU;
 
@@ -309,5 +309,151 @@ extern "C" {
 
 
 
+  void updatePhi(int *seed,
+		 int *nTry,
+		 int *nAccept,
+		 double *epsilon,
+		 double *phi,
+		 int *Q,
+		 int *G,
+		 const int *S,
+		 const double *x,
+		 const int *psi,
+		 const double *nu,
+		 const int *delta,
+		 const double *Delta,
+		 const double *sigma2,
+		 const double *theta,
+		 const double *lambda) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updatePhi(&seedU,*nTry,nAccept,*epsilon,phi,*Q,*G,S,x,psi,nu,
+		 delta,Delta,sigma2,theta,lambda);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+
+  void updateTheta(int *seed,
+		   int *nTry,
+		   int *nAccept,
+		   double *epsilon,
+		   double *theta,
+		   int *Q,
+		   int *G,
+		   const double *phi,
+		   const double *lambda) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateTheta(&seedU,*nTry,nAccept,*epsilon,theta,*Q,*G,phi,lambda);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+  
+  void updateLambda(int *seed,
+		    int *nTry,
+		    int *nAccept,
+		    double *epsilon,
+		    double *lambda,
+		    int *Q,
+		    int *G,
+		    const double *phi,
+		    const double *theta) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateLambda(&seedU,*nTry,nAccept,*epsilon,lambda,*Q,*G,phi,theta);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+
+  void updateT(int *seed,
+	       int *nTry,
+	       int *nAccept,
+	       double *epsilon,
+	       double *t,
+	       int *Q,
+	       int *G,
+	       const double *sigma2,
+	       const double *l) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateT(&seedU,*nTry,nAccept,*epsilon,t,*Q,*G,sigma2,l);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+  
+  void updateL(int *seed,
+	       int *nTry,
+	       int *nAccept,
+	       double *epsilon,
+	       double *l,
+	       int *Q,
+	       int *G,
+	       const double *sigma2,
+	       const double *t) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateT(&seedU,*nTry,nAccept,*epsilon,l,*Q,*G,sigma2,t);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+  
+  void updateXi(int *seed,
+		int *nAccept,
+		double *xi,
+		int *Q,
+		int *G,
+		const int *delta,
+		double alphaXi,
+		double betaXi) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateXi(&seedU,nAccept,xi,*Q,*G,delta,alphaXi,betaXi);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+  
+  void updateXi_onedelta(int *seed,
+			 int *nAccept,
+			 double *xi,
+			 int *Q,
+			 int *G,
+			 const int *delta,
+			 double alphaXi,
+			 double betaXi) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    updateXi_onedelta(&seedU,nAccept,xi,*Q,*G,delta,alphaXi,betaXi);
+
+    *seed = (int) seedU;
+
+    return;
+  }
+
+
+  
 } // extern "C"
     

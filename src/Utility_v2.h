@@ -194,6 +194,103 @@ inline double nuGibbs(double *nu,int Q,int G,const int *S,double gamma2,
   
 
 
+inline double DeltaGibbs(int g,double *Delta,int Q,int G,const int *S,double c2,
+			 const double *tau2R,const double *b,const double *r,
+			 const double *sigma2,const double *phi,
+			 const int *psi,const double *x,
+			 const int *delta,const double *nu,Random &ran) {
+  double pot = 0.0;
+  
+  //
+  // compute prior covariance matrix
+  //
+  
+  int dim = 0;
+  std::vector<int> on(Q,0);
+  int q;
+  for (q = 0; q < Q; q++) {
+    int index = qg2index(q,g,Q,G);
+    if (delta[index] == 1) {
+      on[q] = 1;
+      dim++;
+    }
+  }
+  
+  if (dim > 0) {
+    std::vector<std::vector<double> > var;
+    makeSigma(var,on,Q,c2,tau2R,b,sigma2 + g * Q,r);
+    
+    //
+    // define prior mean
+    //
+    
+    std::vector<double> Mean(dim,0.0);
+    
+    //
+    // compute extra linear and quadratic terms
+    //
+    
+    std::vector<double> mean(dim,0.0);
+    
+    std::vector<double> lin(dim,0.0);
+    std::vector<double> quad(dim,0.0);
+    int s;
+    int k = 0;
+    for (q = 0; q < Q; q++) {
+      if (on[q] == 1) {
+	int kqg = qg2index(q,g,Q,G);
+	double var0 = sigma2[kqg] * phi[kqg];
+	double var1 = sigma2[kqg] / phi[kqg];
+	int s;
+	for (s = 0; s < S[q]; s++)
+	  {
+	    int ksq = sq2index(s,q,S,Q);
+	    double variance = psi[ksq] == 0 ? var0 : var1;
+	    quad[k] += 1.0 / variance;
+	    int xIndex = sqg2index(s,q,g,S,Q,G);
+	    lin[k] += (2.0 * psi[ksq] - 1.0) * (x[xIndex] - nu[kqg]) / variance;
+	  }
+	k++;
+      }
+    }
+    
+    //
+    // Update parameters based on available observations 
+    //
+    
+    std::vector<std::vector<double> > varInv;
+    double detPrior = inverse(var,varInv);
+    for (k = 0; k < dim; k++) {
+      Mean[k] += lin[k];
+      varInv[k][k] += quad[k];
+    }
+    double detPosterior = 1.0 / inverse(varInv,var);
+    matrixMult(var,Mean,mean);
+    
+    //
+    // Draw new values
+    //
+    
+    std::vector<double> vv(dim);
+    vv = ran.MultiGaussian(var,mean);
+    k = 0;
+    for (q = 0; q < Q; q++) {
+      if (on[q] == 1) {
+	int index = qg2index(q,g,Q,G);
+	Delta[index] = vv[k];
+	k++;
+      }
+    }
+    
+    pot += 0.5 * log(detPrior) - 0.5 * log(detPosterior);
+    pot += - 0.5 * quadratic(varInv,mean);
+  }
+  
+  return pot;
+}
+  
+
+
 inline double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
 			 const double *tau2R,const double *b,const double *r,
 			 const double *sigma2,const double *phi,
@@ -202,93 +299,9 @@ inline double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
   double pot = 0.0;
   
   int g;
-  for (g = 0; g < G; g++) {
-    //
-    // compute prior covariance matrix
-    //
-
-    int dim = 0;
-    std::vector<int> on(Q,0);
-    int q;
-    for (q = 0; q < Q; q++) {
-      int index = qg2index(q,g,Q,G);
-      if (delta[index] == 1) {
-	on[q] = 1;
-	dim++;
-      }
-    }
-
-    if (dim > 0) {
-      std::vector<std::vector<double> > var;
-      makeSigma(var,on,Q,c2,tau2R,b,sigma2 + g * Q,r);
-      
-      //
-      // define prior mean
-      //
-      
-      std::vector<double> Mean(dim,0.0);
-
-      //
-      // compute extra linear and quadratic terms
-      //
-      
-      std::vector<double> mean(dim,0.0);
-      
-      std::vector<double> lin(dim,0.0);
-      std::vector<double> quad(dim,0.0);
-      int s;
-      int k = 0;
-      for (q = 0; q < Q; q++) {
-	if (on[q] == 1) {
-	  int kqg = qg2index(q,g,Q,G);
-	  double var0 = sigma2[kqg] * phi[kqg];
-	  double var1 = sigma2[kqg] / phi[kqg];
-	  int s;
-	  for (s = 0; s < S[q]; s++)
-	    {
-	      int ksq = sq2index(s,q,S,Q);
-	      double variance = psi[ksq] == 0 ? var0 : var1;
-	      quad[k] += 1.0 / variance;
-	      int xIndex = sqg2index(s,q,g,S,Q,G);
-	      lin[k] += (2.0 * psi[ksq] - 1.0) * (x[xIndex] - nu[kqg]) / variance;
-	    }
-	  k++;
-	}
-      }
-      
-      //
-      // Update parameters based on available observations 
-      //
-      
-      std::vector<std::vector<double> > varInv;
-      double detPrior = inverse(var,varInv);
-      for (k = 0; k < dim; k++) {
-	Mean[k] += lin[k];
-	varInv[k][k] += quad[k];
-      }
-      double detPosterior = 1.0 / inverse(varInv,var);
-      matrixMult(var,Mean,mean);
-      
-      //
-      // Draw new values
-      //
-      
-      std::vector<double> vv(dim);
-      vv = ran.MultiGaussian(var,mean);
-      k = 0;
-      for (q = 0; q < Q; q++) {
-	if (on[q] == 1) {
-	  int index = qg2index(q,g,Q,G);
-	  Delta[index] = vv[k];
-	  k++;
-	}
-      }
-      
-      pot += 0.5 * log(detPrior) - 0.5 * log(detPosterior);
-      pot += - 0.5 * quadratic(varInv,mean);
-    }
-  }
-
+  for (g = 0; g < G; g++)
+    pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,phi,psi,x,delta,nu,ran);
+  
   return pot;
 }
   
