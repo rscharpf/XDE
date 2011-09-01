@@ -770,7 +770,7 @@ void updateC2DDelta(unsigned int *seed,
     double lower = 1.0 / upper;
     
     double u = lower + (upper - lower) * ran.Unif01();
-    double oldValue = *c2;
+    double oldValue = *c2;	// 
     double newValue = oldValue * u;
 
     if (newValue > c2Max) return;
@@ -2898,6 +2898,640 @@ void updateThetaPhi(unsigned int *seed,
   return;
 }
 
+
+
+
+
+
+void updateDeltaDDelta_MRF1_onedelta(unsigned int *seed,
+				     int nTry,
+				     int *nAccept,
+				     int *delta,
+				     double *Delta,
+				     int Q,
+				     int G,
+				     const int *S,
+				     const double *x,
+				     const int *psi,
+				     const double *nu,
+				     double c2,
+				     const double *r,
+				     const double *sigma2,
+				     const double *phi,
+				     const double *tau2R,
+				     const double *b,
+				     const vector<vector<int> > &neighbour,
+				     double eta0,
+				     double omega0,
+				     double kappa) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    double pot = 0.0;
+
+    int g = (int) (ran.Unif01() * G);
+    
+    int nOn = 0;
+    int q;
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      nOn += delta[kqg];
+    }
+    if (nOn != 0 && nOn != Q) {
+      cout << "Error found in function \"updateDeltaDDelta_MRF1_onedelta\":" << 
+	endl;
+      cout << "All delta's for any gene must be equal." << endl;
+      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
+	endl;
+      cout << "Aborting." << endl;
+      exit(-1);
+    }
+    
+    int kqg = qg2index(0,g,Q,G);
+    int oldDelta = delta[kqg];
+    int newDelta = 1 - oldDelta;
+	  
+    //
+    // propose new values for Delta from full conditionals
+    //
+    
+    double *newDDelta = (double *) calloc(Q * G,sizeof(double));
+
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = newDelta;
+    }
+    pot -= DeltaGibbs(g,newDDelta,Q,G,S,c2,tau2R,b,r,sigma2,
+		      phi,psi,x,delta,nu,ran,1);
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = oldDelta;
+    }
+    pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
+		      phi,psi,x,delta,nu,ran,1);
+    
+
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = oldDelta;
+    }
+    pot -= potentialDelta_MRF1_onedelta(Q,G,delta,neighbour,eta0,omega0,kappa);
+    pot -= potentialDDeltag(g,Q,G,delta,Delta,c2,b,r,tau2R,sigma2);
+    pot -= potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
+
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = newDelta;
+    }
+    pot += potentialDelta_MRF1_onedelta(Q,G,delta,neighbour,eta0,omega0,kappa);
+    pot += potentialDDeltag(g,Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
+    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);    
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = oldDelta;
+    }
+
+    if (ran.Unif01() <= exp(- pot)) {
+      for (q = 0; q < Q; q++) {
+	int kqg = qg2index(q,g,Q,G);
+	delta[kqg] = newDelta;
+	if (newDelta == 1)
+	  Delta[kqg] = newDDelta[kqg];
+      }	
+      
+      (*nAccept)++;
+    }
+    
+    free(newDDelta);
+  }
+  
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+void updateDeltaDDelta_MRF2_onedelta(unsigned int *seed,
+				     int nTry,
+				     int *nAccept,
+				     int *delta,
+				     double *Delta,
+				     int Q,
+				     int G,
+				     const int *S,
+				     const double *x,
+				     const int *psi,
+				     const double *nu,
+				     double c2,
+				     const double *r,
+				     const double *sigma2,
+				     const double *phi,
+				     const double *tau2R,
+				     const double *b,
+				     const vector<vector<int> > &neighbour,
+				     double alpha,
+				     double beta) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    double pot = 0.0;
+
+    int g = (int) (ran.Unif01() * G);
+    
+    int nOn = 0;
+    int q;
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      nOn += delta[kqg];
+    }
+    if (nOn != 0 && nOn != Q) {
+      cout << "Error found in function \"updateDeltaDDelta_MRF2_onedelta\":" << 
+	endl;
+      cout << "All delta's for any gene must be equal." << endl;
+      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
+	endl;
+      cout << "Aborting." << endl;
+      exit(-1);
+    }
+    
+    int kqg = qg2index(0,g,Q,G);
+    int oldDelta = delta[kqg];
+    int newDelta = 1 - oldDelta;
+	  
+    //
+    // propose new values for Delta from full conditionals
+    //
+    
+    double *newDDelta = (double *) calloc(Q * G,sizeof(double));
+
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = newDelta;
+    }
+    pot -= DeltaGibbs(g,newDDelta,Q,G,S,c2,tau2R,b,r,sigma2,
+		      phi,psi,x,delta,nu,ran,1);
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = oldDelta;
+    }
+    pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
+		      phi,psi,x,delta,nu,ran,1);
+    
+
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = oldDelta;
+    }
+    pot -= potentialDelta_MRF2_onedelta(Q,G,delta,neighbour,alpha,beta);
+    pot -= potentialDDeltag(g,Q,G,delta,Delta,c2,b,r,tau2R,sigma2);
+    pot -= potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
+
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = newDelta;
+    }
+    pot += potentialDelta_MRF2_onedelta(Q,G,delta,neighbour,alpha,beta);
+    pot += potentialDDeltag(g,Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
+    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);    
+    for (q = 0; q < Q; q++) {
+      int kqg = qg2index(q,g,Q,G);
+      delta[kqg] = oldDelta;
+    }
+
+    if (ran.Unif01() <= exp(- pot)) {
+      for (q = 0; q < Q; q++) {
+	int kqg = qg2index(q,g,Q,G);
+	delta[kqg] = newDelta;
+	if (newDelta == 1)
+	  Delta[kqg] = newDDelta[kqg];
+      }	
+      
+      (*nAccept)++;
+    }
+    
+    free(newDDelta);
+  }
+  
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+void updateDeltaDDelta_MRF2(unsigned int *seed,
+			    int nTry,
+			    int *nAccept,
+			    int *delta,
+			    double *Delta,
+			    int Q,
+			    int G,
+			    const int *S,
+			    const double *x,
+			    const int *psi,
+			    const double *nu,
+			    double c2,
+			    const double *r,
+			    const double *sigma2,
+			    const double *phi,
+			    const double *tau2R,
+			    const double *b,
+			    const vector<vector<int> > &neighbour,
+			    double alpha,
+			    double beta,
+			    double betag) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    double pot = 0.0;
+
+    int q = (int) (ran.Unif01() * Q);
+    int g = (int) (ran.Unif01() * G);
+    
+    int kqg = qg2index(q,g,Q,G);
+    int oldDelta = delta[kqg];
+    int newDelta = 1 - oldDelta;
+	  
+    //
+    // propose new values for Delta from full conditionals
+    //
+    
+    double *newDDelta = (double *) calloc(Q * G,sizeof(double));
+
+    delta[kqg] = newDelta;
+    pot -= DeltaGibbs(g,newDDelta,Q,G,S,c2,tau2R,b,r,sigma2,
+		      phi,psi,x,delta,nu,ran,1);
+    
+    delta[kqg] = oldDelta;
+    pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
+		      phi,psi,x,delta,nu,ran,1);
+    
+
+    delta[kqg] = oldDelta;
+    pot -= potentialDelta_MRF2(Q,G,delta,neighbour,alpha,beta,betag);
+    pot -= potentialDDeltag(g,Q,G,delta,Delta,c2,b,r,tau2R,sigma2);
+    pot -= potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
+
+    delta[kqg] = newDelta;
+    pot += potentialDelta_MRF2(Q,G,delta,neighbour,alpha,beta,betag);
+    pot += potentialDDeltag(g,Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
+    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);    
+    delta[kqg] = oldDelta;
+    
+    
+    if (ran.Unif01() <= exp(- pot)) {
+      delta[kqg] = newDelta;
+      for (q = 0; q < Q; q++) {
+	int kqg = qg2index(q,g,Q,G);
+	if (delta[kqg] == 1)
+	  Delta[kqg] = newDDelta[kqg];
+      }	
+      
+      (*nAccept)++;
+    }
+    
+    free(newDDelta);
+  }
+  
+  *seed = ran.ChangeSeed(*seed);
+  
+  return;
+}
+
+
+
+
+
+void updateEta0Omega0Kappa_MRF1_onedelta(unsigned int *seed,
+					 int nTry,
+					 int *nAccept,
+					 double epsilonEta0,
+					 double epsilonOmega0,
+					 double epsilonKappa,
+					 double *eta0,
+					 double *omega0,
+					 double *kappa,
+					 int Q,
+					 int G,
+					 const int *delta,
+					 const vector<vector<int> > &neighbour,
+					 double alphaEta,
+					 double betaEta,
+					 double pOmega0,
+					 double lambdaOmega,
+					 double lambdaKappa) {
+  Random ran(*seed);
+
+  int k;
+  for (k = 0; k < nTry; k++) {
+    double pot = 0.0;
+
+    //
+    // propose new value(s)
+    //
+
+    double oldEta0 = *eta0;
+    double newEta0 = *eta0;
+    if (epsilonEta0 > 0.0) {
+      double upper = oldEta0 + epsilonEta0;
+      double lower = oldEta0 - epsilonEta0;
+      if (upper > 1.0) upper = 1.0;
+      if (lower < 0.0) lower = 0.0;
+      newEta0 = lower + (upper - lower) * ran.Unif01();
+      pot -= - log(1.0 / (upper - lower));
+
+      upper = newEta0 + epsilonEta0;
+      lower = newEta0 - epsilonEta0;
+      if (upper > 1.0) upper = 1.0;
+      if (lower < 0.0) lower = 0.0;
+      pot += - log(1.0 / (upper - lower));
+    }
+
+    double oldOmega0 = *omega0;
+    double newOmega0 = *omega0;
+    if (epsilonOmega0 > 0.0) {
+      if (oldOmega0 == 0.0) {
+	double upper = epsilonOmega0;
+	double lower = 0.0;
+	newOmega0 = lower + (upper - lower) * ran.Unif01();
+	pot -= - log(1.0 / (upper - lower));
+
+	double prob0 = - (newOmega0 - epsilonOmega0);
+	pot += - log(prob0);
+      }
+      else {
+	double prob0 = - (oldOmega0 - epsilonOmega0);
+	if (prob0 < 0.0) prob0 = 0.0;
+	double upper = oldOmega0 + epsilonOmega0;
+	double lower = oldOmega0 - epsilonOmega0;
+	if (lower < 0.0) lower = 0.0;
+	double u = ran.Unif01();
+	if (u < prob0) {
+	  newOmega0 = 0.0;
+	  pot -= - log(prob0);
+	  double upper = epsilonOmega0;
+	  double lower = 0.0;
+	  pot += - log(1.0 / (upper - lower));
+	}
+	else {
+	  newOmega0 = lower + (upper - lower) * ran.Unif01();
+	  pot -= - log(1.0 - prob0);
+	  pot -= - log(1.0 / (upper - lower));
+
+	  double prob0 = - (newOmega0 - epsilonOmega0);
+	  if (prob0 < 0.0) prob0 = 0.0;
+	  double upper = newOmega0 + epsilonOmega0;
+	  double lower = newOmega0 - epsilonOmega0;
+	  if (lower < 0.0) lower = 0.0;
+	  pot += - log(1.0 - prob0);
+	  pot += - log(1.0 / (upper - lower));
+	}
+      }
+    }
+
+    double oldKappa = *kappa;
+    double newKappa = *kappa;
+    if (epsilonKappa > 0.0) {
+      double upper = oldKappa + epsilonKappa;
+      double lower = oldKappa - epsilonKappa;
+      if (lower < 0.0) lower = 0.0;
+      newKappa = lower + (upper - lower) * ran.Unif01();
+      pot -= - log(1.0 / (upper - lower));
+
+      upper = newKappa + epsilonKappa;
+      lower = newKappa - epsilonKappa;
+      if (lower < 0.0) lower = 0.0;
+      pot += - log(1.0 / (upper - lower));
+    }
+
+
+    cout << "eta0: " << newEta0 << ", omega0: " << newOmega0 << ", kappa: " << newKappa << endl;
+    int *dd = (int *) calloc(G,sizeof(int));
+    vector<double> potZero(G,0.0);
+    unsigned int dummy = 1;
+    unsigned int seedPerfect = ran.ChangeSeed(dummy);
+    perfectMRF1_onedelta(dd,G,neighbour,potZero,potZero,newEta0,newOmega0,
+			 newKappa,&seedPerfect,1);
+    ran.ChangeSeed(seedPerfect);
+    int *deltaTemp = (int *) calloc(Q * G,sizeof(int));
+    int q,g;
+    for (g = 0; g < G; g++)
+      for (q = 0; q < Q; q++) {
+	int kqg = qg2index(q,g,Q,G);
+	deltaTemp[kqg] = dd[g];
+      }
+
+
+    pot -= potentialEta0(oldEta0,alphaEta,betaEta);
+    pot -= potentialOmega0(oldOmega0,pOmega0,lambdaOmega);
+    pot -= potentialKappa(oldKappa,lambdaKappa);
+    pot -= potentialDelta_MRF1_onedelta(Q,G,delta,neighbour,oldEta0,
+					oldOmega0,oldKappa);
+    pot -= potentialDelta_MRF1_onedelta(Q,G,deltaTemp,neighbour,newEta0,
+					newOmega0,newKappa);
+
+    pot += potentialEta0(newEta0,alphaEta,betaEta);
+    pot += potentialOmega0(newOmega0,pOmega0,lambdaOmega);
+    pot += potentialKappa(newKappa,lambdaKappa);
+    pot += potentialDelta_MRF1_onedelta(Q,G,delta,neighbour,newEta0,
+					newOmega0,newKappa);
+    pot += potentialDelta_MRF1_onedelta(Q,G,deltaTemp,neighbour,oldEta0,
+					oldOmega0,oldKappa);
+
+    free(dd);
+    free(deltaTemp);
+
+    if (ran.Unif01() < exp(- pot)) {
+      *eta0 = newEta0;
+      *omega0 = newOmega0;
+      *kappa = newKappa;
+
+      (*nAccept)++;
+    }
+  }
+
+  *seed = ran.ChangeSeed(*seed);
+
+  return;
+}
+
+
+
+
+
+void updateAlphaBeta_MRF2_onedelta(unsigned int *seed,
+				   int nTry,
+				   int *nAccept,
+				   double epsilonAlpha,
+				   double epsilonBeta,
+				   double *alpha,
+				   double *beta,
+				   int Q,
+				   int G,
+				   const int *delta,
+				   const vector<vector<int> > &neighbour) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    double pot = 0.0;
+    
+    //
+    // propose new value(s)
+    //
+    
+    double oldAlpha = *alpha;
+    double newAlpha = *alpha;
+    if (epsilonAlpha > 0.0) {
+      newAlpha += epsilonAlpha * ran.Norm01();
+    }
+
+    double oldBeta = *beta;
+    double newBeta = *beta;
+    if (epsilonBeta > 0.0) {
+      newBeta += epsilonBeta * ran.Norm01();
+      if (newBeta < 0.0) return;
+    }
+
+
+
+    cout << "alpha: " << newAlpha << ", beta: " << newBeta << endl;
+    int *dd = (int *) calloc(G,sizeof(int));
+    vector<double> potZero(G,0.0);
+    unsigned int dummy = 1;
+    unsigned int seedPerfect = ran.ChangeSeed(dummy);
+    perfectMRF2_onedelta(dd,G,neighbour,potZero,potZero,newAlpha,newBeta,
+			 &seedPerfect,1);
+    ran.ChangeSeed(seedPerfect);
+    int *deltaTemp = (int *) calloc(Q * G,sizeof(int));
+    int q,g;
+    for (g = 0; g < G; g++)
+      for (q = 0; q < Q; q++) {
+	int kqg = qg2index(q,g,Q,G);
+	deltaTemp[kqg] = dd[g];
+      }
+    
+    
+    pot -= potentialAlpha();
+    pot -= potentialBeta();
+    pot -= potentialDelta_MRF2_onedelta(Q,G,delta,neighbour,oldAlpha,oldBeta);
+    pot -= potentialDelta_MRF2_onedelta(Q,G,deltaTemp,neighbour,newAlpha,newBeta);
+
+    pot += potentialAlpha();
+    pot += potentialBeta();
+    pot += potentialDelta_MRF2_onedelta(Q,G,delta,neighbour,newAlpha,newBeta);
+    pot += potentialDelta_MRF2_onedelta(Q,G,deltaTemp,neighbour,oldAlpha,oldBeta);
+
+    free(dd);
+    free(deltaTemp);
+
+    if (ran.Unif01() < exp(- pot)) {
+      *alpha = newAlpha;
+      *beta = newBeta;
+
+      (*nAccept)++;
+    }
+  }
+
+  *seed = ran.ChangeSeed(*seed);
+
+  return;
+}
+
+
+
+
+
+void updateAlphaBetaBetag_MRF2(unsigned int *seed,
+			       int nTry,
+			       int *nAccept,
+			       double epsilonAlpha,
+			       double epsilonBeta,
+			       double epsilonBetag,
+			       double *alpha,
+			       double *beta,
+			       double *betag,
+			       int Q,
+			       int G,
+			       const int *delta,
+			       const vector<vector<int> > &neighbour) {
+  Random ran(*seed);
+  
+  int k;
+  for (k = 0; k < nTry; k++) {
+    double pot = 0.0;
+    
+    //
+    // propose new value(s)
+    //
+    
+    double oldAlpha = *alpha;
+    double newAlpha = *alpha;
+    if (epsilonAlpha > 0.0) {
+      newAlpha += epsilonAlpha * ran.Norm01();
+    }
+    
+    double oldBeta = *beta;
+    double newBeta = *beta;
+    if (epsilonBeta > 0.0) {
+      newBeta += epsilonBeta * ran.Norm01();
+      if (newBeta < 0.0) return;
+    }
+
+
+    double oldBetag = *betag;
+    double newBetag = *betag;
+    if (epsilonBetag > 0.0) {
+      newBetag += epsilonBetag * ran.Norm01();
+      if (newBetag < 0.0) return;
+    }
+
+
+    cout << "alpha: " << newAlpha << ", beta: " << newBeta << ", betag: " <<
+      newBetag << endl;
+    int *dd = (int *) calloc(Q * G,sizeof(int));
+    vector<double> potZero(Q * G,0.0);
+    unsigned int dummy = 1;
+    unsigned int seedPerfect = ran.ChangeSeed(dummy);
+    perfectMRF2(dd,Q,G,neighbour,potZero,potZero,newAlpha,newBeta,
+		newBetag,&seedPerfect,1);
+    ran.ChangeSeed(seedPerfect);
+    
+    pot -= potentialAlpha();
+    pot -= potentialBeta();
+    pot -= potentialBetag();
+    pot -= potentialDelta_MRF2(Q,G,delta,neighbour,oldAlpha,oldBeta,oldBetag);
+    pot -= potentialDelta_MRF2(Q,G,dd,neighbour,newAlpha,newBeta,newBetag);
+    
+    pot += potentialAlpha();
+    pot += potentialBeta();
+    pot += potentialBetag();
+    pot += potentialDelta_MRF2(Q,G,delta,neighbour,newAlpha,newBeta,newBetag);
+    pot += potentialDelta_MRF2(Q,G,dd,neighbour,oldAlpha,oldBeta,oldBetag);
+
+    free(dd);
+
+    if (ran.Unif01() < exp(- pot)) {
+      *alpha = newAlpha;
+      *beta = newBeta;
+      *betag = newBetag;
+
+      (*nAccept)++;
+    }
+  }
+
+  *seed = ran.ChangeSeed(*seed);
+
+  return;
+}
 
 
 

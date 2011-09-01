@@ -555,4 +555,127 @@ void updateThetaPhi(unsigned int *seed,
 		    const double *Delta,
 		    const double *sigma2,
 		    const double *lambda);
+
+
+
+void updateDeltaDDelta_MRF1_onedelta(unsigned int *seed,
+				     int nTry,
+				     int *nAccept,
+				     int *delta,
+				     double *Delta,
+				     int Q,
+				     int G,
+				     const int *S,
+				     const double *x,
+				     const int *psi,
+				     const double *nu,
+				     double c2,
+				     const double *r,
+				     const double *sigma2,
+				     const double *phi,
+				     const double *tau2R,
+				     const double *b,
+				     const vector<vector<int> > &neighbour,
+				     double eta0,
+				     double omega0,
+				     double kappa);
+
+
+
+void updateDeltaDDelta_MRF2_onedelta(unsigned int *seed,
+				     int nTry,
+				     int *nAccept,
+				     int *delta,
+				     double *Delta,
+				     int Q,
+				     int G,
+				     const int *S,
+				     const double *x,
+				     const int *psi,
+				     const double *nu,
+				     double c2,
+				     const double *r,
+				     const double *sigma2,
+				     const double *phi,
+				     const double *tau2R,
+				     const double *b,
+				     const vector<vector<int> > &neighbour,
+				     double alpha,
+				     double beta);
+
+
+
+void updateDeltaDDelta_MRF2(unsigned int *seed,
+			    int nTry,
+			    int *nAccept,
+			    int *delta,
+			    double *Delta,
+			    int Q,
+			    int G,
+			    const int *S,
+			    const double *x,
+			    const int *psi,
+			    const double *nu,
+			    double c2,
+			    const double *r,
+			    const double *sigma2,
+			    const double *phi,
+			    const double *tau2R,
+			    const double *b,
+			    const vector<vector<int> > &neighbour,
+			    double alpha,
+			    double beta,
+			    double betag);
+
+
+
+
+void updateEta0Omega0Kappa_MRF1_onedelta(unsigned int *seed,
+					 int nTry,
+					 int *nAccept,
+					 double epsilonEta0,
+					 double epsilonOmega0,
+					 double epsilonKappa,
+					 double *eta0,
+					 double *omega0,
+					 double *kappa,
+					 int Q,
+					 int G,
+					 const int *delta,
+					 const vector<vector<int> > &neighbour,
+					 double alphaEta,
+					 double betaEta,
+					 double pOmega0,
+					 double lambdaOmega,
+					 double lambdaKappa);
+
+
+void updateAlphaBeta_MRF2_onedelta(unsigned int *seed,
+				   int nTry,
+				   int *nAccept,
+				   double epsilonAlpha,
+				   double epsilonBeta,
+				   double *alpha,
+				   double *beta,
+				   int Q,
+				   int G,
+				   const int *delta,
+				   const vector<vector<int> > &neighbour);
+
+
+void updateAlphaBetaBetag_MRF2(unsigned int *seed,
+			       int nTry,
+			       int *nAccept,
+			       double epsilonAlpha,
+			       double epsilonBeta,
+			       double epsilonBetag,
+			       double *alpha,
+			       double *beta,
+			       double *betag,
+			       int Q,
+			       int G,
+			       const int *delta,
+			       const vector<vector<int> > &neighbour);
+
+
 #endif

@@ -48,4 +48,56 @@ double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
 		  const int *psi,const double *x,
 		  const int *delta,const double *nu,Random &ran,int draw);
 
+
+
+void updateMRF1perfect_onedelta(int g,vector<int> &valueLower,
+				vector<int> &valueUpper,
+				const vector<double> &potOn,
+				const vector<double> &potOff,
+				const vector<vector<int> > &neighbour,
+				double eta0,double omega0,double kappa,
+				Random &ran);
+
+
+double perfectMRF1_onedelta(int *delta,int G,
+			    const vector<vector<int> > &neighbour,
+			    const vector<double> &potOn,
+			    const vector<double> &potOff,
+			    double eta0,double omega0,double kappa,
+			    unsigned int *seed,int draw);
+
+
+void updateMRF2perfect_onedelta(int g,vector<int> &valueLower,
+				vector<int> &valueUpper,
+				const vector<double> &potOn,
+				const vector<double> &potOff,
+				const vector<vector<int> > &neighbour,
+				double alpha,double beta,Random &ran);
+
+
+
+double perfectMRF2_onedelta(int *delta,int G,
+			    const vector<vector<int> > &neighbour,
+			    const vector<double> &potOn,
+			    const vector<double> &potOff,
+			    double alpha,double beta,
+			    unsigned int *seed,int draw);
+
+
+void updateMRF2perfect(int q,int g,int Q,int G,vector<int> &valueLower,
+		       vector<int> &valueUpper,const vector<double> &potOn,
+		       const vector<double> &potOff,
+		       const vector<vector<int> > &neighbour,
+		       double alpha,double beta,double betag,
+		       Random &ran);
+
+
+double perfectMRF2(int *delta,int Q,int G,
+		   const vector<vector<int> > &neighbour,
+		   const vector<double> &potOn,
+		   const vector<double> &potOff,
+		   double alpha,double beta,
+		   double betag,unsigned int *seed,int draw);
+
+
 #endif
