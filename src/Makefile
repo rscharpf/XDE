@@ -9,7 +9,7 @@ all:	$(BIN)/xdeTest Rinterface_v2.o
 
 
 Rinterface_v2.o:	Rinterface_v2.cpp Update_v2.h
-			R CMD SHLIB -o Rinterface_v2.so Rinterface_v2.cpp
+			$(R_HOME)/bin/R CMD SHLIB -o Rinterface_v2.so Rinterface_v2.cpp
 
 $(BIN)/xdeTest:		mainTest_v2.o Update_v2.o Potential_v2.o \
 			Utility_v2.o Random.o Cholesky.o Matrix.o
