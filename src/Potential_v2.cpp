@@ -591,3 +591,136 @@ double potentialLambda(void) {
   return 0.0;
 }
 
+
+
+double potentialDelta_MRF1_onedelta(int Q,
+				    int G,
+				    const int *delta,
+				    const vector<vector<int> > &neighbour,
+				    double eta0,
+				    double omega0,
+				    double kappa) {
+  int *dd = (int *) calloc(G,sizeof(int));
+  int g;
+  for (g = 0; g < G; g++) {
+    int kqg = qg2index(0,g,Q,G);
+    dd[g] = delta[kqg];
+  }
+  vector<double> potMarg(G,0);
+
+  unsigned int dummy = 1;
+  double pot = perfectMRF1_onedelta(dd,G,neighbour,potMarg,potMarg,
+				    eta0,omega0,kappa,&dummy,0);
+  free(dd);
+
+  return pot;
+}
+
+
+
+double potentialDelta_MRF2_onedelta(int Q,
+				    int G,
+				    const int *delta,
+				    const vector<vector<int> > &neighbour,
+				    double alpha,
+				    double beta) {
+  int *dd = (int *) calloc(G,sizeof(int));
+  int g;
+  for (g = 0; g < G; g++) {
+    int kqg = qg2index(0,g,Q,G);
+    dd[g] = delta[kqg];
+  }
+  vector<double> potMarg(G,0);
+
+  unsigned int dummy = 1;
+  double pot = perfectMRF2_onedelta(dd,G,neighbour,potMarg,potMarg,
+				    alpha,beta,&dummy,0);
+  free(dd);
+
+  return pot;
+}
+
+
+
+double potentialDelta_MRF2(int Q,
+			   int G,
+			   const int *delta,
+			   const vector<vector<int> > &neighbour,
+			   double alpha,
+			   double beta,
+			   double betag) {
+  vector<double> potMarg(Q * G,0);
+
+  int *dd = (int *) calloc(Q * G,sizeof(int));
+  int k;
+  for (k = 0; k < Q * G; k++)
+    dd[k] = delta[k];
+
+  unsigned int dummy = 1;
+  double pot = perfectMRF2(dd,Q,G,neighbour,potMarg,potMarg,
+			   alpha,beta,betag,&dummy,0);
+
+  free(dd);
+
+  return pot;
+}
+
+
+
+double potentialEta0(double eta0,double alphaEta,double betaEta) {
+  double pot = 0.0;
+
+  unsigned int seed = 1;
+  Random ran(seed);
+
+  pot += ran.PotentialBeta(alphaEta,betaEta,eta0);
+
+  return pot;
+}
+
+
+
+
+double potentialOmega0(double omega0,double pOmega0,double lambdaOmega) {
+  double pot = 0.0;
+  
+  if (omega0 = 0.0)
+    pot += - log(pOmega0);
+  else {
+    pot += - log(1.0 - pOmega0);
+    //    pot += - log(lambdaOmega) + lambdaOmega * omega0;
+  }
+
+  return pot;
+}
+
+
+
+
+double potentialKappa(double kappa,double lambdaKappa) {
+  double pot = 0.0;
+  
+  pot += - log(lambdaKappa) + lambdaKappa * kappa;
+
+  pot = 0.0;
+    
+  return pot;
+}
+
+
+
+
+double potentialAlpha(void) {
+  return 0.0;
+}
+
+
+double potentialBeta(void) {
+  return 0.0;
+}
+
+
+
+double potentialBetag(void) {
+  return 0.0;
+}

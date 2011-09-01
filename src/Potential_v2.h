@@ -225,9 +225,47 @@ double potentialTheta(void);
 double potentialLambda(void);
 
 
+double potentialDelta_MRF1_onedelta(int Q,
+				    int G,
+				    const int *delta,
+				    const vector<vector<int> > &neighbour,
+				    double eta0,
+				    double omega0,
+				    double kappa);
+ 
+
+double potentialDelta_MRF2_onedelta(int Q,
+				    int G,
+				    const int *delta,
+				    const vector<vector<int> > &neighbour,
+				    double alpha,
+				    double beta);
 
 
+double potentialDelta_MRF2(int Q,
+			   int G,
+			   const int *delta,
+			   const vector<vector<int> > &neighbour,
+			   double alpha,
+			   double beta,
+			   double betag);
 
 
+double potentialEta0(double eta0,double alphaEta,double betaEta);
+
+
+double potentialOmega0(double omega0,double pOmega0,double lambdaOmega);
+
+
+double potentialKappa(double kappa,double lambdaKappa);
+
+
+double potentialAlpha(void);
+
+
+double potentialBeta(void);
+
+
+double potentialBetag(void);
 
 #endif

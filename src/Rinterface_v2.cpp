@@ -775,6 +775,301 @@ extern "C" {
     
     return;
   }
+
+
+
+  
+  void updateDeltaDDelta_MRF_onedelta(unsigned int *seed,
+				      const int *nTry,
+				      int *nAccept,
+				      int *delta,
+				      double *Delta,
+				      const int *Q,
+				      const int *G,
+				      const int *S,
+				      const double *x,
+				      const int *psi,
+				      const double *nu,
+				      const double *c2,
+				      const double *r,
+				      const double *sigma2,
+				      const double *phi,
+				      const double *tau2R,
+				      const double *b,
+				      const int *nNeighbour,
+				      const int *neighbour,
+				      const double *alpha,
+				      const double *beta) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    vector<vector<int> > nn;
+    nn.resize(*G);
+    int g;
+    for (g = 0; g < *G; g++) nn[g].resize(0);
+
+    int i;
+    for (i = 0; i < *nNeighbour; i++) {
+      int g1 = neighbour[2 * i];
+      int g2 = neighbour[2 * i + 1];
+      nn[g1].push_back(g2);
+      nn[g2].push_back(g1);
+    }
+    
+    updateDeltaDDelta_MRF2_onedelta(&seedU,*nTry,nAccept,delta,Delta,
+				    *Q,*G,S,x,psi,nu,*c2,r,sigma2,phi,
+				    tau2R,b,nn,*alpha,*beta);
+    
+    *seed = (int) seedU;
+    
+    return;
+  }
+
+
+
+  
+  void updateDeltaDDelta_MRF(unsigned int *seed,
+			     const int *nTry,
+			     int *nAccept,
+			     int *delta,
+			     double *Delta,
+			     const int *Q,
+			     const int *G,
+			     const int *S,
+			     const double *x,
+			     const int *psi,
+			     const double *nu,
+			     const double *c2,
+			     const double *r,
+			     const double *sigma2,
+			     const double *phi,
+			     const double *tau2R,
+			     const double *b,
+			     const int *nNeighbour,
+			     const int *neighbour,
+			     const double *alpha,
+			     const double *beta,
+			     const double *betag) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    vector<vector<int> > nn;
+    nn.resize(*G);
+    int g;
+    for (g = 0; g < *G; g++) nn[g].resize(0);
+
+    int i;
+    for (i = 0; i < *nNeighbour; i++) {
+      int g1 = neighbour[2 * i];
+      int g2 = neighbour[2 * i + 1];
+      nn[g1].push_back(g2);
+      nn[g2].push_back(g1);
+    }
+    
+    updateDeltaDDelta_MRF2(&seedU,*nTry,nAccept,delta,Delta,
+			   *Q,*G,S,x,psi,nu,*c2,r,sigma2,phi,
+			   tau2R,b,nn,*alpha,*beta,*betag);
+    
+    *seed = (int) seedU;
+    
+    return;
+  }
+
+
+
+  void updateAlpha_MRF_onedelta(unsigned int *seed,
+				const int *nTry,
+				int *nAccept,
+				const double *epsilon,
+				double *alpha,
+				const int *Q,
+				const int *G,
+				const int *delta,
+				const int *nNeighbour,
+				const int *neighbour,
+				const double *beta) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    vector<vector<int> > nn;
+    nn.resize(*G);
+    int g;
+    for (g = 0; g < *G; g++) nn[g].resize(0);
+
+    int i;
+    for (i = 0; i < *nNeighbour; i++) {
+      int g1 = neighbour[2 * i];
+      int g2 = neighbour[2 * i + 1];
+      nn[g1].push_back(g2);
+      nn[g2].push_back(g1);
+    }
+    
+    double betaCopy = *beta;
+    updateAlphaBeta_MRF2_onedelta(&seedU,*nTry,nAccept,*epsilon,0.0,alpha,
+				  &betaCopy,*Q,*G,delta,nn);
+    
+    *seed = (int) seedU;
+    
+    return;
+  }
+
+
+
+  
+  void updateBeta_MRF_onedelta(unsigned int *seed,
+			       const int *nTry,
+			       int *nAccept,
+			       const double *epsilon,
+			       double *beta,
+			       const int *Q,
+			       const int *G,
+			       const int *delta,
+			       const int *nNeighbour,
+			       const int *neighbour,
+			       const double *alpha) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    vector<vector<int> > nn;
+    nn.resize(*G);
+    int g;
+    for (g = 0; g < *G; g++) nn[g].resize(0);
+    
+    int i;
+    for (i = 0; i < *nNeighbour; i++) {
+      int g1 = neighbour[2 * i];
+      int g2 = neighbour[2 * i + 1];
+      nn[g1].push_back(g2);
+      nn[g2].push_back(g1);
+    }
+    
+    double alphaCopy = *alpha;
+    updateAlphaBeta_MRF2_onedelta(&seedU,*nTry,nAccept,0.0,*epsilon,&alphaCopy,
+				  beta,*Q,*G,delta,nn);
+    
+    *seed = (int) seedU;
+    
+    return;
+  }
+
+
+
+  
+  void updateAlpha_MRF(unsigned int *seed,
+		       const int *nTry,
+		       int *nAccept,
+		       const double *epsilon,
+		       double *alpha,
+		       const int *Q,
+		       const int *G,
+		       const int *delta,
+		       const int *nNeighbour,
+		       const int *neighbour,
+		       const double *beta,
+		       const double *betag) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    vector<vector<int> > nn;
+    nn.resize(*G);
+    int g;
+    for (g = 0; g < *G; g++) nn[g].resize(0);
+    
+    int i;
+    for (i = 0; i < *nNeighbour; i++) {
+      int g1 = neighbour[2 * i];
+      int g2 = neighbour[2 * i + 1];
+      nn[g1].push_back(g2);
+      nn[g2].push_back(g1);
+    }
+    
+    double betaCopy = *beta;
+    double betagCopy = *betag;
+    updateAlphaBetaBetag_MRF2(&seedU,*nTry,nAccept,*epsilon,0.0,0.0,alpha,
+			      &betaCopy,&betagCopy,*Q,*G,delta,nn);
+    
+    *seed = (int) seedU;
+    
+    return;
+  }
+
+
+
+  
+  void updateBeta_MRF(unsigned int *seed,
+		      const int *nTry,
+		      int *nAccept,
+		      const double *epsilon,
+		      double *beta,
+		      const int *Q,
+		      const int *G,
+		      const int *delta,
+		      const int *nNeighbour,
+		      const int *neighbour,
+		      const double *alpha,
+		      const double *betag) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    vector<vector<int> > nn;
+    nn.resize(*G);
+    int g;
+    for (g = 0; g < *G; g++) nn[g].resize(0);
+    
+    int i;
+    for (i = 0; i < *nNeighbour; i++) {
+      int g1 = neighbour[2 * i];
+      int g2 = neighbour[2 * i + 1];
+      nn[g1].push_back(g2);
+      nn[g2].push_back(g1);
+    }
+    
+    double alphaCopy = *alpha;
+    double betagCopy = *betag;
+    updateAlphaBetaBetag_MRF2(&seedU,*nTry,nAccept,0.0,*epsilon,0.0,&alphaCopy,
+			      beta,&betagCopy,*Q,*G,delta,nn);
+    
+    *seed = (int) seedU;
+    
+    return;
+  }
+
+
+
+  
+  void updateBetag_MRF(unsigned int *seed,
+		       const int *nTry,
+		       int *nAccept,
+		       const double *epsilon,
+		       double *betag,
+		       const int *Q,
+		       const int *G,
+		       const int *delta,
+		       const int *nNeighbour,
+		       const int *neighbour,
+		       const double *alpha,
+		       const double *beta) {
+    unsigned int seedU = (unsigned int) *seed;
+    
+    vector<vector<int> > nn;
+    nn.resize(*G);
+    int g;
+    for (g = 0; g < *G; g++) nn[g].resize(0);
+    
+    int i;
+    for (i = 0; i < *nNeighbour; i++) {
+      int g1 = neighbour[2 * i];
+      int g2 = neighbour[2 * i + 1];
+      nn[g1].push_back(g2);
+      nn[g2].push_back(g1);
+    }
+    
+    double alphaCopy = *alpha;
+    double betaCopy = *beta;
+    updateAlphaBetaBetag_MRF2(&seedU,*nTry,nAccept,0.0,0.0,*epsilon,&alphaCopy,
+			      &betaCopy,betag,*Q,*G,delta,nn);
+    
+    *seed = (int) seedU;
+    
+    return;
+  }
+
+
+
   
 
 } // extern "C"
