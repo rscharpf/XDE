@@ -72,11 +72,11 @@ extern "C" {
     if (CHECKINPUT)
       cout << "seed: " << seed << "\n";
     Random ran(seed);
-    
+
     int Q = *IQ;
     if (CHECKINPUT)
       cout << "Q: " << Q << "\n";
-    
+
     int G = *IG;
     if (CHECKINPUT)
       cout << "G: " << G << "\n";
@@ -111,9 +111,9 @@ extern "C" {
       str.setInitialValues(INu,IDDelta,IA,IB,IC2,IGamma2,IR,IRho,IDelta,
 			   IXi,ISigma2,IT,IL,IPhi,ITheta,ILambda,
 			   ITau2R,ITau2Rho);
-      
+
       PotentialZero potTau2R;
-      
+
       UpdateTau2RhoNuMH update(&str,&potTau2Rho,0.02);
       update.setEpsilon(*Iepsilon);
       update.update(ran);
@@ -121,18 +121,19 @@ extern "C" {
       str.setFinalValues(INu,IDDelta,IA,IB,IC2,IGamma2,IR,IRho,IDelta,
 			 IXi,ISigma2,IT,IL,IPhi,ITheta,ILambda,ITau2R,ITau2Rho);
       break;
-      
+
     case 1: // update for Delta and tau2R
-      
+
       break;
     case 2: // and so on for each update type
+
     }
 
-    
+
     seed = ran.ChangeSeed(seed);
     *Iseed = (int) seed;
 
     return;
   }
-  
+
 } // extern "C"
