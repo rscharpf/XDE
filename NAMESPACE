@@ -1,4 +1,4 @@
-##useDynLib("XDE")
+useDynLib("XDE")
 import(Biobase, methods)
 #MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
 ##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
