@@ -1,8 +1,9 @@
 % \VignetteIndexEntry{XDE Vignette}
-% \VignetteKeywords{microarray, differential expression}
+% \VignetteKeywords{microarray, differential expression, meta-analysis}
 % \VignettePackage{XDE}
 \documentclass{article}
 \usepackage{amsmath}
+\usepackage{inconsolata}
 \usepackage{graphicx}
 \usepackage{natbib}
 \usepackage{hyperref}
@@ -45,7 +46,7 @@
 
 <<echo=FALSE>>=
 options(width=60)
-@ 
+@
 
 \section{Introduction}
 
@@ -70,25 +71,25 @@ cross-study analysis of differential expression are
 \cite{Choi2007}, and \Rpackage{rankProduct} \cite{Hong2006}.
 
 
-After reading this vignette, one should be able to 
+After reading this vignette, one should be able to
 \begin{itemize}
-  
+
 \item create an instance of the class \esetList{}
-    
+
 \item create an instance of the class \xparam{} that contains default
   options for the MCMC
-  
+
 \item fit the Bayesian hierarchical model to two or more studies
   stored as an \esetList{} class
-    
+
 \item plot MCMC chains to assess convergence
-    
+
 \item compute posterior averages for concordant and discordant
   differential expression
-    
+
 \item generate alternative cross-study summaries of differential
   expression
-  
+
 \end{itemize}
 
 See \cite{Scharpf2009} for a more detailed discussion of the Bayesian
@@ -117,7 +118,7 @@ library(XDE)
 data(expressionSetList)
 xlist <- expressionSetList
 class(xlist)
-@ 
+@
 
 The original study is described in \cite{garb:etal:2001}.  The
 processed data was mapped to unigene identifiers and made available in
@@ -131,7 +132,7 @@ the same in each element.
 
 <<validObject, eval=TRUE>>=
 validObject(xlist)
-@ 
+@
 
 In order to assess differential expression across multiple studies,
 one must define a dichotomous covariate in the \Robject{phenoData} of
@@ -144,7 +145,7 @@ following statement must evaluate to \texttt{TRUE}:
 
 <<covariate, eval=TRUE>>=
 all(sapply(xlist, function(x, label){ label %in% varLabels(x)}, label="adenoVsquamous"))
-@ 
+@
 
 
 
@@ -154,20 +155,20 @@ There are many features in our implementation of the hierarchical
 Bayesian model that can be modified:
 
 \begin{itemize}
-  
+
 \item hyperparameters for the Bayesian hierarchical model
 
 \item the seed for generating random values in the MCMC
-    
+
 \item the starting values for the MCMC chains
 
 \item tuning parameters for Metropolis-Hastings proposals
-    
+
 \item the number of updates per MCMC iteration (each parameter can
   have a different number of updates)
-    
+
 \item selection of MCMC chains that are to be written to log files
-    
+
 \end{itemize}
 
 All of the above features are provided in the \xparam{} class.  The
@@ -184,7 +185,7 @@ initializing an instance of the \xparam{} class:
 <<initializeList, eval=TRUE>>=
 params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous")
 params
-@ 
+@
 
 This parameterization, presently the default, assumes that a gene is
 differentially expressed in all studies or in none.  An alternative
@@ -193,9 +194,9 @@ subset of studies can be obtained by setting the argument
 \Robject{one.delta} to \Robject{FALSE}.
 
 <<initializeList2, eval=FALSE>>=
-params <- new("XdeParameter", esetList=xlist, 
+params <- new("XdeParameter", esetList=xlist,
 	      phenotypeLabel="adenoVsquamous", one.delta=FALSE)
-@ 
+@
 
 Whether one fits the ``$\delta_g$'' (\Robject{one.delta=TRUE}) or the
 ``$\delta_{gp}$'' model (\Robject{one.delta=FALSE}), the chain written
@@ -203,7 +204,7 @@ to file is of dimension G x P x I, where G is the number of genes, P
 is the number of studies, and S is the number of samples (in the case
 of the $\delta_g$ model, the value written to file for a single gene
 will be the same for each study.  The same is true for the $\xi_p$
-parameter.)  
+parameter.)
 
 \section{\label{sec:fit} Fitting the Bayesian hierarchical model}
 
@@ -216,7 +217,7 @@ the priors.  When the value of \texttt{burnin} is true, the output
 from the MCMC are not saved to file and the chain can not be monitored
 for convergence. By default the value of \Robject{burnin} is TRUE and
 only the last iteration from the chain will be available (the
-parameters are not written to log files).  
+parameters are not written to log files).
 
 
 
@@ -231,7 +232,7 @@ and then specifying your own values for the first MCMC:
 params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous", one.delta=FALSE)
 empirical <- empiricalStart(xlist, phenotypeLabel="adenoVsquamous")
 firstMcmc(params) <- empirical
-@ 
+@
 
 To run a burnin of 3 iterations starting from the empircal values:
 
@@ -239,7 +240,7 @@ To run a burnin of 3 iterations starting from the empircal values:
 iterations(params) <- 3
 burnin(params) <- TRUE
 fit <- xde(params, xlist)
-@ 
+@
 
 Only the first and last iterations of the MCMC are available when
 \texttt{burnin} is \texttt{TRUE}.  The output of the \Rfunction{xde}
@@ -254,7 +255,7 @@ function:
 <<moreIterations, eval=FALSE>>=
 iterations(params) <- 2
 fit2 <- xde(params, xlist, fit)
-@ 
+@
 
 When an object of class \xmcmc{} is supplied as an argument to the
 \Rfunction{xde} function, the seed and the last iteration from the
@@ -266,7 +267,7 @@ identical to the following sequence of commands:
 firstMcmc(params) <- lastMcmc(fit)
 seed(params) <- seed(fit)
 fit2 <- xde(params, xlist)
-@ 
+@
 
 One should run several thousand iterations (saving all parameters to
 file) to monitor convergence.  In the following code chunk (not run)
@@ -280,17 +281,17 @@ saved.
 <<runMoreIterations, eval=FALSE, echo=TRUE>>=
 burnin(params) <- FALSE
 iterations(params) <- 2000
-output(params)[c("potential", "acceptance", 
-		 "diffExpressed", 
+output(params)[c("potential", "acceptance",
+		 "diffExpressed",
 		 "nu", ##"DDelta",
-                 ##"delta", 
-		 "probDelta", 
-		 ##"sigma2", 
+                 ##"delta",
+		 "probDelta",
+		 ##"sigma2",
 		 "phi")] <- 0
 thin(params) <- 2
 directory(params) <- "logFiles"
 xmcmc <- xde(params, xlist)
-@ 
+@
 
 <<savexmcmc, eval=FALSE, echo=FALSE, results=hide>>=
 ##this function should work
@@ -301,7 +302,7 @@ BES <- calculateBayesianEffectSize(xmcmc)
 save(BES, file="~/madman/Rpacks/XDE/inst/logFiles/BES.rda")
 save(xmcmc, file="~/madman/Rpacks/XDE/data/xmcmc.RData")
 q("no")
-@ 
+@
 
 See the \xparam{} vignette for a more detailed discussion of the
 output, burnin, and thin methods.  The \Robject{xmcmc} object can be
@@ -309,7 +310,7 @@ loaded by:
 
 <<loadObject, echo=FALSE, eval=TRUE>>=
 data(xmcmc, package="XDE")
-@ 
+@
 
 \section{\label{sec:mcmc} MCMC diagnostics}
 
@@ -322,7 +323,7 @@ The following is a list of the chains that were saved in our run with
 1000 saved iterations:
 <<savedParams, eval=TRUE>>=
 output(xmcmc)[2:22][output(xmcmc)[2:22] == 1]
-@ 
+@
 
 The \$ operator can be used to read in log files.  First, we need to
 update the \texttt{directory} slot in the \Robject{xmcmc} with a
@@ -357,8 +358,8 @@ param.names <- getLogs(xmcmc)
 params <- lapply(lapply(as.list(param.names), function(name, object) eval(substitute(object$NAME_ARG, list(NAME_ARG=name))), object=xmcmc), as.ts)
 names(params) <- param.names
 tracefxn <- function(x, name)  plot(x, plot.type="single", col=1:ncol(x), ylab=name)
-mapply(tracefxn, params, name=names(params))	
-@ 
+mapply(tracefxn, params, name=names(params))
+@
 
 \section{\label{sec:posterior} Posterior probabilities of differential expression}
 
@@ -369,7 +370,7 @@ obtained by
 
 <<bayesianEffectSize, eval=FALSE>>=
 bayesianEffectSize(xmcmc) <- calculateBayesianEffectSize(xmcmc)
-@ 
+@
 
 As the function \Rfunction{calculateBayesianEffectSize} requires that
 the $\delta, \Delta$, and $\sigma^2$ chains are saved, the above code
@@ -378,7 +379,7 @@ chunk is not evaluated in this vignette.
 <<bes, eval=TRUE>>=
 load(file.path(pathToLogFiles, "BES.rda"))
 load(file.path(pathToLogFiles, "postAvg.rda"))
-@ 
+@
 
 Posterior averages for the probability of differential expression,
 concordant differential expression, and discordant differential
@@ -392,13 +393,13 @@ average probabilities are computed.
 par(las=1)
 hist(postAvg[, "concordant"], breaks=50, xlim=c(0, 1), main="",
      xlab="posterior probability of concordant differential expression")
-@ 
+@
 
 <<postAvgFig_disc, echo=FALSE, fig=TRUE, eval=TRUE>>=
 par(las=1)
 hist(postAvg[, "discordant"], breaks=50, xlim=c(0, 1), main="",
      xlab="posterior probability of discordant differential expression")
-@ 
+@
 
 We may wish to differentially label the study-specific statistics of
 effect size that have high probabilities of concordant differential
@@ -410,20 +411,20 @@ options to \Rfunction{pairs}.
 <<setPar, eval=TRUE>>=
 op.conc <- symbolsInteresting(rankingStatistic=postAvg[, "concordant"])
 op.disc <- symbolsInteresting(rankingStatistic=postAvg[, "discordant"])
-@ 
+@
 
 <<conc, fig=TRUE, eval=TRUE>>=
 par(las=1)
-graphics:::pairs(BES[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
+graphics:::pairs(BES[op.conc$order, ], pch=op.conc$pch, col=op.conc$col,
                  bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)
-@ 
+@
 
 or high probabilities of discordant differential expression
 
 <<disc, fig=TRUE, eval=TRUE>>=
-graphics:::pairs(BES[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg, 
+graphics:::pairs(BES[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, bg=op.disc$bg,
 		 upper.panel=NULL, cex=op.disc$cex)
-@ 
+@
 
 \section{\label{sec:alternatives} Alternative cross-study summaries of differential expression}
 
@@ -442,24 +443,24 @@ if(require(siggenes)){
 if(require(GeneMeta)){
   z <- ssStatistic(statistic="z", phenotypeLabel="adenoVsquamous", esetList=xlist)
 }
-@ 
+@
 
 <<tstatConc, eval=FALSE>>=
-graphics:::pairs(tt[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
-                 bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
+graphics:::pairs(tt[op.conc$order, ], pch=op.conc$pch, col=op.conc$col,
+                 bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)
 
 @
 
 <<zConc, eval=FALSE>>=
-graphics:::pairs(tt[op.conc$order, ], pch=op.conc$pch, col=op.conc$col, 
-                 bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)  
+graphics:::pairs(tt[op.conc$order, ], pch=op.conc$pch, col=op.conc$col,
+                 bg=op.conc$bg, upper.panel=NULL, cex=op.conc$cex)
 
 @
 
 <<tstatDisc, eval=FALSE>>=
-graphics:::pairs(tt[op.disc$order, ], pch=op.disc$pch, col=op.disc$col, 
-                 bg=op.disc$bg, upper.panel=NULL, cex=op.disc$cex)  
-@ 
+graphics:::pairs(tt[op.disc$order, ], pch=op.disc$pch, col=op.disc$col,
+                 bg=op.disc$bg, upper.panel=NULL, cex=op.disc$cex)
+@
 
 Uncorrelated $t$ and $SAM$ statistics suggest a low level of
 reproducibility that may be attributable to technological differences
@@ -503,7 +504,7 @@ vignette were:
 
 <<sessionInfo, echo=FALSE, results=tex>>=
 toLatex(sessionInfo())
-@ 
+@
 
 \bibliography{genomics}
 \bibliographystyle{plain}

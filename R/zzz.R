@@ -1,4 +1,4 @@
 .onAttach <- function(libname, pkgname) {
 	version <- packageDescription("XDE", field="Version")
-	message("Welcome to XDE version ", version)
+	packageStartupMessage("Welcome to XDE version ", version)
 }
