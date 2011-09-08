@@ -16,7 +16,7 @@ using namespace std;
 #define FACTOR2    256
 #define FACTOR3    256
 #define FACTOR4    128
-//#define PI         3.14159265
+#define PI         3.14159265
 
 
 class Random
