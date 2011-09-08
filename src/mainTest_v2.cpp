@@ -14,7 +14,7 @@
 #include "Update_v2.h"
 
 
-int main(void) {
+int mainTest(void) {
   unsigned int seed = 174431;
   Random ran(seed);
 
@@ -658,7 +658,7 @@ int main(void) {
   betag = 0.01;
 
   */
-=======
+  /*=======
 
 
 >>>>>>> started file for testing v2 interface */
