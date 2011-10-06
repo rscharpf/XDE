@@ -25,7 +25,7 @@ psi <- c(rbinom(S[1], 1, 0.5),
 ## initialize parameters to be simulated
 ##
 ##---------------------------------------------------------------------------
-trace(getParameters, browser)
+trace(XDE:::getParameters, browser)
 tmp <- XDE:::getParameters(hyper.params)
 
 ##

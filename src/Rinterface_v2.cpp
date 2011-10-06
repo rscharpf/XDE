@@ -3,7 +3,8 @@
 #include "Update_v2.h"
 
 extern "C" {
-
+  // nu|... ~ N(0, Sigma)
+  // a is the power conjugate
   void updateANu(int *seed,
 		 const int *nTry,
 		 int *nAccept,
