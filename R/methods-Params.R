@@ -10,3 +10,6 @@ setMethod("vectorize", signature(object="Params"), function(object){
 	params$sigma2 <- vectorize(params$sigma2)
 	return(params)
 })
+
+setMethod("show", signature(object="Params"), function(object) print(ls.str(object)))
+

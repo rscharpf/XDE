@@ -77,7 +77,7 @@
                       Diffexpressed=Diffexpressed)
               assign("vars", x, eenv)
               eenv
-          }
+      }
 
 calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1, burnin=0){
 	if(class(object) != "XdeMcmc") stop("object must be of class XdeMcmc")
@@ -599,78 +599,14 @@ makeSigma <- function(G, Q, gamma2, tau2, a, sigma2, r){
 ##getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
 ##Params <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
 
-HyperParams <- function(object, G, Q, S, seed, clinicalCovariate, ...){
-	if(!missing(object)){
-		stopifnot(is(object, "ExpressionSetList"))
-		Gs <- sapply(object, nrow)
-		stopifnot(length(unique(Gs)) == 1)
-		G <- Gs[[1]]
-		Q <- length(object)
-		S <- sapply(object, ncol)
-		psi <- phenotype(object, clinicalCovariate)
-		stopifnot(length(vectorize(psi)) == sum(S))
-	} else {
-		anymissing <- missing(G) | missing(Q) | missing(S)
-		stopifnot(!anymissing)
-		psi <- NULL
-	}
-	if(missing(seed)) seed <- 123L
 
-	betaA <- alphaA <- 1.0
-	pA0 <- pA1 <- 0.1
 
-	##
-	betaB <- alphaB <- 1.0
-	pB0 <- pB1 <- 0.1
-
-	## degrees of freedom for correlation of Delta
-	## p.8 Scharpf et al
-	nuR <- 1.0+Q
-	## degrees of freedom for correlation of Nu
-	nuRho <- 1.0+Q
-
-	betaXi <- alphaXi <- 1.0
-
-	c2Max <- 10.0
-
-	betaEta <- alphaEta <- 1.0
-
-	pOmega0 <- 0.1
-	lambdaOmega <- 1.0
-	lambdaKappa <- 1.0
-
-	res <- list(
-		   G=G,
-		    Q=Q,
-		    S=S,
-		    alphaA=alphaA,
-		    betaA=betaA,
-		    alphaB=alphaB,
-		    betaB=betaB,
-		    pA0=pA0,
-		    pA1=pA1,
-		    pB0=pB0,
-		    pB1=pB1,
-		    nuR=nuR,
-		    nuRho=nuRho,
-		    alphaXi=alphaXi,
-		    betaXi=betaXi,
-		    c2Max=c2Max,
-		    alphaEta=alphaEta,
-		    betaEta=betaEta,
-		    pOmega0=pOmega0,
-		    lambdaOmega=lambdaOmega,
-		    lambdaKappa=lambdaKappa,
-		    seed=seed,
-		    psi=psi)
-	res <- as(res, "HyperParams")
-	return(res)
-}
-
-rupdateANu <- function(object, hyper.params, params,
-		      seed=123L,
-		      nTry=length(object),
-		      nAccept=0L, epsilon=0.2){
+rupdateANu <- function(object, hyper.params,
+		       params,
+		       seed=123L,
+		       nTry=length(object),
+		       nAccept=0L, epsilon=0.2,
+		       dryrun=FALSE){
 	hyper.params <- vectorize(hyper.params)
 	params <- vectorize(params)
 	x <- expressionVector(object)
@@ -700,6 +636,7 @@ rupdateANu <- function(object, hyper.params, params,
 		  pA1=hyper.params[["pA1"]],
 		  alphaA=hyper.params[["alphaA"]],
 		  betaA=hyper.params[["betaA"]])
+	if(dryrun) return(res)
 	res2 <- .C("updateANu",
 		  seed=seed,
 		  nTry=nTry,
@@ -729,36 +666,64 @@ rupdateANu <- function(object, hyper.params, params,
 }
 
 rupdateBDDelta <- function(object,
-			  hyper.params,
-			  params,
-			  seed=123L,
-			  nTry=length(object),
-			  nAccept=0L,
-			  epsilon=0.2){
+			   hyper.params,
+			   params,
+			   seed=123L,
+			   nTry=length(object),
+			   nAccept=0L,
+			   epsilon=0.2,
+			   dryrun=FALSE){
 	x <- expressionVector(object)
 	hyper.params <- vectorize(hyper.params)
 	vparams <- vectorize(params)
-tmp=	.C("updateBDDelta",
-	   seed=seed,
-	   nTry=nTry,
-	   nAccept=nAccept,
-	   epsilon=epsilon,
-	   tau2Rho=vparams[["tau2Rho"]],
-	   b=vparams[["b"]],
-	   Q=hyper.params[["Q"]],
-	   G=hyper.params[["G"]],
-	   S=hyper.params[["S"]],
-	   x=x,
-	   psi=hyper.params[["psi"]],
-	   nu=vparams[["nu"]],
-	   delta=vparams[["delta"]],
-	   c2=vparams[["c2"]],
-	   r=vparams[["r"]],
-	   sigma2=vparams[["sigma2"]],
-	   phi=vparams[["phi"]],
-	   tau2R=vparams[["tau2R"]],
-	   pB0=hyper.params[["pB0"]],
-	   pB1=hyper.params[["pB1"]],
-	   alphaB=hyper.params[["alphaB"]],
-	   betaB=hyper.params[["betaB"]])
+	if(dryrun){
+		obj <- list(
+			    seed=seed,
+			    nTry=nTry,
+			    nAccept=nAccept,
+			    epsilon=epsilon,
+			    tau2Rho=vparams[["tau2Rho"]],
+			    b=vparams[["b"]],
+			    Q=hyper.params[["Q"]],
+			    G=hyper.params[["G"]],
+			    S=hyper.params[["S"]],
+			    x=x,
+			    psi=hyper.params[["psi"]],
+			    nu=vparams[["nu"]],
+			    delta=vparams[["delta"]],
+			    c2=vparams[["c2"]],
+			    r=vparams[["r"]],
+			    sigma2=vparams[["sigma2"]],
+			    phi=vparams[["phi"]],
+			    tau2R=vparams[["tau2R"]],
+			    pB0=hyper.params[["pB0"]],
+			    pB1=hyper.params[["pB1"]],
+			    alphaB=hyper.params[["alphaB"]],
+			    betaB=hyper.params[["betaB"]])
+		return(obj)
+	}
+	tmp <- .C("updateBDDelta",
+		  seed=seed,
+		  nTry=nTry,
+		  nAccept=nAccept,
+		  epsilon=epsilon,
+		  tau2Rho=vparams[["tau2Rho"]],
+		  b=vparams[["b"]],
+		  Q=hyper.params[["Q"]],
+		  G=hyper.params[["G"]],
+		  S=hyper.params[["S"]],
+		  x=x,
+		  psi=hyper.params[["psi"]],
+		  nu=vparams[["nu"]],
+		  delta=vparams[["delta"]],
+		  c2=vparams[["c2"]],
+		  r=vparams[["r"]],
+		  sigma2=vparams[["sigma2"]],
+		  phi=vparams[["phi"]],
+		  tau2R=vparams[["tau2R"]],
+		  pB0=hyper.params[["pB0"]],
+		  pB1=hyper.params[["pB1"]],
+		  alphaB=hyper.params[["alphaB"]],
+		  betaB=hyper.params[["betaB"]])
+	return(tmp)
 }
