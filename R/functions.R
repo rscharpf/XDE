@@ -656,13 +656,14 @@ rupdateANu <- function(object, hyper.params,
 		  sigma2=params[["sigma2"]],
 		  phi=params[["phi"]],
 		  tau2Rho=params[["tau2Rho"]],
-		  pA0=hyper.params[["pA0"]],
-		  pA1=hyper.params[["pA1"]],
+		   pA0=hyper.params[["pA0"]],
+		   pA1=hyper.params[["pA1"]],
 		   alphaA=hyper.params[["alphaA"]],
 		   betaA=hyper.params[["betaA"]])
 	thesame <- identical(res[-1], res2[-1])
+	if(thesame) print("nothing changed")
 	res <- list(thesame, res2)
-	return(res)
+	return(res2)
 }
 
 rupdateBDDelta <- function(object,
