@@ -3,6 +3,7 @@
 \alias{XdeParameter-class}
 \alias{burnin,XdeParameter-method}
 \alias{burnin<-,XdeParameter,logical-method}
+\alias{coerce,XdeParameter,Params-method}
 \alias{directory,XdeParameter-method}
 \alias{directory<-}
 \alias{directory<-,XdeParameter-method}
@@ -75,7 +76,7 @@ Objects can be created by calls of the form \code{new("XdeParameter",
     \item{\code{firstMcmc}:}{Object of class \code{environment}. Values
       for the first iteration of the MCMC }
     \item{\code{seed}:}{Object of class \code{integer}.  Seed used for
-    simulating random numbers.}    
+    simulating random numbers.}
     \item{\code{showIterations}:}{Object of class \code{logical}.
       Whether to show the MCMC iteration when fitting the model}
     \item{\code{specifiedInitialValues}:}{Object of class
@@ -132,7 +133,7 @@ Objects can be created by calls of the form \code{new("XdeParameter",
     \item{seed}{\code{signature(object = "XdeParameter")} See
       \code{\link{seed}}}
     \item{seed<-}{\code{signature(object = "XdeParameter",
-    value="integer")} Replacement method. See also \code{\link{seed}}.}    
+    value="integer")} Replacement method. See also \code{\link{seed}}.}
     \item{show}{\code{signature(object = "XdeParameter")} Produces a
       short summary of objects that are instances of the
       \code{XdeParameter} class}
