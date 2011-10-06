@@ -74,7 +74,6 @@ export(calculatePosteriorAvg,
        symbolsInteresting,
        xde,
        xsScores)
-
 #export(.goodnessOfFit, computeGOF)
 
 

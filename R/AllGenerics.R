@@ -52,4 +52,4 @@ setGeneric("updates<-", function(object, value) standardGeneric("updates<-"))
 setGeneric("zeroNu", function(object, ...) standardGeneric("zeroNu"))
 
 
-setGeneric("getHyperparameters", function(object, G, Q, S, ...) standardGeneric("getHyperparameters"))
+##setGeneric("getHyperparameters", function(object, G, Q, S, ...) standardGeneric("getHyperparameters"))
