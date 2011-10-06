@@ -1,4 +1,4 @@
-useDynLib(XDE)
+useDynLib(XDE, updateANu, updateBDDelta, .registration=TRUE)
 import(Biobase, methods)
 #MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
 ##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
@@ -83,7 +83,8 @@ export(calculatePosteriorAvg,
 ##
 ##---------------------------------------------------------------------------
 importFrom(mvtnorm, rmvnorm)
-export(getParameters, getHyperparameters, updateANu)
+exportClasses(HyperParams, Params)
+export(HyperParams, Params, rupdateANu, rupdateBDDelta)
 exportMethods(phenotype)
 
 

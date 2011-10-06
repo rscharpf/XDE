@@ -1,6 +1,6 @@
-\name{getParameters}
-\alias{getParameters}
-\alias{getHyperParameters}
+\name{Parameters}
+\alias{HyperParams}
+\alias{Params}
 \title{
   Initialize both hyperparameters and parameters.
 }
@@ -10,8 +10,8 @@
 }
 
 \usage{
-getHyperparameters(object, G, Q, S, seed, ...)
-getParameters(hyper.parameters, one.delta = FALSE, MRF = FALSE)
+HyperParams(object, G, Q, S, seed, clinicalCovariate, ...)
+Params(hyper.parameters, one.delta = FALSE, MRF = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 
@@ -23,6 +23,7 @@ getParameters(hyper.parameters, one.delta = FALSE, MRF = FALSE)
     \code{object} is not missing.}
   \item{S}{ vector of integers.  The number of samples in each study.  Ignored if
     \code{object} is not missing.}
+  \item{clinicalCovariate}{character.  Name of binary clinical covariate.}
   \item{seed}{Integer.  Seed for reproducibility.}
   \item{\dots}{Ignored}
   \item{hyper.parameters}{ A \code{list} of hyperparameters. }
@@ -34,21 +35,22 @@ getParameters(hyper.parameters, one.delta = FALSE, MRF = FALSE)
 
 }
 \value{
-  A list.
+  Return \code{HyperParams} or \code{Params} object, respectively.
 }
 \author{
   R. Scharpf
 }
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+   \code{\linkS4class{HyperParams-class}}, \code{\linkS4class{Params-class}}
 }
 \examples{
 data(expressionSetList)
-ohyper.params <- getHyperparameters(expressionSetList)
-params <- getParameters(hyper.params, one.delta=FALSE, MRF=TRUE)
+hyper.params <- HyperParams(expressionSetList)
+params <- Params(hyper.params, one.delta=FALSE, MRF=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{list}
+\keyword{methods}
 

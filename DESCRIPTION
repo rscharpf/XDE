@@ -18,7 +18,9 @@ Collate:  functions.R
 	  methods-data.frame.R
 	  methods-ExpressionSet.R
 	  methods-ExpressionSetList.R
+	  methods-HyperParams.R
 	  methods-mergeExpressionSet.R
+	  methods-Params.R
 	  methods-XdeMcmc.R
 	  xde.R
 	  zzz.R

@@ -596,185 +596,10 @@ makeSigma <- function(G, Q, gamma2, tau2, a, sigma2, r){
 	return(Sigma)
 }
 
-getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
-	##require(mvtnorm)
-	G <- hyper.parameters[["G"]]
-	Q <- hyper.parameters[["Q"]]
-	pA0 <- hyper.parameters[["pA0"]]
-	pA1 <- hyper.parameters[["pA1"]]
-	pB0 <- hyper.parameters[["pB0"]]
-	pB1 <- hyper.parameters[["pB1"]]
-	alphaXi <- hyper.parameters[["alphaXi"]]
-	betaXi <- hyper.parameters[["betaXi"]]
+##getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
+##Params <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
 
-	gamma2 <- 0.5*0.5
-	c2 <- 0.5*0.5
-	tau2Rho <- rep(1.0, Q)
-	tau2R <- rep(1.0,Q)
-	a <- b <- rep(NA, Q)
-	l <- rep(1.0, Q)
-	t <- rep(0.5^2, Q)
-	sigma2 <- matrix(NA, G, Q)
-	## simulate variances from gamma
-	param2 <- l/t
-	param1 <- l*param2
-	for(q in seq(length=Q)){
-		u <- runif(1)
-		if(u < pA0){
-			a[q] <- 0
-		} else {
-			if(u < pA0+pA1){
-				a[q] <- 1
-			} else {
-				a[q] <-runif(1)
-			}
-		}
-		u <- runif(1)
-		if(u < pB0){
-			b[q] <- 0
-		} else {
-			if(u < pB0+pB1){
-				b[q] <- 1
-			} else {
-				b[q] <-runif(1)
-			}
-		}
-		## in R, mean is shape * scale and variance is shape*scale^2
-		## in Haakon's formulation, mean = l and variance = t
-		## => shape=l^2/t and scale =t/l
-		##  (this means that param2 is the rate and param1 is the shape
-		sigma2[, q] <- rgamma(G, shape=param1[q], rate=param2[q])
-	}
-	## the platform index changes the fastest, then gene
-	##sigma2 <- as.numeric(t(sigma2))
-	##
-	## initialize phi
-	lambda <- rep(1.0, Q)
-	theta <- rep(0.1*0.1, Q)
-	param2 <- lambda/theta
-	param1 <- lambda*theta
-	phi <- matrix(NA, G, Q)
-	for(q in seq(length=Q)){
-		phi[, q] <- rgamma(G, shape=param1[q], rate=param2[q])
-	}
-	##r <- rho <- rep(0.5, Q*(Q-1)/2)
-	r <- rho <- matrix(NA, Q, Q)
-	diag(r) <- diag(rho) <- 1
-	rho[upper.tri(rho)] <- r[upper.tri(r)] <- 0.5
-	rho[lower.tri(rho)] <- r[lower.tri(r)] <- 0.5
-	## nu
-	nu <- matrix(NA, G, Q)
-	for(g in seq(length=G)){
-		Sig <- makeSigma(Q=Q, gamma2=gamma2, tau2=tau2Rho, a=a,
-				 sigma2=sigma2[g, ], r=rho)
-		## simulate from multivariate normal
-		nu[g, ] <- rmvnorm(1, sigma=Sig)
-	}
-	Delta <- matrix(NA, G, Q)
-	for(g in seq(length=G)){
-		R <- makeSigma(Q=Q, gamma2=c2, tau2=tau2Rho, a=b,
-			       sigma2=sigma2[g, ], r=r)
-		## simulate from multivariate normal
-		Delta[g, ] <- rmvnorm(1, sigma=Sig)
-	}
-	##---------------------------------------------------------------------------
-	##
-	## Simulating delta
-	##
-	## There are 4 prior models for delta:
-	##    model A: one delta
-	##    model B: study-specific delta
-	##    model C: MRF study-specific delta
-	##    model D: MRF one delta
-	##
-	##---------------------------------------------------------------------------
-	## Delta in the Rinterface.cpp file there are different
-	## functions relating to each of the now four prior models for
-	##
-	## delta
-	##
-	## model A:
-	##         updateXi_onedelta
-	##         updateDeltaDDelta_onedelta
-	##
-	## model B:
-	##         updateXi
-	##         updateDeltaDDelta
-	##
-	## model C:
-	##         updateAlpha_MRF
-        ##         updateBeta_MRF
-        ##         updateBetag_MRF
-        ##         updateDeltaDDelta_MRF
-
-	##
-	## model D:
-	##         updateAlpha_MRF_onedelta
-        ##         updateBeta_MRF_onedelta
-        ##         updateDeltaDDelta_MRF_onedelta
-	##
-	alpha.mrf <- -0.2  ## in (-Inf, +Inf)
-	beta.mrf <- 3.0    ## > 0
-	if(one.delta){
-		delta <- rbinom(G, 1, 0.2)
-		Delta[delta==0, ] <- 0
-	} else{
-		delta <- matrix(rbinom(G*Q, 1, 0.2), G, Q)
-		Delta <- Delta*delta
-	}
-##	if(!MRF){
-##		if(one.delta){
-##			## model A
-##			##delta <- rep(0L, G)
-##			delta <- rbinom(G, 1, 0.2)
-##		} else {
-##			## model B (default)
-##			delta <- matrix(0L, G, Q)
-##		}
-##	} else {
-##		## 1. specify alpha.mrf, beta.mrf
-##		## 2. specify |N_g|
-##		## 3. sample |N_g| indices from {1, ..., G} to form N_g for each g
-##		## 4. simulate delta_g or delta_gp from Bernoulli(prob), with
-##		##    prob = exp (...)/(1+exp(...))
-##		##    ... =
-##		##
-##		if(one.delta){
-##			delta <- rbinom(G, 1, 0.2)
-##			## model D
-##			## a subset of genes are differentially expressed
-##			##    the probability of a gene's differential expression
-##			##    depends on other genes in the network and is assumed
-##			##    to be the same across platforms.
-##			## Let's assume 20% of the genes are differentially expressed
-##
-##			##
-##			##
-##		} else {
-##			## model C
-##			delta <- matrix(NA, G, Q)
-##		}
-##	}
-	res <- list(gamma2=gamma2,
-		    c2=c2,
-		    tau2Rho=tau2Rho,
-		    tau2R=tau2R,
-		    a=a,
-		    b=b,
-		    l=l,
-		    t=t,
-		    lambda=lambda,
-		    theta=theta,
-		    phi=phi,
-		    sigma2=sigma2,
-		    r=r,
-		    rho=rho,
-		    delta=delta,
-		    nu=nu,
-		    Delta=Delta)
-}
-
-getHyperparameters <- function(object, G, Q, S, seed, ...){
+HyperParams <- function(object, G, Q, S, seed, clinicalCovariate, ...){
 	if(!missing(object)){
 		stopifnot(is(object, "ExpressionSetList"))
 		Gs <- sapply(object, nrow)
@@ -782,9 +607,12 @@ getHyperparameters <- function(object, G, Q, S, seed, ...){
 		G <- Gs[[1]]
 		Q <- length(object)
 		S <- sapply(object, ncol)
+		psi <- phenotype(object, clinicalCovariate)
+		stopifnot(length(vectorize(psi)) == sum(S))
 	} else {
 		anymissing <- missing(G) | missing(Q) | missing(S)
 		stopifnot(!anymissing)
+		psi <- NULL
 	}
 	if(missing(seed)) seed <- 123L
 
@@ -811,11 +639,14 @@ getHyperparameters <- function(object, G, Q, S, seed, ...){
 	lambdaOmega <- 1.0
 	lambdaKappa <- 1.0
 
-	res <- list(G=G,
+	res <- list(
+		   G=G,
 		    Q=Q,
 		    S=S,
 		    alphaA=alphaA,
 		    betaA=betaA,
+		    alphaB=alphaB,
+		    betaB=betaB,
 		    pA0=pA0,
 		    pA1=pA1,
 		    pB0=pB0,
@@ -830,28 +661,23 @@ getHyperparameters <- function(object, G, Q, S, seed, ...){
 		    pOmega0=pOmega0,
 		    lambdaOmega=lambdaOmega,
 		    lambdaKappa=lambdaKappa,
-		    seed=seed)
+		    seed=seed,
+		    psi=psi)
+	res <- as(res, "HyperParams")
 	return(res)
 }
 
-updateANu <- function(object, hyper.params, params){
-	seed <- 123L
-	nTry <- 2L
-	nAccept <- 1L
-	epsilon <- 0.2
-	params[["nu"]] <- as.numeric(params[["nu"]])
-	params[["delta"]] <- as.integer(params[["delta"]])
-	params[["Delta"]] <- as.numeric(params[["Delta"]])
-	params[["psi"]] <- as.integer(params[["psi"]])
-	params[["phi"]] <- as.numeric(params[["phi"]])
-	hyper.params[["S"]] <- as.integer(hyper.params[["S"]])
-	rho <- params[["rho"]]
-	params[["rho"]] <- rho[upper.tri(rho)]
-	params[["sigma2"]] <- as.numeric(params[["sigma2"]])
-	x <- lapply(object, function(object) as.numeric(exprs(object)))
-	x <- unlist(x)
-	res <- .C("updateANu",
-		  seed=seed,
+rupdateANu <- function(object, hyper.params, params,
+		      seed=123L,
+		      nTry=length(object),
+		      nAccept=0L, epsilon=0.2){
+	hyper.params <- vectorize(hyper.params)
+	params <- vectorize(params)
+	x <- expressionVector(object)
+	##x <- lapply(object, function(object) as.numeric(exprs(object)))
+	##x <- unlist(x)
+	res <- list(
+		    seed=seed,
 		  nTry=nTry,
 		  nAccept=nAccept,
 		  epsilon=epsilon,
@@ -862,7 +688,7 @@ updateANu <- function(object, hyper.params, params){
 		  G=hyper.params[["G"]],
 		  S=hyper.params[["S"]],
 		  x=x,
-		  psi=params[["psi"]],
+		  psi=hyper.params[["psi"]],
 		  delta=params[["delta"]],
 		  Delta=params[["Delta"]],
 		  gamma2=params[["gamma2"]],
@@ -874,5 +700,65 @@ updateANu <- function(object, hyper.params, params){
 		  pA1=hyper.params[["pA1"]],
 		  alphaA=hyper.params[["alphaA"]],
 		  betaA=hyper.params[["betaA"]])
+	res2 <- .C("updateANuWrap",
+		  seed=seed,
+		  nTry=nTry,
+		  nAccept=nAccept,
+		  epsilon=epsilon,
+		  a=params[["a"]],
+		  nu=params[["nu"]],
+		  Q=hyper.params[["Q"]],
+		  G=hyper.params[["G"]],
+		  S=hyper.params[["S"]],
+		  x=x,
+		  psi=hyper.params[["psi"]],
+		  delta=params[["delta"]],
+		  Delta=params[["Delta"]],
+		  gamma2=params[["gamma2"]],
+		  rho=params[["rho"]],
+		  sigma2=params[["sigma2"]],
+		  phi=params[["phi"]],
+		  tau2Rho=params[["tau2Rho"]],
+		  pA0=hyper.params[["pA0"]],
+		  pA1=hyper.params[["pA1"]],
+		   alphaA=hyper.params[["alphaA"]],
+		   betaA=hyper.params[["betaA"]])
+	thesame <- identical(res, res2)
+	res <- list(thesame, res2)
 	return(res)
+}
+
+rupdateBDDelta <- function(object,
+			  hyper.params,
+			  params,
+			  seed=123L,
+			  nTry=length(object),
+			  nAccept=0L,
+			  epsilon=0.2){
+	x <- expressionVector(object)
+	hyper.params <- vectorize(hyper.params)
+	vparams <- vectorize(params)
+tmp=	.C("updateBDDelta",
+	   seed=seed,
+	   nTry=nTry,
+	   nAccept=nAccept,
+	   epsilon=epsilon,
+	   tau2Rho=vparams[["tau2Rho"]],
+	   b=vparams[["b"]],
+	   Q=hyper.params[["Q"]],
+	   G=hyper.params[["G"]],
+	   S=hyper.params[["S"]],
+	   x=x,
+	   psi=hyper.params[["psi"]],
+	   nu=vparams[["nu"]],
+	   delta=vparams[["delta"]],
+	   c2=vparams[["c2"]],
+	   r=vparams[["r"]],
+	   sigma2=vparams[["sigma2"]],
+	   phi=vparams[["phi"]],
+	   tau2R=vparams[["tau2R"]],
+	   pB0=hyper.params[["pB0"]],
+	   pB1=hyper.params[["pB1"]],
+	   alphaB=hyper.params[["alphaB"]],
+	   betaB=hyper.params[["betaB"]])
 }

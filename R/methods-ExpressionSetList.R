@@ -234,3 +234,17 @@ setMethod("phenotype", signature(object="ExpressionSetList", varLabel="character
 		  stopifnot(all(unique.var %in% 0:1))
 		  return(clinical.var)
 	  })
+setMethod("expressionVector", signature(object="ExpressionSetList"),
+	  function(object){
+		  ##x: A vector of expression values.
+		  ## The order of the values is
+		  ## x_gsp
+		  ## sample index changes the fastest, then gene, then study
+		  ## x_{1,1,1},  ... , x_{1, S_1, 1}, x_{2,1,1} ... x_{G,S_1,1}
+		  x <- lapply(object, exprs)
+		  x <- lapply(x, expressionVector)
+		  ##x <- expressionVector(x)
+		  ##x <- lapply(object, function(object) as.numeric(exprs(object)))
+		  x <- unlist(x)
+		  return(x)
+	  })
