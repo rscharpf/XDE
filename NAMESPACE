@@ -83,7 +83,7 @@ export(calculatePosteriorAvg,
 ##
 ##---------------------------------------------------------------------------
 importFrom(mvtnorm, rmvnorm)
-##exportClasses(HyperParams, Params)
+exportClasses(HyperParams, Params)
 ##export(HyperParams, Params, rupdateANu, rupdateBDDelta)
 ##exportMethods(phenotype)
 

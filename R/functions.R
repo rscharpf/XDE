@@ -601,7 +601,8 @@ makeSigma <- function(G, Q, gamma2, tau2, a, sigma2, r){
 
 
 
-rupdateANu <- function(object, hyper.params,
+rupdateANu <- function(object,
+		       hyper.params,
 		       params,
 		       seed=123L,
 		       nTry=length(object),
@@ -612,58 +613,73 @@ rupdateANu <- function(object, hyper.params,
 	x <- expressionVector(object)
 	##x <- lapply(object, function(object) as.numeric(exprs(object)))
 	##x <- unlist(x)
-	res <- list(
-		    seed=seed,
-		  nTry=nTry,
-		  nAccept=nAccept,
-		  epsilon=epsilon,
-##		  tmp=list(
-		  a=params[["a"]],
-		  nu=params[["nu"]],
-		  Q=hyper.params[["Q"]],
-		  G=hyper.params[["G"]],
-		  S=hyper.params[["S"]],
-		  x=x,
-		  psi=hyper.params[["psi"]],
-		  delta=params[["delta"]],
-		  Delta=params[["Delta"]],
-		  gamma2=params[["gamma2"]],
-		  rho=params[["rho"]],
-		  sigma2=params[["sigma2"]],
-		  phi=params[["phi"]],
-		  tau2Rho=params[["tau2Rho"]],
-		  pA0=hyper.params[["pA0"]],
-		  pA1=hyper.params[["pA1"]],
-		  alphaA=hyper.params[["alphaA"]],
-		  betaA=hyper.params[["betaA"]])
-	if(dryrun) return(res)
-	res2 <- .C("updateANu",
-		  seed=seed,
-		  nTry=nTry,
-		  nAccept=nAccept,
-		  epsilon=epsilon,
-		  a=params[["a"]],
-		  nu=params[["nu"]],
-		  Q=hyper.params[["Q"]],
-		  G=hyper.params[["G"]],
-		  S=hyper.params[["S"]],
-		  x=x,
-		  psi=hyper.params[["psi"]],
-		  delta=params[["delta"]],
-		  Delta=params[["Delta"]],
-		  gamma2=params[["gamma2"]],
-		  rho=params[["rho"]],
-		  sigma2=params[["sigma2"]],
-		  phi=params[["phi"]],
-		  tau2Rho=params[["tau2Rho"]],
+	if(dryrun){
+		res <- list(seed=seed,
+			    nTry=nTry,
+			    nAccept=nAccept,
+			    epsilon=epsilon,
+			    a=params[["a"]],
+			    nu=params[["nu"]],
+			    Q=hyper.params[["Q"]],
+			    G=hyper.params[["G"]],
+			    S=hyper.params[["S"]],
+			    x=x,
+			    psi=hyper.params[["psi"]],
+			    delta=params[["delta"]],
+			    Delta=params[["Delta"]],
+			    gamma2=params[["gamma2"]],
+			    rho=params[["rho"]],
+			    sigma2=params[["sigma2"]],
+			    phi=params[["phi"]],
+			    tau2Rho=params[["tau2Rho"]],
+			    pA0=hyper.params[["pA0"]],
+			    pA1=hyper.params[["pA1"]],
+			    alphaA=hyper.params[["alphaA"]],
+			    betaA=hyper.params[["betaA"]])
+		return(res)
+	}
+	res <- .C("updateANu",
+		   seed=seed,
+		   nTry=nTry,
+		   nAccept=nAccept,
+		   epsilon=epsilon,
+		   a=params[["a"]],
+		   nu=params[["nu"]],
+		   Q=hyper.params[["Q"]],
+		   G=hyper.params[["G"]],
+		   S=hyper.params[["S"]],
+		   x=x,
+		   psi=hyper.params[["psi"]],
+		   delta=params[["delta"]],
+		   Delta=params[["Delta"]],
+		   gamma2=params[["gamma2"]],
+		   rho=params[["rho"]],
+		   sigma2=params[["sigma2"]],
+		   phi=params[["phi"]],
+		   tau2Rho=params[["tau2Rho"]],
 		   pA0=hyper.params[["pA0"]],
 		   pA1=hyper.params[["pA1"]],
 		   alphaA=hyper.params[["alphaA"]],
 		   betaA=hyper.params[["betaA"]])
-	thesame <- identical(res[-1], res2[-1])
-	if(thesame) print("nothing changed")
-	res <- list(thesame, res2)
-	return(res2)
+##	thesame <- identical(res[-1], res2[-1])
+##	if(thesame) print("nothing changed")
+##	res <- list(thesame, res2)
+	res$c2 <- params$c2
+	res$r <- params$r
+	res$b <- params$b
+	res$t <- params$t
+	res$theta <- params$theta
+	res$tau2R <- params$tau2R
+	res$l <- params$l
+	res$lambda <- params$theta
+	res$xi <- params$xi
+	res$pB0 <- params$pB0
+	res$pB1 <- params$pB1
+	res$alphaB <- params$alphaB
+	res$betaB <- params$betaB
+	stopifnot(length(setdiff(names(params), names(res)))==0)
+	res <- as(res, "Params")
+	return(res)
 }
 
 rupdateBDDelta <- function(object,
@@ -676,55 +692,71 @@ rupdateBDDelta <- function(object,
 			   dryrun=FALSE){
 	x <- expressionVector(object)
 	hyper.params <- vectorize(hyper.params)
-	vparams <- vectorize(params)
+	params <- vectorize(params)
+	x <- expressionVector(object)
 	if(dryrun){
 		obj <- list(
 			    seed=seed,
 			    nTry=nTry,
 			    nAccept=nAccept,
 			    epsilon=epsilon,
-			    tau2Rho=vparams[["tau2Rho"]],
-			    b=vparams[["b"]],
+			    tau2Rho=params[["tau2Rho"]],
+			    b=params[["b"]],
 			    Q=hyper.params[["Q"]],
 			    G=hyper.params[["G"]],
 			    S=hyper.params[["S"]],
 			    x=x,
 			    psi=hyper.params[["psi"]],
-			    nu=vparams[["nu"]],
-			    delta=vparams[["delta"]],
-			    c2=vparams[["c2"]],
-			    r=vparams[["r"]],
-			    sigma2=vparams[["sigma2"]],
-			    phi=vparams[["phi"]],
-			    tau2R=vparams[["tau2R"]],
+			    nu=params[["nu"]],
+			    delta=params[["delta"]],
+			    c2=params[["c2"]],
+			    r=params[["r"]],
+			    sigma2=params[["sigma2"]],
+			    phi=params[["phi"]],
+			    tau2R=params[["tau2R"]],
 			    pB0=hyper.params[["pB0"]],
 			    pB1=hyper.params[["pB1"]],
 			    alphaB=hyper.params[["alphaB"]],
 			    betaB=hyper.params[["betaB"]])
 		return(obj)
 	}
-	tmp <- .C("updateBDDelta",
-		  seed=seed,
-		  nTry=nTry,
-		  nAccept=nAccept,
-		  epsilon=epsilon,
-		  tau2Rho=vparams[["tau2Rho"]],
-		  b=vparams[["b"]],
+	res <- .C("updateBDDelta",
+		  seed=as.integer(seed),
+		  nTry=as.integer(nTry),
+		  nAccept=as.integer(nAccept),
+		  epsilon=as.numeric(epsilon),
+		  b=params[["b"]],
+		  Delta=params[["Delta"]],
 		  Q=hyper.params[["Q"]],
 		  G=hyper.params[["G"]],
 		  S=hyper.params[["S"]],
 		  x=x,
 		  psi=hyper.params[["psi"]],
-		  nu=vparams[["nu"]],
-		  delta=vparams[["delta"]],
-		  c2=vparams[["c2"]],
-		  r=vparams[["r"]],
-		  sigma2=vparams[["sigma2"]],
-		  phi=vparams[["phi"]],
-		  tau2R=vparams[["tau2R"]],
+		  nu=params[["nu"]],
+		  delta=params[["delta"]],
+		  c2=params[["c2"]],
+		  r=params[["r"]],
+		  sigma2=params[["sigma2"]],
+		  phi=params[["phi"]],
+		  tau2R=params[["tau2R"]],
 		  pB0=hyper.params[["pB0"]],
 		  pB1=hyper.params[["pB1"]],
 		  alphaB=hyper.params[["alphaB"]],
 		  betaB=hyper.params[["betaB"]])
-	return(tmp)
+	res$a <- params$a
+	res$gamma2 <- params$gamma2
+	res$rho <- params$rho
+	res$tau2Rho <- params$tau2Rho
+	res$pA0 <- params$pA1
+	res$pA1 <- params$pA1
+	res$alphaA <- params$alphaA
+	res$betaA <- params$betaA
+	res$t <- params$t
+	res$theta <- params$theta
+	res$l <- params$l
+	res$lambda <- params$lambda
+	res$xi <- params$xi
+	stopifnot(length(setdiff(names(params), names(res)))==0)
+	res <- as(res, "Params")
+	return(res)
 }
