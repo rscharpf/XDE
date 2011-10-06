@@ -82,6 +82,7 @@ export(calculatePosteriorAvg,
 ## functions and methods for v2 interface
 ##
 ##---------------------------------------------------------------------------
+importFrom(mvtnorm, rmvnorm)
 export(getParameters, getHyperparameters, updateANu)
 exportMethods(phenotype)
 

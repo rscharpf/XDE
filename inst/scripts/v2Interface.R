@@ -14,7 +14,11 @@ data(expressionSetList)
 ##hyper.params <- XDE:::getHyperparameters(G=3592, Q=3, S=c(100,50,75))
 hyper.params <- XDE:::getHyperparameters(object=expressionSetList)
 params <- XDE:::getParameters(hyper.params)
-
+psi <- phenotype(expressionSetList, "adenoVsquamous")
+params$psi <- psi
+res <- updateANu(expressionSetList,
+		 hyper.params,
+		 params)
 ##---------------------------------------------------------------------------
 ## initialize clinical variables
 ##---------------------------------------------------------------------------
