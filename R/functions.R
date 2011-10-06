@@ -670,6 +670,13 @@ getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
 		## simulate from multivariate normal
 		nu[g, ] <- rmvnorm(1, sigma=Sig)
 	}
+	Delta <- matrix(NA, G, Q)
+	for(g in seq(length=G)){
+		R <- makeSigma(Q=Q, gamma2=c2, tau2=tau2Rho, a=b,
+			       sigma2=sigma2[g, ], r=r)
+		## simulate from multivariate normal
+		Delta[g, ] <- rmvnorm(1, sigma=Sig)
+	}
 	##---------------------------------------------------------------------------
 	##
 	## Simulating delta
@@ -699,6 +706,7 @@ getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
         ##         updateBeta_MRF
         ##         updateBetag_MRF
         ##         updateDeltaDDelta_MRF
+
 	##
 	## model D:
 	##         updateAlpha_MRF_onedelta
@@ -707,32 +715,46 @@ getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
 	##
 	alpha.mrf <- -0.2  ## in (-Inf, +Inf)
 	beta.mrf <- 3.0    ## > 0
-	if(!MRF){
-		if(one.delta){
-			## model A
-			delta <- rep(NA, G)
-		} else {
-			## model B (default)
-			delta <- matrix(NA, G, Q)
-		}
-	} else {
-		## 1. specify alpha.mrf, beta.mrf
-		## 2. specify |N_g|
-		## 3. sample |N_g| indices from {1, ..., G} to form N_g for each g
-		## 4. simulate delta_g or delta_gp from Bernoulli(prob), with
-		##    prob = exp (...)/(1+exp(...))
-		##    ... =
-		##
-		if(one.delta){
-			## model D
-			delta <- rep(NA, G)
-
-
-		} else {
-			## model C
-			delta <- matrix(NA, G, Q)
-		}
+	if(one.delta){
+		delta <- rbinom(G, 1, 0.2)
+		Delta[delta==0, ] <- 0
+	} else{
+		delta <- matrix(rbinom(G*Q, 1, 0.2), G, Q)
+		Delta <- Delta*delta
 	}
+##	if(!MRF){
+##		if(one.delta){
+##			## model A
+##			##delta <- rep(0L, G)
+##			delta <- rbinom(G, 1, 0.2)
+##		} else {
+##			## model B (default)
+##			delta <- matrix(0L, G, Q)
+##		}
+##	} else {
+##		## 1. specify alpha.mrf, beta.mrf
+##		## 2. specify |N_g|
+##		## 3. sample |N_g| indices from {1, ..., G} to form N_g for each g
+##		## 4. simulate delta_g or delta_gp from Bernoulli(prob), with
+##		##    prob = exp (...)/(1+exp(...))
+##		##    ... =
+##		##
+##		if(one.delta){
+##			delta <- rbinom(G, 1, 0.2)
+##			## model D
+##			## a subset of genes are differentially expressed
+##			##    the probability of a gene's differential expression
+##			##    depends on other genes in the network and is assumed
+##			##    to be the same across platforms.
+##			## Let's assume 20% of the genes are differentially expressed
+##
+##			##
+##			##
+##		} else {
+##			## model C
+##			delta <- matrix(NA, G, Q)
+##		}
+##	}
 	res <- list(gamma2=gamma2,
 		    c2=c2,
 		    tau2Rho=tau2Rho,
@@ -746,15 +768,17 @@ getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
 		    phi=phi,
 		    sigma2=sigma2,
 		    r=r,
-		    rho=rho)
-
+		    rho=rho,
+		    delta=delta,
+		    nu=nu,
+		    Delta=Delta)
 }
 
-getHyperparameters <- function(object, G, Q, S, ...){
+getHyperparameters <- function(object, G, Q, S, seed, ...){
 	if(!missing(object)){
 		stopifnot(is(object, "ExpressionSetList"))
 		Gs <- sapply(object, nrow)
-		stopifnot(length(unique(G)) == 1)
+		stopifnot(length(unique(Gs)) == 1)
 		G <- Gs[[1]]
 		Q <- length(object)
 		S <- sapply(object, ncol)
@@ -762,6 +786,7 @@ getHyperparameters <- function(object, G, Q, S, ...){
 		anymissing <- missing(G) | missing(Q) | missing(S)
 		stopifnot(!anymissing)
 	}
+	if(missing(seed)) seed <- 123L
 
 	betaA <- alphaA <- 1.0
 	pA0 <- pA1 <- 0.1
@@ -770,7 +795,10 @@ getHyperparameters <- function(object, G, Q, S, ...){
 	betaB <- alphaB <- 1.0
 	pB0 <- pB1 <- 0.1
 
+	## degrees of freedom for correlation of Delta
+	## p.8 Scharpf et al
 	nuR <- 1.0+Q
+	## degrees of freedom for correlation of Nu
 	nuRho <- 1.0+Q
 
 	betaXi <- alphaXi <- 1.0
@@ -801,6 +829,49 @@ getHyperparameters <- function(object, G, Q, S, ...){
 		    betaEta=betaEta,
 		    pOmega0=pOmega0,
 		    lambdaOmega=lambdaOmega,
-		    lambdaKappa=lambdaKappa)
+		    lambdaKappa=lambdaKappa,
+		    seed=seed)
 	return(res)
+}
+
+updateANu <- function(object, hyper.params, params){
+	seed <- 123L
+	nTry <- 2L
+	nAccept <- 1L
+	epsilon <- 0.2
+	params[["nu"]] <- as.numeric(params[["nu"]])
+	params[["delta"]] <- as.integer(params[["delta"]])
+	params[["Delta"]] <- as.numeric(params[["Delta"]])
+	params[["psi"]] <- as.integer(params[["psi"]])
+	params[["phi"]] <- as.numeric(params[["phi"]])
+	hyper.params[["S"]] <- as.integer(hyper.params[["S"]])
+	rho <- params[["rho"]]
+	params[["rho"]] <- rho[upper.tri(rho)]
+	params[["sigma2"]] <- as.numeric(params[["sigma2"]])
+	x <- lapply(object, function(object) as.numeric(exprs(object)))
+	x <- unlist(x)
+	res <- .C("updateANu",
+		  seed=seed,
+		  nTry=nTry,
+		  nAccept=nAccept,
+		  epsilon=epsilon,
+##		  tmp=list(
+		  a=params[["a"]],
+		  nu=params[["nu"]],
+		  Q=hyper.params[["Q"]],
+		  G=hyper.params[["G"]],
+		  S=hyper.params[["S"]],
+		  x=x,
+		  psi=params[["psi"]],
+		  delta=params[["delta"]],
+		  Delta=params[["Delta"]],
+		  gamma2=params[["gamma2"]],
+		  rho=params[["rho"]],
+		  sigma2=params[["sigma2"]],
+		  phi=params[["phi"]],
+		  tau2Rho=params[["tau2Rho"]],
+		  pA0=hyper.params[["pA0"]],
+		  pA1=hyper.params[["pA1"]],
+		  alphaA=hyper.params[["alphaA"]],
+		  betaA=hyper.params[["betaA"]])
 }

@@ -143,8 +143,8 @@ squamous carcinomas.  The binary covariate ``adenoVsquamous'' has been
 defined in each of the \eset{} elements for this purpose.  The
 following statement must evaluate to \texttt{TRUE}:
 
-<<covariate, eval=TRUE>>=
-all(sapply(xlist, function(x, label){ label %in% varLabels(x)}, label="adenoVsquamous"))
+<<covariate>>=
+stopifnot(all(sapply(xlist, function(x, label){ label %in% varLabels(x)}, label="adenoVsquamous")))
 @
 
 

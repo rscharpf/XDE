@@ -190,7 +190,7 @@ int mainTest(void) {
 
   vector<vector<int> > neighbour;
   neighbour.resize(G);
-
+  // RS: 'neighbour' stores the binary matrix R
   ifstream in("R.txt");
   for (g = 0; g < G; g++) {
     neighbour[g].resize(0);
