@@ -874,4 +874,5 @@ updateANu <- function(object, hyper.params, params){
 		  pA1=hyper.params[["pA1"]],
 		  alphaA=hyper.params[["alphaA"]],
 		  betaA=hyper.params[["betaA"]])
+	return(res)
 }

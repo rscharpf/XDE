@@ -224,9 +224,13 @@ setMethod("goodnessOfFit", c("ExpressionSetList", "XdeMcmc"),
 ##	  })
 setMethod("phenotype", signature(object="ExpressionSetList", varLabel="character"),
 	  function(object, varLabel){
-		  stopifnot(all(sapply(xlist, function(x, label){ label %in% varLabels(x)}, label=varLabel)))
+		  stopifnot(all(sapply(object, function(x, label){ label %in% varLabels(x)}, label=varLabel)))
 		  f <- function(object, varLabel){
-			  eval(substitute(object$NAME_ARG, list(NAME_ARG=varLabel)))
+			  as.integer(eval(substitute(object$NAME_ARG, list(NAME_ARG=varLabel))))
 		  }
-		  sapply(object, f, varLabel)
+		  clinical.var <- sapply(object, f, varLabel)
+		  unique.var <- unique(as.integer(clinical.var))
+		  stopifnot(is(unique.var, "integer"))
+		  stopifnot(all(unique.var %in% 0:1))
+		  return(clinical.var)
 	  })
