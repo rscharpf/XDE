@@ -1,9 +1,9 @@
-xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2, center=TRUE){
+xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2, center=TRUE, ...){
 	if(is.null(batchSize)){
 		fit <- xdeFit(paramsMcmc=paramsMcmc,
 			      esetList=esetList,
 			      outputMcmc=outputMcmc,
-			      center=center)
+			      center=center, ...)
 	} else{
 		## Tabulate running average of posterior means
 		## Remove log files after each batch
@@ -13,23 +13,23 @@ xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2, cente
 		for(i in 1:I){
 			cat("Batch ", i, "\n")
 			if(i > 1){
-				firstMcmc(paramsMcmc) <- lastMcmc(fit)					
+				firstMcmc(paramsMcmc) <- lastMcmc(fit)
 				fit <- xdeFit(paramsMcmc=paramsMcmc,
 					      esetList=esetList,
-					      center=center)			
+					      center=center)
 				pa.last <- calculatePosteriorAvg(fit, NCONC=NCONC)
 				pa.cum <- (pa.last*batchSize + pa.cum*(i-1)*batchSize)/(i*batchSize)
-				
+
 				bes.last <- calculateBayesianEffectSize(fit)
 				bes.cum <- (bes.last*batchSize + bes.cum*(i-1)*batchSize)/(i*batchSize)
 			} else{
 				fit <- xdeFit(paramsMcmc=paramsMcmc,
 					      esetList=esetList,
-					      center=center)						
+					      center=center)
 				pa.cum <- calculatePosteriorAvg(fit, NCONC=NCONC)
 				bes.cum <- calculateBayesianEffectSize(fit)
 			}
-			unlink(directory(paramsMcmc), recursive=TRUE)			
+			unlink(directory(paramsMcmc), recursive=TRUE)
 		}
 		bayesianEffectSize(fit) <- bes.cum
 		posteriorAvg(fit) <- pa.cum
@@ -37,7 +37,8 @@ xde <- function(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2, cente
 	return(fit)
 }
 
-xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
+xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE,
+		   dryrun=FALSE){
 	if(!file.exists(directory(paramsMcmc))){
 		dir.create(directory(paramsMcmc), recursive=TRUE)
 	}
@@ -73,7 +74,7 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 	if(any(is.na(expression.vector))){
 		stop("Missing values in the expression data")
 	}
-	##Convert phenoData to a vector 
+	##Convert phenoData to a vector
 	convertToVector <- function(x, phenotypeLabel){
 		x <- pData(x)
 		if(dim(x)[2] > 1 & is.null(phenotypeLabel)){
@@ -95,11 +96,12 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 				firstMcmc=firstMcmc,
 				expression.vector=expression.vector,
 				psi=psi)
+	if(dryrun) stop(return(ZZ))
 	TRY <- tryCatch(results <- .C("xdeLIN_main",
 				      seed = ZZ[["seed"]],
 				      showIterations = ZZ[["showIterations"]],
 				      nIt = ZZ[["nIt"]],
-				      oneDelta=ZZ[["one.delta"]],  ##if zero, prior model A (multiple delta) is used				
+				      oneDelta=ZZ[["one.delta"]],  ##if zero, prior model A (multiple delta) is used
 				      Q = ZZ[["Q"]],
 				      G = ZZ[["G"]],
 				      S = ZZ[["S"]],
@@ -107,7 +109,7 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 				      Psi = ZZ[["Psi"]],
 				      specifiedInitialValues = ZZ[["specifiedInitialValues"]],
 				      Nu = ZZ[["Nu"]],
-				      DDelta = ZZ[["DDelta"]], 
+				      DDelta = ZZ[["DDelta"]],
 				      A = ZZ[["A"]],
 				      B = ZZ[["B"]],
 				      C2 = ZZ[["C2"]],
@@ -152,7 +154,7 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 				      valueTau2Rho=ZZ[["valueTau2Rho"]],
 				      valueProbDelta = ZZ[["valueProbDelta"]],
 				      valueDiffexpressed=ZZ[["valueDiffexpressed"]],
-				      writeDiffexpressedTofile=ZZ[["writeDiffexpressedTofile"]]),                                          
+				      writeDiffexpressedTofile=ZZ[["writeDiffexpressedTofile"]]),
                   error=function(e) NULL)
 	if(is.null(TRY)){
 		stop("Problem in C wrapper to xdeLIN_main. Check arguments in .fit")
@@ -198,7 +200,7 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 ##		##if(nrow(xmcmc@posteriorAvg) == ZZ$G){
 ##		##	rownames(xmcmc@posteriorAvg) <- featureNames(esetList)
 ##		##}
-##	} 
+##	}
 	xmcmc
 }
 
@@ -264,10 +266,10 @@ xdeFit <- function(paramsMcmc, esetList, outputMcmc, center=TRUE){
 		  valueTheta = as.double(firstMcmc$Theta),#50
 		  valueLambda = as.double(firstMcmc$Lambda),#51
 		  valueTau2R = as.double(firstMcmc$Tau2R),#52
-		  valueTau2Rho = as.double(firstMcmc$Tau2Rho),#52		  
+		  valueTau2Rho = as.double(firstMcmc$Tau2Rho),#52
 		  valueProbDelta = as.double(firstMcmc$ProbDelta),#53
-		  ##posterior mean of differential expression,  concordant differential expression, and discordant differential expression            
+		  ##posterior mean of differential expression,  concordant differential expression, and discordant differential expression
 		  valueDiffexpressed = as.double(firstMcmc$Diffexpressed), ##54
-		  writeDiffexpressedTofile = as.integer(FALSE)) ##55 -- 
+		  writeDiffexpressedTofile = as.integer(FALSE)) ##55 --
 	ZZ
 }
