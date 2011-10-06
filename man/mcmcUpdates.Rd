@@ -41,7 +41,7 @@ R. Scharpf
 }
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+  %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 data(expressionSetList)
@@ -53,5 +53,5 @@ res <- updateANu(expressionSetList,
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{}
+\keyword{iteration}
 

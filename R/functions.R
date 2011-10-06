@@ -597,7 +597,7 @@ makeSigma <- function(G, Q, gamma2, tau2, a, sigma2, r){
 }
 
 getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
-	require(mvtnorm)
+	##require(mvtnorm)
 	G <- hyper.parameters[["G"]]
 	Q <- hyper.parameters[["Q"]]
 	pA0 <- hyper.parameters[["pA0"]]
