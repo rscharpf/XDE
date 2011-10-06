@@ -10,7 +10,7 @@
 ##
 ##---------------------------------------------------------------------------
 library(XDE)
-hyper.params <- getHyperparameters(G=3592, Q=3, S=c(100,50,75))
+hyper.params <- XDE:::getHyperparameters(G=3592, Q=3, S=c(100,50,75))
 
 ##---------------------------------------------------------------------------
 ## initialize clinical variables
@@ -26,7 +26,7 @@ psi <- c(rbinom(S[1], 1, 0.5),
 ##
 ##---------------------------------------------------------------------------
 trace(getParameters, browser)
-tmp <- getParameters(hyper.params)
+tmp <- XDE:::getParameters(hyper.params)
 
 ##
 ## simulate data from model
