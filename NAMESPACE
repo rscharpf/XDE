@@ -77,6 +77,13 @@ export(calculatePosteriorAvg,
 #export(.goodnessOfFit, computeGOF)
 
 
+##---------------------------------------------------------------------------
+##
+## functions and methods for v2 interface
+##
+##---------------------------------------------------------------------------
+export(getParameters, getHyperparameters, updateANu)
+exportMethods(phenotype)
 
 
 

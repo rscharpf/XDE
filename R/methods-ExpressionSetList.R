@@ -222,3 +222,11 @@ setMethod("goodnessOfFit", c("ExpressionSetList", "XdeMcmc"),
 ##			      lambdaKappa=lambdaKappa)
 ##		  return(res)
 ##	  })
+setMethod("phenotype", signature(object="ExpressionSetList", varLabel="character"),
+	  function(object, varLabel){
+		  stopifnot(all(sapply(xlist, function(x, label){ label %in% varLabels(x)}, label=varLabel)))
+		  f <- function(object, varLabel){
+			  eval(substitute(object$NAME_ARG, list(NAME_ARG=varLabel)))
+		  }
+		  sapply(object, f, varLabel)
+	  })
