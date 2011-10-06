@@ -11,12 +11,12 @@ validityMethod <- function(object){
 	if(class(fnList) != "matrix") {
 		warning("all objects in ExpressionSetList must have the same number of features")
 		return(FALSE)
-	} 
-	
+	}
+
 	f <- function(features){
 		length(unique(features)) == 1
 	}
-  
+
 	identicalFeatureNames <- apply(fnList, 1, f)
 	if(any(!identicalFeatureNames)) {
 		warning("featureNames must be in the same order for each element in the list")
@@ -61,6 +61,7 @@ setClass("XdeParameter",
 			one.delta="logical"))
 
 
-
+setClass("HyperParams", contains="list")
+setClass("Params", contains="list")
 
 

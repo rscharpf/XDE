@@ -12,7 +12,6 @@
 }
 
 \usage{
-  dim(object)
   phenotype(object, varLabel)
 }
 

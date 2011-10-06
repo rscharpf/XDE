@@ -2,9 +2,9 @@
 
 #include "Update_v2.h"
 
-extern "C" {
   // nu|... ~ N(0, Sigma)
   // a is the power conjugate
+extern "C" {
   void updateANu(int *seed,
 		 const int *nTry,
 		 int *nAccept,
@@ -33,11 +33,13 @@ extern "C" {
 	      *gamma2,rho,sigma2,phi,tau2Rho,*pA0,*pA1,*alphaA,*betaA);
 
     *seed = (int) seedU;
+    //printf("seems to be working");
 
     return;
   }
+} // extern "C"
 
-
+extern "C" {
   void updateBDDelta(int *seed,
 		     const int *nTry,
 		     int *nAccept,
@@ -69,8 +71,9 @@ extern "C" {
 
     return;
   }
+} // extern "C"
 
-
+extern "C"{
   void updateTau2RhoNu(int *seed,
 		       const int *nTry,
 		       int *nAccept,

@@ -12,81 +12,33 @@
 library(XDE)
 data(expressionSetList)
 ##hyper.params <- XDE:::getHyperparameters(G=3592, Q=3, S=c(100,50,75))
-hyper.params <- XDE:::getHyperparameters(object=expressionSetList)
-params <- XDE:::getParameters(hyper.params)
-psi <- phenotype(expressionSetList, "adenoVsquamous")
-params$psi <- psi
-res <- updateANu(expressionSetList,
+hyper.params <- HyperParams(object=expressionSetList, clinicalCovariate="adenoVsquamous")
+params <- Params(hyper.params)
+
+## note that some values have changed, but nAccept is 'zero'
+## Also, the seed has not changed
+trace(rupdateANu, browser)
+res <- rupdateANu(expressionSetList,
 		 hyper.params,
-		 params)
-##---------------------------------------------------------------------------
-## initialize clinical variables
-##---------------------------------------------------------------------------
-S <- hyper.params[["S"]]
-psi <- c(rbinom(S[1], 1, 0.5),
-	 rbinom(S[2], 1, 0.5),
-	 rbinom(S[3], 1, 0.5))
+		 params,
+		 nTry=10e5,
+		 epsilon=0.01)
 
-##---------------------------------------------------------------------------
-##
-## initialize parameters to be simulated
-##
-##---------------------------------------------------------------------------
-tmp <- XDE:::getParameters(hyper.params)
-
-##
-## simulate data from model
-##
-
-##---------------------------------------------------------------------------
-##
-##  run Metropolis-Hastings updates
-##
-##---------------------------------------------------------------------------
+trace(updateBDDelta, browser)
+res <- rupdateBDDelta(expressionSetList,
+		     hyper.params,
+		     params,
+		     nTry=100000,
+		     epsilon=0.00001)
 
 
-##---------------------------------------------------------------------------
-##
-##  initialize parameters to be simulated (to random values)
-##
-##---------------------------------------------------------------------------
 
 
-##---------------------------------------------------------------------------
-##
-##  parameter updates
-##
-##---------------------------------------------------------------------------
 
-## update potential
-##...
-##
 
-## begin mcmc
-## update nu
-seed <- 123L
-nu <- .C("updateANu", seed=seed,
-	 nTry=Q
-	 nAccept=0
-	 epsilonANu=0.1,
-	 a=a,
-	 nu=nu,
-	 Q=Q
-	 G=G,
-	 S=S,
-	 x=x,
-	 psi=psi,
-	 delta=delta,
-	 Delta=Delta,
-	 gamma2=gamma2,
-	 rho=rho,
-	 sigma2=sigma2,
-	 phi=phi,
-	 tau2Rho=tau2Rho,
-	 pA0=pA0,
-	 pA1=pA1,
-	 alphaA=alphaA,
-	 betaA=betaA)
+
+
+
 
 
 
