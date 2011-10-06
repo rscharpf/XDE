@@ -13,6 +13,7 @@
 \alias{nrow,ExpressionSetList-method}
 \alias{pData,ExpressionSetList-method}
 \alias{pca,ExpressionSetList-method}
+\alias{phenotype,ExpressionSetList,character-method}
 \alias{standardizeSamples,ExpressionSetList-method}
 \alias{studyCenter,ExpressionSetList-method}
 \alias{zeroNu,ExpressionSetList-method}
@@ -31,7 +32,7 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
   }
 }
 \section{Extends}{
-  
+
   Class \code{"\linkS4class{list}"}, from data part.
   Class \code{"\linkS4class{vector}"}, by class "list", distance 2.
   Class \code{\link[Biobase]{class.AssayData}}, by class "list", distance 2.
@@ -39,7 +40,7 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
 }
 \section{Methods}{
   \describe{
-    
+
     \item{.integrativeCorrelationFilter}{\code{signature(object =
   "ExpressionSetList")} Experimental function for filtering an arbitrary
   list of ExpressionSets by integrative correlation.  Genes are excluded
@@ -48,7 +49,7 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
 \item{"["}{\code{signature(x = "ExpressionSetList")} Subsets each
   \code{ExpressionSet} element in the list.}
 
-    
+
 \item{coerce}{\code{signature(from = "list", to = "ExpressionSetList")}
   Coerces a list of \code{ExpressionSet} objects to an object of class
   \code{ExpressionSetList}. The \code{validityMethod} for the
@@ -78,10 +79,15 @@ Objects can be created by calls of the form \code{new("ExpressionSetList", ...)}
   list of \code{data.frames}.  The elements of the list correspond to
   the studies in the \code{ExpressionSetList} object.}
 
-\item{.pca}{\code{signature(object = "ExpressionSetList")} Runs
-  principal components to generate cross-study summary scores of
-  differential expression in multiple studies.  Not meant to be called
-  directly.  See \code{\link{xsScores}}.}
+%\item{.pca}{\code{signature(object = "ExpressionSetList")} Runs
+%  principal components to generate cross-study summary scores of
+%  differential expression in multiple studies.  Not meant to be called
+%  directly.  See \code{\link{xsScores}}.}
+\item{phenotype}{\code{signature(object="ExpressionSetList",
+    varLabel="character")}
+  Accessor for the clinical variable. Assumes that the clinical variable
+  has the same name in each study.
+  }
 
 \item{standardizeSamples}{\code{signature(object = "ExpressionSetList")}
   See \code{\link{standardizeSamples}}

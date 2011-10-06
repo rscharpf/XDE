@@ -53,3 +53,4 @@ setGeneric("zeroNu", function(object, ...) standardGeneric("zeroNu"))
 
 
 ##setGeneric("getHyperparameters", function(object, G, Q, S, ...) standardGeneric("getHyperparameters"))
+setGeneric("phenotype", function(object, varLabel) standardGeneric("phenotype"))
