@@ -19,17 +19,17 @@ params <- Params(hyper.params)
 ## Also, the seed has not changed
 trace(rupdateANu, browser)
 res <- rupdateANu(expressionSetList,
-		 hyper.params,
-		 params,
-		 nTry=10e5,
-		 epsilon=0.01)
+		  hyper.params,
+		  params,
+		  nTry=1000L,
+		  epsilon=0.05)
 
 trace(updateBDDelta, browser)
 res <- rupdateBDDelta(expressionSetList,
 		     hyper.params,
 		     params,
-		     nTry=100000,
-		     epsilon=0.00001)
+		     nTry=100000L,
+		     epsilon=.2)
 
 
 
