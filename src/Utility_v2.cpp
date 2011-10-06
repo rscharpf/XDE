@@ -10,7 +10,7 @@
 
 int qg2index(int q,int g,int Q,int G) {
   int index = g * Q + q;
-  
+
   return index;
 }
 
@@ -20,9 +20,9 @@ int sq2index(int s,int q,const int *S,int Q) {
   int p;
   for (p = 0; p < q; p++)
     index += S[p];
-  
+
   index += s;
-  
+
   return index;
 }
 
@@ -38,14 +38,14 @@ int sqg2index(int s,int q,int g,const int *S,int Q,int G) {
     index += S[p];
 
   index += s;
-  
+
   return index;
 }
 
 
 int qg2indexNew(int q,int g,int Q,int G) {
   int index = q * G + g;
-  
+
   return index;
 }
 
@@ -55,9 +55,9 @@ int sq2indexNew(int s,int q,const int *S,int Q) {
   int qq;
   for (qq = 0; qq < q; qq++)
     index += S[qq];
-  
+
   index += s;
-  
+
   return index;
 }
 
@@ -67,9 +67,9 @@ int sqg2indexNew(int s,int q,int g,const int *S,int Q,int G) {
   int qq;
   for (qq = 0; qq < q; qq++)
     index += G * S[qq];
-  
+
   index += S[q] * g + s;
-  
+
   return index;
 }
 
@@ -87,7 +87,7 @@ int qq2index(int q1,int q2,int Q) {
     index += Q - p1 - 1;
 
   index += q2 - q1 - 1;
-  
+
   return index;
 }
 
@@ -98,6 +98,7 @@ void makeSigma(int g,int G,std::vector<std::vector<double> > &Sigma,const int Q,
 	       const double *r) {
   Sigma.resize(Q);
   int q;
+  // diagonal elements
   for (q = 0; q < Q; q++) {
     int kqg = qg2index(q,g,Q,G);
     Sigma[q].resize(Q);
@@ -106,6 +107,7 @@ void makeSigma(int g,int G,std::vector<std::vector<double> > &Sigma,const int Q,
   }
 
   int q1,q2;
+  // off-diagonal elements
   for (q1 = 0; q1 < Q; q1++)
     for (q2 = q1 + 1; q2 < Q; q2++) {
       int k = qq2index(q1,q2,Q);
@@ -125,7 +127,7 @@ void makeSigma(int g,int G,std::vector<std::vector<double> > &Sigma,
 	       const double *a,const double *sigma2,
 	       const double *r) {
   int dim = 0;
-  int q; 
+  int q;
   for (q = 0; q < Q; q++)
     dim += on[q];
 
@@ -156,7 +158,7 @@ void makeSigma(int g,int G,std::vector<std::vector<double> > &Sigma,
 	  k2++;
 	}
       }
-      
+
       k1++;
     }
   }
@@ -172,22 +174,22 @@ double nuGibbs(double *nu,int Q,int G,const int *S,double gamma2,
 	       const int *psi,const double *x,
 	       const int *delta,const double *Delta,Random &ran,int draw) {
   double pot = 0.0;
-  
+
   int g;
   for (g = 0; g < G; g++) {
     //
     // compute prior covariance matrix
     //
-    
+
     std::vector<std::vector<double> > var;
     makeSigma(g,G,var,Q,gamma2,tau2Rho,a,sigma2,rho);
-    
+
     //
     // define prior mean
     //
-    
+
     std::vector<double> Mean(Q,0.0);
-	  
+
     //
     // compute extra linear and quadratic terms
     //
@@ -205,31 +207,31 @@ double nuGibbs(double *nu,int Q,int G,const int *S,double gamma2,
 	double variance = psi[ksq] == 0 ? var0 : var1;
 	quad[q] += 1.0 / variance;
 	int ksqg = sqg2index(s,q,g,S,Q,G);
-	lin[q] += (x[ksqg] - delta[kqg] * (2.0 * psi[ksq] - 1.0) * 
+	lin[q] += (x[ksqg] - delta[kqg] * (2.0 * psi[ksq] - 1.0) *
 		   Delta[kqg]) / variance;
       }
     }
-	  
+
     //
-    // Update parameters based on available observations 
+    // Update parameters based on available observations
     //
-    
+
     std::vector<std::vector<double> > varInv;
     double detPrior = inverse(var,varInv);
-	  
+
     for (q = 0; q < Q; q++) {
       varInv[q][q] += quad[q];
       Mean[q] += lin[q];
     }
-	  
+
     double detPosterior = 1.0 /inverse(varInv,var);
     std::vector<double> mean(Q,0.0);
     matrixMult(var,Mean,mean);
-	  
+
     //
     // Draw new values
     //
-    
+
     std::vector<double> vv(Q,0.0);
 
     if (draw == 1)
@@ -242,7 +244,7 @@ double nuGibbs(double *nu,int Q,int G,const int *S,double gamma2,
     }
 
     pot += ran.PotentialMultiGaussian(var,mean,vv);
-    
+
     if (draw == 1) {
       for (q = 0; q < Q; q++) {
 	int kqg = qg2index(q,g,Q,G);
@@ -253,7 +255,7 @@ double nuGibbs(double *nu,int Q,int G,const int *S,double gamma2,
 
   return pot;
 }
-  
+
 
 
 double DeltaGibbs(int g,double *Delta,int Q,int G,const int *S,double c2,
@@ -262,11 +264,11 @@ double DeltaGibbs(int g,double *Delta,int Q,int G,const int *S,double c2,
 		  const int *psi,const double *x,
 		  const int *delta,const double *nu,Random &ran,int draw) {
   double pot = 0.0;
-  
+
   //
   // compute prior covariance matrix
   //
-  
+
   int dim = 0;
   std::vector<int> on(Q,0);
   int q;
@@ -277,24 +279,24 @@ double DeltaGibbs(int g,double *Delta,int Q,int G,const int *S,double c2,
       dim++;
     }
   }
-  
+
   if (dim > 0) {
     std::vector<std::vector<double> > var;
     makeSigma(g,G,var,on,Q,c2,tau2R,b,sigma2,r);
-    
+
     //
     // define prior mean
     //
-    
+
     std::vector<double> Mean(dim,0.0);
     std::vector<double> meanPrior(Mean);
-    
+
     //
     // compute extra linear and quadratic terms
     //
-    
+
     std::vector<double> mean(dim,0.0);
-    
+
     std::vector<double> lin(dim,0.0);
     std::vector<double> quad(dim,0.0);
     int s;
@@ -316,11 +318,11 @@ double DeltaGibbs(int g,double *Delta,int Q,int G,const int *S,double c2,
 	k++;
       }
     }
-    
+
     //
-    // Update parameters based on available observations 
+    // Update parameters based on available observations
     //
-    
+
     std::vector<std::vector<double> > varInv;
     double detPrior = inverse(var,varInv);
     std::vector<std::vector<double> > covInvPrior(varInv);
@@ -330,13 +332,13 @@ double DeltaGibbs(int g,double *Delta,int Q,int G,const int *S,double c2,
     }
     double detPosterior = 1.0 / inverse(varInv,var);
     matrixMult(var,Mean,mean);
-    
+
     //
     // Draw new values
     //
-    
+
     std::vector<double> vv(dim,0.0);
-    if (draw == 1) 
+    if (draw == 1)
       vv = ran.MultiGaussian(var,mean);
     else {
       k = 0;
@@ -383,10 +385,10 @@ double DeltaGibbs(int g,double *Delta,int Q,int G,const int *S,double c2,
     cout << "nuDDelta: " << potTest << endl;
     */
   }
-  
+
   return pot;
 }
-  
+
 
 
 double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
@@ -395,15 +397,15 @@ double DeltaGibbs(double *Delta,int Q,int G,const int *S,double c2,
 		  const int *psi,const double *x,
 		  const int *delta,const double *nu,Random &ran,int draw) {
   double pot = 0.0;
-  
+
   int g;
   for (g = 0; g < G; g++)
     pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,phi,psi,x,
 		      delta,nu,ran,draw);
-  
+
   return pot;
 }
-  
+
 
 
 void updateMRF1perfect_onedelta(int g,vector<int> &valueLower,
@@ -420,7 +422,7 @@ void updateMRF1perfect_onedelta(int g,vector<int> &valueLower,
 
   int n = neighbour[g].size();
   double omega;
-  if (n > 0) 
+  if (n > 0)
     omega = omega0 * ((double) n) / (kappa + ((double) n));
   else
     omega = 0.0;
@@ -474,9 +476,9 @@ void updateMRF1perfect_onedelta(int g,vector<int> &valueLower,
 
     meanLower = (1.0 - omega) * eta0 + omega * meanLower;
     meanUpper = (1.0 - omega) * eta0 + omega * meanUpper;
-    
+
     double extra = omega / ((double) neighbour[gene].size());
-    
+
     if (valueLower[gene] == 0 && valueUpper[gene] == 0) {
       potUpper += - log(1.0 - meanUpper) + log(1.0 - meanUpper - extra);
       potLower += - log(1.0 - meanLower) + log(1.0 - meanLower - extra);
@@ -564,12 +566,12 @@ double perfectMRF1_onedelta(int *delta,int G,
 	int k;
 	for (k = first; k < last; k++) {
 	  int g;
-	  for (g = 0; g < G; g++) 
+	  for (g = 0; g < G; g++)
 	    updateMRF1perfect_onedelta(g,valueLower,valueUpper,potOn,
 				       potOff,neighbour,
 				       eta0,omega0,kappa,ran);
 	}
-	
+
 	unsigned int dummy = 1;
 	if (b == start.size() - 1) nextSeed = ran.ChangeSeed(dummy);
       }
@@ -589,7 +591,7 @@ double perfectMRF1_onedelta(int *delta,int G,
 	seeds.push_back(nextSeed);
 	start.push_back(2*start[start.size() - 1]);
       }
-      
+
       if (finished == 1) {
 	for (g = 0; g < G; g++)
 	  delta[g] = valueLower[g];
@@ -632,7 +634,7 @@ double perfectMRF1_onedelta(int *delta,int G,
 
   return pot;
 }
-			   
+
 
 
 
@@ -656,7 +658,7 @@ void updateMRF2perfect_onedelta(int g,vector<int> &valueLower,
     int ngg = neighbour[gg].size();
     //    double w = beta * exp(- kappa * log((double) (ng * ngg)));
     double w = beta * (1.0 / ((double) ng) + 1.0 / ((double) ngg));
-    
+
     if (valueLower[gg] == 0 && valueUpper[gg] == 0) {
       potLower += w;
       potUpper += w;
@@ -678,23 +680,23 @@ void updateMRF2perfect_onedelta(int g,vector<int> &valueLower,
     probLower = 1.0 / (1.0 + exp(potLower));
   else
     probLower = exp(- potLower) / (1.0 + exp(- potLower));
-  
+
   if (potUpper < 0.0)
     probUpper = 1.0 / (1.0 + exp(potUpper));
   else
     probUpper = exp(- potUpper) / (1.0 + exp(- potUpper));
-  
+
   double u = ran.Unif01();
   if (u < probLower)
     valueLower[g] = 1;
   else
     valueLower[g] = 0;
-  
+
   if (u < probUpper)
     valueUpper[g] = 1;
   else
     valueUpper[g] = 0;
-  
+
   return;
 }
 
@@ -732,11 +734,11 @@ double perfectMRF2_onedelta(int *delta,int G,
 	int k;
 	for (k = first; k < last; k++) {
 	  int g;
-	  for (g = 0; g < G; g++) 
+	  for (g = 0; g < G; g++)
 	    updateMRF2perfect_onedelta(g,valueLower,valueUpper,potOn,
 				       potOff,neighbour,alpha,beta,ran);
 	}
-	
+
 	unsigned int dummy = 1;
 	if (b == start.size() - 1) nextSeed = ran.ChangeSeed(dummy);
       }
@@ -756,7 +758,7 @@ double perfectMRF2_onedelta(int *delta,int G,
 	seeds.push_back(nextSeed);
 	start.push_back(2*start[start.size() - 1]);
       }
-      
+
       if (finished == 1) {
 	for (g = 0; g < G; g++)
 	  delta[g] = valueLower[g];
@@ -773,7 +775,7 @@ double perfectMRF2_onedelta(int *delta,int G,
       pot += - alpha + potOn[g];
     else
       pot += potOff[g];
-    
+
     int k;
     for (k = 0; k < neighbour[g].size(); k++) {
       int gg = neighbour[g][k];
@@ -782,7 +784,7 @@ double perfectMRF2_onedelta(int *delta,int G,
 	int ngg = neighbour[gg].size();
 	//	double w = 0.5 * exp(- kappa * log((double) (ng * ngg)));
 	double w = 1.0 / ((double) ng);
-	
+
 	pot += - beta * w;
       }
     }
@@ -790,7 +792,7 @@ double perfectMRF2_onedelta(int *delta,int G,
 
   return pot;
 }
-			   
+
 
 
 
@@ -803,10 +805,10 @@ void updateMRF2perfect(int q,int g,int Q,int G,vector<int> &valueLower,
   int kqg = qg2index(q,g,Q,G);
   double potLower = potOff[kqg] - potOn[kqg];
   double potUpper = potOff[kqg] - potOn[kqg];
-  
+
   potLower += - alpha;
   potUpper += - alpha;
-  
+
   int k;
   for (k = 0; k < neighbour[g].size(); k++) {
     int gg = neighbour[g][k];
@@ -814,8 +816,8 @@ void updateMRF2perfect(int q,int g,int Q,int G,vector<int> &valueLower,
     int ngg = neighbour[gg].size();
     //    double w = beta * exp(- kappa * log((double) (ng * ngg)));
     double w = beta * (1.0 / ((double) ng) + 1.0 / ((double) ngg));
-    
-    
+
+
     int kqgg = qg2index(q,gg,Q,G);
     if (valueLower[kqgg] == 0 && valueUpper[kqgg] == 0) {
       potLower += w;
@@ -835,7 +837,7 @@ void updateMRF2perfect(int q,int g,int Q,int G,vector<int> &valueLower,
   for (qq = 0; qq < Q; qq++) {
     if (qq != q) {
       int kqqg = qg2index(qq,g,Q,G);
-      
+
       if (valueLower[kqqg] == 0 && valueUpper[kqqg] == 0) {
 	potLower += betag / ((double) (Q - 1));
 	potUpper += betag / ((double) (Q - 1));
@@ -850,31 +852,31 @@ void updateMRF2perfect(int q,int g,int Q,int G,vector<int> &valueLower,
       }
     }
   }
-  
+
   double probLower;
   double probUpper;
   if (potLower < 0.0)
     probLower = 1.0 / (1.0 + exp(potLower));
   else
     probLower = exp(- potLower) / (1.0 + exp(- potLower));
-  
+
   if (potUpper < 0.0)
     probUpper = 1.0 / (1.0 + exp(potUpper));
   else
     probUpper = exp(- potUpper) / (1.0 + exp(- potUpper));
-  
+
   kqg = qg2index(q,g,Q,G);
   double u = ran.Unif01();
   if (u < probLower)
     valueLower[kqg] = 1;
   else
     valueLower[kqg] = 0;
-  
+
   if (u < probUpper)
     valueUpper[kqg] = 1;
   else
     valueUpper[kqg] = 0;
-  
+
   return;
 }
 
@@ -888,11 +890,11 @@ double perfectMRF2(int *delta,int Q,int G,
 		   double alpha,double beta,
 		   double betag,unsigned int *seed,int draw) {
   unsigned int finalStart = *seed;
-  
+
   if (draw == 1) {
     vector<int> start(1,-1);
     vector<unsigned int> seeds(1,finalStart);
-    
+
     unsigned int nextSeed;
     int finished = 0;
     while (finished == 0) {
@@ -913,11 +915,11 @@ double perfectMRF2(int *delta,int Q,int G,
 	for (k = first; k < last; k++) {
 	  int q,g;
 	  for (q = 0; q < Q; q++)
-	    for (g = 0; g < G; g++) 
+	    for (g = 0; g < G; g++)
 	      updateMRF2perfect(q,g,Q,G,valueLower,valueUpper,potOn,potOff,
 				neighbour,alpha,beta,betag,ran);
 	}
-	
+
 	unsigned int dummy = 1;
 	if (b == start.size() - 1) nextSeed = ran.ChangeSeed(dummy);
       }
@@ -940,7 +942,7 @@ double perfectMRF2(int *delta,int Q,int G,
 	seeds.push_back(nextSeed);
 	start.push_back(2*start[start.size() - 1]);
       }
-      
+
       if (finished == 1) {
 	for (q = 0; q < Q; q++)
 	  for (g = 0; g < G; g++) {
@@ -949,7 +951,7 @@ double perfectMRF2(int *delta,int Q,int G,
 	  }
       }
     }
-    
+
     *seed = nextSeed;
   }
 
@@ -962,7 +964,7 @@ double perfectMRF2(int *delta,int Q,int G,
 	pot += - alpha + potOn[kqg];
       else
 	pot += potOff[kqg];
-    
+
       int k;
       for (k = 0; k < neighbour[g].size(); k++) {
 	int gg = neighbour[g][k];
@@ -972,24 +974,24 @@ double perfectMRF2(int *delta,int Q,int G,
 	  int ngg = neighbour[gg].size();
 	  //	  double w = 0.5 * exp(- kappa * log((double) (ng * ngg)));
 	  double w = 1.0 / ((double) ng);
-	  
+
 	  pot += - beta * w;
 	}
       }
     }
-  
+
   int qq;
   for (q = 0; q < Q; q++)
-    for (qq = q + 1; qq < Q; qq++) 
+    for (qq = q + 1; qq < Q; qq++)
       for (g = 0; g < G; g++) {
 	int kqg = qg2index(q,g,Q,G);
 	int kqqg = qg2index(qq,g,Q,G);
 	if (delta[kqg] == delta[kqqg])
 	  pot += - betag / ((double) (Q - 1));
       }
-  
+
   return pot;
 }
-			   
+
 
 

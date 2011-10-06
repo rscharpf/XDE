@@ -24,7 +24,7 @@
 				       "tau2Rho",
                                         "probDelta",
                                         "diffExpressed")
-              
+
             ##These values are placeholders to create a chain of the
             ##right dimension.  If called, it is assumed that default
             ##starting values for the chain will be used.
@@ -40,7 +40,7 @@
             C2 <- rep(0, chain.length[["c2"]])
             Gamma2 <- rep(0, chain.length[["gamma2"]])
             Rho <- rep(0, QQ*(QQ-1)/2*chain.length[["rho"]])
-            R <- rep(0, QQ*(QQ-1)/2*chain.length[["r"]])              
+            R <- rep(0, QQ*(QQ-1)/2*chain.length[["r"]])
             Delta <- rep(0, G*QQ*chain.length[["delta"]])
             Xi <- rep(0, QQ*chain.length[["xi"]])
             Sigma2 <- rep(0, QQ * G*chain.length[["sigma2"]])
@@ -95,9 +95,9 @@ calculatePosteriorAvg <- function(object, NCONC=2, NDIFF=1, burnin=0){
 		##tmp <- t(rbind(colSums(x > 0), colSums(x < 0)))
 		colnames(tmp) <- c("#up", "#down")
 		discordant <- (tmp[, 1] * tmp[, 2]) != 0
-		
-		##1) no discordant signs		
-		concordant <- (tmp[, 1] * tmp[, 2]) == 0  
+
+		##1) no discordant signs
+		concordant <- (tmp[, 1] * tmp[, 2]) == 0
 		##2) let the number of concordant studies be user-specified
 		concordant <- concordant * (rowSums(tmp) >= NCONC)
 		diffExpr <- rowSums(abs(tmp)) >= NDIFF
@@ -176,7 +176,7 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 	##-----------------------------------------------------------
 	##Wrapper for Welch t-statistic
 ##	multtestWrapper <- function(eset, classlabel, ...){
-##		require(multtest) || stop("Package multtest not available")    
+##		require(multtest) || stop("Package multtest not available")
 ##		column <- grep(classlabel, colnames(pData(eset)))
 ##		if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
 ##		if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
@@ -190,7 +190,7 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 
 
 	sam.wrapper <- function(eset, classlabel, method, returnQ, gene.names){
-		require(siggenes) || stop("Package siggenes not available")              
+		require(siggenes) || stop("Package siggenes not available")
 		column <- grep(classlabel, colnames(pData(eset)))
 		if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
 		if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
@@ -207,7 +207,7 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 		require(GeneMeta) || stop("Package GeneMeta is not available")
 		pDataList <- function(eset, covariateName){
 			1-(pData(eset)[, grep(covariateName, colnames(pData(eset)))])
-		}  
+		}
 		classes <- lapply(object, pDataList, classlabel)
 		z <- zScores(object, classes=classes, useREM=useREM)
 		##    z <- data.frame(z[, grep("zSco", colnames(z))])
@@ -227,7 +227,7 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 	return(stat)
 }
 
-symbolsInteresting <- function(rankingStatistic, percentile=0.9, 
+symbolsInteresting <- function(rankingStatistic, percentile=0.9,
                                colors=c("grey50", "royalblue"),
                                symbols=c(".", "o"),
                                size=c(3, 1),
@@ -255,9 +255,9 @@ xsScores <- function(statistic, N){
 	if(missing(N)) stop("Must specify the sample size of each study")
 
 	scores <- matrix(NA, nrow(statistic), ncol=3)
-	if(!is.null(rownames(statistic))) rownames(scores) <- rownames(statistic)  
-	colnames(scores) <- c("diffExpressed", "concordant", "discordant")  
-  
+	if(!is.null(rownames(statistic))) rownames(scores) <- rownames(statistic)
+	colnames(scores) <- c("diffExpressed", "concordant", "discordant")
+
 	##------------------------------------------------
 	##Differential expression
 	scores[, 1] <- .pca(abs(statistic), N=N)
@@ -305,6 +305,8 @@ xsScores <- function(statistic, N){
                               "c2max")
   hyperparameters
 }
+
+
 
 ##.getPar <- function(object, ...){
 ##  as.list(...)
@@ -377,7 +379,7 @@ xsScores <- function(statistic, N){
 		    0.40,  #14. phi
 		    0.10,  #15. theta and lambda
 		    0.02,  #16. lambda
-		    0.04,  #17. tau2R             
+		    0.04,  #17. tau2R
 		    0.04) #18. tau2Rho
   names(tuning) <- c("nu", "Delta",  "a", "b", "c2", "gamma2",
                      "rAndC2", "rhoAndGamma2", "delta", "xi", "sigma2",
@@ -392,14 +394,14 @@ empiricalStart <- function(object, zeroNu=FALSE,
 	if(length(grep(phenotypeLabel, varLabels(object[[1]]))) < 1) stop("phenotypeLabel must be in varLabels")
 	potential <- rep(0, 19)
 	acceptance <- rep(0, 17)
-  
+
 	##order should be platforms, genes for nu, phi, sigma2, delta, and DDelta
 	if(!zeroNu){
-		meanExpression <- function(eset) rowMeans(exprs(eset))  
+		meanExpression <- function(eset) rowMeans(exprs(eset))
 		Nu <- sapply(object, meanExpression)
 		Rho <- cor(Nu)
 		##order should be 1_2, 1_3, ..., 1_P, 2_3, ..., 2_P, ...
-		##R <- R[upper.tri(R)]  ##Not in the right order!		
+		##R <- R[upper.tri(R)]  ##Not in the right order!
 		cors <- list()
 		if(nrow(Rho) > 1){
 			for(i in 1:(nrow(Rho)-1)) cors[[i]] <- Rho[i, -(1:i)]
@@ -449,7 +451,7 @@ empiricalStart <- function(object, zeroNu=FALSE,
 		} else cors[[1]] <- R
 		R <- unlist(cors)
 	}
-	DeltaVars <- apply(DDelta*delta, 2, "var")	
+	DeltaVars <- apply(DDelta*delta, 2, "var")
 	C2 <- mean(DeltaVars)
 	S <- length(DeltaVars)
 	if(any(colSums(delta)==0)){
@@ -459,7 +461,7 @@ empiricalStart <- function(object, zeroNu=FALSE,
 	}
 	##0.1 seems reasonable,  or the proportion of t-statistics > X
 	Xi <- apply(delta, 2, "mean")
-	Sigma2 <- sapply(lapply(object, exprs), rowVars)	
+	Sigma2 <- sapply(lapply(object, exprs), rowVars)
 	DDelta <- as.numeric(t(DDelta))
 	delta <- as.numeric(t(delta))
 	##Should we start at zero, 1, or somewhere in the middle?
@@ -471,9 +473,9 @@ empiricalStart <- function(object, zeroNu=FALSE,
 	T <- as.numeric(apply(Sigma2, 2, var))
 	Sigma2 <- as.numeric(t(Sigma2))
 	##sigma2*phi is variance of expression values for patients with binary phenotype = 0
-	##sigma2/phi is variance of expression values for patients with binary phenotype = 1	
+	##sigma2/phi is variance of expression values for patients with binary phenotype = 1
 	Phi <- rep(1, (length(object) * nrow(object)))
-	##Lambda and theta are the mean and variance for phi (study-specific)	
+	##Lambda and theta are the mean and variance for phi (study-specific)
 	Lambda <- rep(1, length(object))
 	Theta <- rep(0.05, length(object))
 	##Tau2 is the relative scale of sigma across platforms
@@ -481,11 +483,11 @@ empiricalStart <- function(object, zeroNu=FALSE,
 	##- tau2 is shared by both nu and Delta
 	##Tau2 <- rep(1, length(object))
 	##Tau2 <- tau2.Delta * tau2.Nu
-	linInitialValues <- list(Nu=Nu, DDelta=DDelta, 
-				 A=A, B=B, C2=C2, Gamma2=Gamma2, 
+	linInitialValues <- list(Nu=Nu, DDelta=DDelta,
+				 A=A, B=B, C2=C2, Gamma2=Gamma2,
 				 R=R, Rho=Rho, Delta=delta,
-				 Xi=Xi, Sigma2=Sigma2, T=T, L=L, 
-				 Phi=Phi, Theta=Theta, Lambda=Lambda, 
+				 Xi=Xi, Sigma2=Sigma2, T=T, L=L,
+				 Phi=Phi, Theta=Theta, Lambda=Lambda,
 				 Tau2R=tau2R,
 				 Tau2Rho=tau2Rho)
 	linInitialValues
@@ -520,7 +522,7 @@ computeGOF <- function(object,
 			sigma2.1 <- sigma2[i, , ]
 			phi.1 <- phi[i, , ]
 			sigma.1 <- sqrt(sigma2.1/phi.1)
-			sigma.0 <- sqrt(sigma2.1*phi.1)		
+			sigma.0 <- sqrt(sigma2.1*phi.1)
 			##	trace(goodnessOfFit, browser)
 			by <- 1/round(ncol(object[[p]])^0.4, 1)
 			qtls <- qnorm(seq(0, 1, by=by), mean=0, sd=1)
@@ -551,8 +553,8 @@ computeGOF <- function(object,
 }
 
 .goodnessOfFit <- function(x, nus, delta, Delta, sigma.0, sigma.1, psi, qtls){
-	Psi <- matrix(psi, nrow=nrow(x), ncol=ncol(x), byrow=TRUE)	
-	mus <- nus + delta * (2*Psi - 1)*Delta	
+	Psi <- matrix(psi, nrow=nrow(x), ncol=ncol(x), byrow=TRUE)
+	mus <- nus + delta * (2*Psi - 1)*Delta
 	sigma <- sigma.0*(1-Psi) + sigma.1 * Psi
 	m.k <- matrix(NA, nrow(x), length(qtls[-1]))
 
@@ -579,4 +581,171 @@ computeGOF <- function(object,
 	n1 <- sum(psi==1)
 	sds <- (sds0*(n0-1) + sds1*(n1-1))/(n0+n1-2)
 	return(list(pvals=pvals, R.b=R.b, sds=sds, z=z, m.k=m.k))
+}
+
+makeSigma <- function(G, Q, gamma2, tau2, a, sigma2, r){
+	sigma <- sqrt(gamma2*tau2*exp(a*log(sigma2)))
+	Sigma <- sigma %*% t(sigma)
+	Sigma <- Sigma*r
+	## check diagonals
+	if(FALSE){
+		correct.answer <- gamma2*tau2*exp(a*log(sigma2))
+		answer2 <- diag(Sigma)
+		all.equal(correct.answer, answer2)
+	}
+	return(Sigma)
+}
+
+getParameters <- function(hyper.parameters, one.delta=FALSE, MRF=FALSE){
+	require(mvtnorm)
+	G <- hyper.parameters[["G"]]
+	Q <- hyper.parameters[["Q"]]
+	pA0 <- hyper.parameters[["pA0"]]
+	pA1 <- hyper.parameters[["pA1"]]
+	pB0 <- hyper.parameters[["pB0"]]
+	pB1 <- hyper.parameters[["pB1"]]
+	alphaXi <- hyper.parameters[["alphaXi"]]
+	betaXi <- hyper.parameters[["betaXi"]]
+
+	gamma2 <- 0.5*0.5
+	c2 <- 0.5*0.5
+	tau2Rho <- rep(1.0, Q)
+	tau2R <- rep(1.0,Q)
+	a <- b <- rep(NA, Q)
+	l <- rep(1.0, Q)
+	t <- rep(0.5^2, Q)
+	sigma2 <- matrix(NA, G, Q)
+	## simulate variances from gamma
+	param2 <- l/t
+	param1 <- l*param2
+	for(q in seq(length=Q)){
+		u <- runif(1)
+		if(u < pA0){
+			a[q] <- 0
+		} else {
+			if(u < pA0+pA1){
+				a[q] <- 1
+			} else {
+				a[q] <-runif(1)
+			}
+		}
+		u <- runif(1)
+		if(u < pB0){
+			b[q] <- 0
+		} else {
+			if(u < pB0+pB1){
+				b[q] <- 1
+			} else {
+				b[q] <-runif(1)
+			}
+		}
+		## in R, mean is shape * scale and variance is shape*scale^2
+		## in Haakon's formulation, mean = l and variance = t
+		## => shape=l^2/t and scale =t/l
+		##  (this means that param2 is the rate and param1 is the shape
+		sigma2[, q] <- rgamma(G, shape=param1[q], rate=param2[q])
+	}
+	## the platform index changes the fastest, then gene
+	##sigma2 <- as.numeric(t(sigma2))
+	##
+	## initialize phi
+	lambda <- rep(1.0, Q)
+	theta <- rep(0.1*0.1, Q)
+	param2 <- lambda/theta
+	param1 <- lambda*theta
+	phi <- matrix(NA, G, Q)
+	for(q in seq(length=Q)){
+		phi[, q] <- rgamma(G, shape=param1[q], rate=param2[q])
+	}
+	##r <- rho <- rep(0.5, Q*(Q-1)/2)
+	r <- rho <- matrix(NA, Q, Q)
+	diag(r) <- diag(rho) <- 1
+	rho[upper.tri(rho)] <- r[upper.tri(r)] <- 0.5
+	rho[lower.tri(rho)] <- r[lower.tri(r)] <- 0.5
+	## nu
+	nu <- matrix(NA, G, Q)
+	for(g in seq(length=G)){
+		Sig <- makeSigma(Q=Q, gamma2=gamma2, tau2=tau2Rho, a=a,
+				 sigma2=sigma2[g, ], r=rho)
+		## simulate from multivariate normal
+		nu[g, ] <- rmvnorm(1, sigma=Sig)
+	}
+	##---------------------------------------------------------------------------
+	##
+	## Simulating delta
+	##
+	## There are 4 prior models for delta:
+	##    model A: one delta
+	##    model B: study-specific delta
+	##    model C: MRF study-specific delta
+	##    model D: MRF one delta
+	##
+	##---------------------------------------------------------------------------
+	## Delta in the Rinterface.cpp file there are different
+	## functions relating to each of the now four prior models for
+	##
+	## delta
+	##
+	## model A:
+	##         updateXi_onedelta
+	##         updateDeltaDDelta_onedelta
+	##
+	## model B:
+	##         updateXi
+	##         updateDeltaDDelta
+	##
+	## model C:
+	##         updateAlpha_MRF
+        ##         updateBeta_MRF
+        ##         updateBetag_MRF
+        ##         updateDeltaDDelta_MRF
+	##
+	## model D:
+	##         updateAlpha_MRF_onedelta
+        ##         updateBeta_MRF_onedelta
+        ##         updateDeltaDDelta_MRF_onedelta
+	##
+	alpha.mrf <- -0.2  ## in (-Inf, +Inf)
+	beta.mrf <- 3.0    ## > 0
+	if(!MRF){
+		if(one.delta){
+			## model A
+			delta <- rep(NA, G)
+		} else {
+			## model B (default)
+			delta <- matrix(NA, G, Q)
+		}
+	} else {
+		## 1. specify alpha.mrf, beta.mrf
+		## 2. specify |N_g|
+		## 3. sample |N_g| indices from {1, ..., G} to form N_g for each g
+		## 4. simulate delta_g or delta_gp from Bernoulli(prob), with
+		##    prob = exp (...)/(1+exp(...))
+		##    ... =
+		##
+		if(one.delta){
+			## model D
+			delta <- rep(NA, G)
+
+
+		} else {
+			## model C
+			delta <- matrix(NA, G, Q)
+		}
+	}
+	res <- list(gamma2=gamma2,
+		    c2=c2,
+		    tau2Rho=tau2Rho,
+		    tau2R=tau2R,
+		    a=a,
+		    b=b,
+		    l=l,
+		    t=t,
+		    lambda=lambda,
+		    theta=theta,
+		    phi=phi,
+		    sigma2=sigma2,
+		    r=r,
+		    rho=rho)
+
 }

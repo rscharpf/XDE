@@ -30,7 +30,7 @@ setGeneric("phenotypeLabel", function(object) standardGeneric("phenotypeLabel"))
 setGeneric("phenotypeLabel<-", function(object, value) standardGeneric("phenotypeLabel<-"))
 setGeneric("posteriorAvg", function(object) standardGeneric("posteriorAvg"))
 setGeneric("posteriorAvg<-", function(object, value) standardGeneric("posteriorAvg<-"))
-setGeneric("qqplot", function(x, y, plot.it = TRUE, xlab = deparse(substitute(x)), 
+setGeneric("qqplot", function(x, y, plot.it = TRUE, xlab = deparse(substitute(x)),
                               ylab = deparse(substitute(y)),...) standardGeneric("qqplot"))
 setGeneric("seed", function(object) standardGeneric("seed"))
 setGeneric("seed<-", function(object, value) standardGeneric("seed<-"))
@@ -52,3 +52,4 @@ setGeneric("updates<-", function(object, value) standardGeneric("updates<-"))
 setGeneric("zeroNu", function(object, ...) standardGeneric("zeroNu"))
 
 
+setGeneric("getHyperparameters", function(object, G, Q, S, ...) standardGeneric("getHyperparameters"))

@@ -11,8 +11,6 @@ setMethod("lapply", "ExpressionSetList", function(X, FUN, ...){
 	  }
 	  return(X)
 	  })
-	  
-
 
 setMethod("[", "ExpressionSetList", function(x, i, j, ..., drop = FALSE){
             if (missing(drop)) drop <- FALSE
@@ -56,7 +54,7 @@ setMethod(".pca", "ExpressionSetList",
 		  principal.components <- function(x, P, N, G){
 			  ##1. obtain the effect sizes in the P studies
 			  ##   - these are stored in 'x'
-            
+
 			  ##2. center the effect sizes by their means
 			  meancen <- colMeans(x)
 			  xcen <- sweep(x, 2, meancen)
@@ -91,7 +89,7 @@ setMethod("pData", "ExpressionSetList",
 setMethod("standardizeSamples", "ExpressionSetList",
           function(object, ...){
             standardizeColumns <- function(object){
-              colSds <- function(x) rowSds(t(x))            
+              colSds <- function(x) rowSds(t(x))
               sds <- colSds(exprs(object))
               exprs(object) <- t(apply(exprs(object), 1, "/", sds))
               mns <- colMeans(exprs(object))
@@ -129,7 +127,7 @@ setMethod("zeroNu", "ExpressionSetList",
           function(object, phenotypeLabel, one.delta=FALSE, ...){
 		  if(missing(phenotypeLabel)) stop("must specify phenotypeLabel (character string)")
 		  object <- geneCenter(object)
-            
+
 		  ##Note that by zeroing the nu's we must specify initial
 		  ##values and can not draw random samples from the prior
 		  ##(could result in illegal values)
@@ -139,7 +137,7 @@ setMethod("zeroNu", "ExpressionSetList",
 		  firstMcmc <- empiricalStart(object, zeroNu=TRUE, phenotypeLabel=phenotypeLabel, one.delta=one.delta)
 		  firstMcmc$A <- rep(0, length(object))
 		  firstMcmc$Rho <- rep(0, choose(length(object), 2))
-		  firstMcmc$Tau2Rho <- rep(1, length(object))	    
+		  firstMcmc$Tau2Rho <- rep(1, length(object))
 		  up <- updates(params)
 		  up["nu"] <- 0
 		  up["a"] <- 0
@@ -175,3 +173,105 @@ setMethod("goodnessOfFit", c("ExpressionSetList", "XdeMcmc"),
 			     lastIteration=lastIteration,
 			     by=by)
 	  })
+
+
+##setMethod("getHyperparameters", signature(object="ExpressionSetList"),
+getHyperparameters <- function(object, G, Q, S, ...){
+	if(!missing(object)){
+		stopifnot(is(object, "ExpressionSetList"))
+		Gs <- sapply(object, nrow)
+		stopifnot(length(unique(G)) == 1)
+		G <- Gs[[1]]
+		Q <- length(object)
+		S <- sapply(object, ncol)
+	} else {
+		anymissing <- missing(G) | missing(Q) | missing(S)
+		stopifnot(!anymissing)
+	}
+
+	betaA <- alphaA <- 1.0
+	pA0 <- pA1 <- 0.1
+
+	##
+	betaB <- alphaB <- 1.0
+	pB0 <- pB1 <- 0.1
+
+	nuR <- 1.0+Q
+	nuRho <- 1.0+Q
+
+	betaXi <- alphaXi <- 1.0
+
+	c2Max <- 10.0
+
+	betaEta <- alphaEta <- 1.0
+
+	pOmega0 <- 0.1
+	lambdaOmega <- 1.0
+	lambdaKappa <- 1.0
+
+	res <- list(G=G,
+		    Q=Q,
+		    S=S,
+		    alphaA=alphaA,
+		    betaA=betaA,
+		    pA0=pA0,
+		    pA1=pA1,
+		    pB0=pB0,
+		    pB1=pB1,
+		    nuR=nuR,
+		    nuRho=nuRho,
+		    alphaXi=alphaXi,
+		    betaXi=betaXi,
+		    c2Max=c2Max,
+		    alphaEta=alphaEta,
+		    betaEta=betaEta,
+		    pOmega0=pOmega0,
+		    lambdaOmega=lambdaOmega,
+		    lambdaKappa=lambdaKappa)
+	return(res)
+}
+
+##setMethod("getHyperparameters", signature(object="NULL"),
+##	  function(object, G, Q, S, ...){
+##		  anymissing <- missing(G) | missing(Q) | missing(S)
+##		  stopifnot(!anymissing)
+##
+##		  betaA <- alphaA <- 1.0
+##		  pA0 <- pA1 <- 0.1
+##
+##		  ##
+##		  betaB <- alphaB <- 1.0
+##		  pA0 <- pB0 <- 0.1
+##
+##		  nuR <- 1.0+Q
+##		  nuRho <- 1.0+Q
+##
+##		  betaXi <- alphaXi <- 1.0
+##
+##		  c2Max <- 10.0
+##
+##		  betaEta <- alphaEta <- 1.0
+##
+##		  pOmega0 <- 0.1
+##		  lambdaOmega <- 1.0
+##		  lambdaKappa <- 1.0
+##
+##		  res <- list(G=G,
+##			      Q=Q,
+##			      S=S,
+##			      alphaA=alphaA,
+##			      betaA=betaA,
+##			      pA0=pA0,
+##			      pA1=pA1,
+##			      nuR=nuR,
+##			      nuRho=nuRho,
+##			      alphaXi=alphaXi,
+##			      betaXi=betaXi,
+##			      c2Max=c2Max,
+##			      alphaEta=alphaEta,
+##			      betaEta=betaEta,
+##			      pOmega0=pOmega0,
+##			      lambdaOmega=lambdaOmega,
+##			      lambdaKappa=lambdaKappa)
+##		  return(res)
+##	  })
