@@ -33,13 +33,11 @@ extern "C" {
 	      *gamma2,rho,sigma2,phi,tau2Rho,*pA0,*pA1,*alphaA,*betaA);
 
     *seed = (int) seedU;
-    printf("seems to be working");
+    //printf("seems to be working\n");
 
     return;
   }
-} // extern "C"
 
-extern "C" {
   void updateBDDelta(int *seed,
 		     const int *nTry,
 		     int *nAccept,
@@ -71,9 +69,7 @@ extern "C" {
 
     return;
   }
-} // extern "C"
 
-extern "C"{
   void updateTau2RhoNu(int *seed,
 		       const int *nTry,
 		       int *nAccept,
