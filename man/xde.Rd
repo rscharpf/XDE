@@ -4,15 +4,16 @@
   gene expression}
 
 \description{
-  
+
   Fits the Bayesian hierarchical model for cross-study differential
-  gene expression. 
-  
+  gene expression.
+
 }
 
 \usage{
-  
-  xde(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2, center=TRUE)
+
+  xde(paramsMcmc, esetList, outputMcmc, batchSize=NULL, NCONC=2,
+  center=TRUE, ...)
 
 }
 
@@ -26,7 +27,9 @@
   \item{NCONC}{The number of studies for which a gene must be
   differentially expressed in the same direction to be considered as
   concordantly differentially expressed.}
-\item{center}{Logical.  If TRUE, each study is centered to have mean zero.}
+\item{center}{Logical.  If TRUE, each study is centered to have mean
+  zero.}
+\item{\dots}{Additional arguments passed to \code{xdeFit}.}
 }
 
 \details{
@@ -40,7 +43,7 @@
   file.  This allows one to do many iterations without creating enormous
   log files.  This is only reasonable to do if one has already assessed
   convergence.
-  
+
 }
 
 \value{
@@ -50,8 +53,7 @@
 \references{
 
   R. Scharpf et al., A Bayesian Model for Cross-Study Differential Gene
-  Expression, Technical Report 158, Johns Hopkins University, Department
-  of Biostatistics, 2007
+  Expression, JASA 2009, p1295--1310.
 
 }
 

@@ -3,8 +3,20 @@ data(expressionSetList)
 ##hyper.params <- XDE:::getHyperparameters(G=3592, Q=3, S=c(100,50,75))
 hyper.params <- HyperParams(object=expressionSetList, clinicalCovariate="adenoVsquamous")
 params <- Params(hyper.params)
+## - phi is very small
+## - Delta has many zeros.
+
+
+Sweave("XDE.Rnw")
+params.xde <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous", one.delta=FALSE)
+empirical <- empiricalStart(xlist, phenotypeLabel="adenoVsquamous")
+firstMcmc(params) <- empirical
+iterations(params.xde) <- 5
+thin(params) <- 1
+paramList <- xde(params.xde, xlist,dryrun=TRUE)
 
 ## Cholesky failure
+## -- comes from function chol(Sigma, err) in C routine Random::MultiGaussian
 res <- rupdateANu(expressionSetList,
 		  hyper.params,
 		  params,
@@ -43,7 +55,8 @@ res <- rupdateBDDelta(expressionSetList,
 		      hyper.params,
 		      params,
 		      nTry=100L,
-		      epsilon=.2)
+		      epsilon=.2,
+		      dryrun=F)
 
 
 

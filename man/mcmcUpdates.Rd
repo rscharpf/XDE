@@ -44,12 +44,13 @@ R. Scharpf
   %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
+\dontrun{
 data(expressionSetList)
-hyper.params <- XDE:::getHyperparameters(object=expressionSetList)
-params <- getParameters(hyper.params)
+
 res <- updateANu(expressionSetList,
 		 hyper.params,
 		 params)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
