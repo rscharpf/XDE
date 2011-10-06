@@ -723,7 +723,7 @@ rupdateANu <- function(object, hyper.params, params,
 		  pA1=hyper.params[["pA1"]],
 		   alphaA=hyper.params[["alphaA"]],
 		   betaA=hyper.params[["betaA"]])
-	thesame <- identical(res, res2)
+	thesame <- identical(res[-1], res2[-1])
 	res <- list(thesame, res2)
 	return(res)
 }
