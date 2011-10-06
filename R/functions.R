@@ -700,7 +700,7 @@ rupdateANu <- function(object, hyper.params, params,
 		  pA1=hyper.params[["pA1"]],
 		  alphaA=hyper.params[["alphaA"]],
 		  betaA=hyper.params[["betaA"]])
-	res2 <- .C("updateANuWrap",
+	res2 <- .C("updateANu",
 		  seed=seed,
 		  nTry=nTry,
 		  nAccept=nAccept,

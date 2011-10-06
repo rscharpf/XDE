@@ -11,12 +11,13 @@
 
 \usage{
 HyperParams(object, G, Q, S, seed, clinicalCovariate, ...)
-Params(hyper.parameters, one.delta = FALSE, MRF = FALSE)
+Params(object, one.delta = FALSE, MRF = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 
 \arguments{
-  \item{object}{ A \code{ExpressionSetList}.}
+  \item{object}{For \code{HyperParams}, object must be an
+  \code{ExpressionSetList}.  For \code{Params}, 'object' must be a \code{HyperParams} object.}
   \item{G}{ integer.  The number of genes.  Ignored if
     \code{object} is not missing.}
   \item{Q}{ integer.  The number of studies.  Ignored if
@@ -26,7 +27,6 @@ Params(hyper.parameters, one.delta = FALSE, MRF = FALSE)
   \item{clinicalCovariate}{character.  Name of binary clinical covariate.}
   \item{seed}{Integer.  Seed for reproducibility.}
   \item{\dots}{Ignored}
-  \item{hyper.parameters}{ A \code{list} of hyperparameters. }
   \item{one.delta}{Logical.  If TRUE, we assume that a gene is
   differentiall expressed in all studies or none of the studies.}
   \item{MRF}{Logical.  If TRUE, we use a Markov Random Field prior on the deltas. }
@@ -42,11 +42,11 @@ Params(hyper.parameters, one.delta = FALSE, MRF = FALSE)
 }
 
 \seealso{
-   \code{\linkS4class{HyperParams-class}}, \code{\linkS4class{Params-class}}
+   \code{\linkS4class{HyperParams}}, \code{\linkS4class{Params}}
 }
 \examples{
 data(expressionSetList)
-hyper.params <- HyperParams(expressionSetList)
+hyper.params <- HyperParams(expressionSetList, clinicalCovariate="adenoVsquamous")
 params <- Params(hyper.params, one.delta=FALSE, MRF=TRUE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

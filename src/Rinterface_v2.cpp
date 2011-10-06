@@ -33,7 +33,7 @@ extern "C" {
 	      *gamma2,rho,sigma2,phi,tau2Rho,*pA0,*pA1,*alphaA,*betaA);
 
     *seed = (int) seedU;
-    //printf("seems to be working");
+    printf("seems to be working");
 
     return;
   }
