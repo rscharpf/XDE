@@ -87,7 +87,10 @@ importFrom(mvtnorm, rmvnorm)
 exportClasses(Parameters)
 ##export(HyperParams, Params, rupdateANu, rupdateBDDelta)
 ##exportMethods(phenotype)
-
+export(rupdateANu,
+       rupdateBDDelta,
+       rupdateTau2RhoNu,
+       rupdateTau2RDDelta)
 
 
 
