@@ -59,7 +59,64 @@ setClass("XdeParameter",
 			one.delta="logical"))
 
 
-setClass("HyperParams", contains="list")
-setClass("Params", contains="list")
+##setClass("HyperParams", contains="list")
+##setClass("Params", contains="list")
+##setClass("foo", contains="list",
+##	 representation(A="numeric",
+##			B="numeric"))
+##setValidity("foo", function(object){
+##	c("A", "B") %in% names(object)
+##}
+
+
+setClass("Parameters",
+	 representation(seed="integer",
+			data="numeric",##"environment",
+			phenodata="integer",
+			G="integer",
+			Q="integer",
+			S="integer",
+			alphaA="numeric",
+			alphaB="numeric",
+			betaA="numeric",
+			betaB="numeric",
+			pA0="numeric",
+			pA1="numeric",
+			pB0="numeric",
+			pB1="numeric",
+			nuR="numeric",
+			nuRho="numeric",
+			alphaXi="numeric",
+			betaXi="numeric",
+			c2Max="numeric",
+			alphaEta="numeric",
+			betaEta="numeric",
+			pOmega0="numeric",
+			lambdaOmega="numeric",
+			lambdaKappa="numeric",
+			gamma2="numeric",
+			c2="numeric",
+			tau2Rho="numeric",
+			tau2R="numeric",
+			a="numeric",
+			b="numeric",
+			l="numeric",
+			t="numeric",
+			lambda="numeric",
+			theta="numeric",
+			phi="numeric",
+			sigma2="numeric",
+			r="numeric",
+			rho="numeric",
+			nu="numeric",
+			delta="numeric",
+			Delta="numeric",
+			xi="numeric"))
+setGeneric("pnames", function(object) standardGeneric("pnames"))
+
+setValidity("Parameters", function(object){
+	if(length(exprs(object)) != object@G*sum(object@S))
+		return("data should have length G*sum(S)")
+})
 
 

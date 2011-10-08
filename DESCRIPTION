@@ -1,6 +1,6 @@
 Package: XDE
 Title: XDE: a Bayesian hierarchical model for cross-study analysis of differential gene expression
-Version: 1.99.11
+Version: 1.99.12
 Date: 2011-05-10
 Author: R.B. Scharpf, G. Parmigiani, A.B. Nobel, and H. Tjelmeland
 Description: Multi-level model for cross-study detection of differential gene expression.
@@ -13,14 +13,14 @@ License: LGPL-2
 Collate:  functions.R
 	  AllClasses.R
 	  AllGenerics.R
+	  RUpdates.R
 	  methods-XdeParameter.R
 	  methods-matrix.R
 	  methods-data.frame.R
 	  methods-ExpressionSet.R
 	  methods-ExpressionSetList.R
-	  methods-HyperParams.R
 	  methods-mergeExpressionSet.R
-	  methods-Params.R
+	  methods-Parameters.R
 	  methods-XdeMcmc.R
 	  xde.R
 	  zzz.R
