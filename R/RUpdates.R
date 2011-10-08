@@ -234,12 +234,10 @@ rupdateTau2RDDelta <- function(object,
 }
 
 rupdateNu <- function(object,
-		      nTry=10L,
 		      nAccept=0L,
 		      dryrun=FALSE){
 	if(dryrun){
 		res <- list(seed=object[["seed"]],
-			    nTry=nTry,
 			    nAccept=nAccept,
 			    nu=object[["nu"]],
 			    Q=object[["Q"]],
@@ -249,8 +247,6 @@ rupdateNu <- function(object,
 			    psi=object[["phenodata"]],
 			    delta=object[["delta"]],
 			    Delta=object[["Delta"]],
-			    nu=object[["nu"]],
-			    delta=object[["delta"]],
 			    gamma2=object[["gamma2"]],
 			    rho=object[["rho"]],
 			    sigma2=object[["sigma2"]],
@@ -261,7 +257,6 @@ rupdateNu <- function(object,
 	}
 	res <- .C("updateNu",
 		  seed=object[["seed"]],
-		  nTry=nTry,
 		  nAccept=nAccept,
 		  nu=object[["nu"]],
 		  Q=object[["Q"]],
@@ -271,8 +266,6 @@ rupdateNu <- function(object,
 		  psi=object[["phenodata"]],
 		  delta=object[["delta"]],
 		  Delta=object[["Delta"]],
-		  nu=object[["nu"]],
-		  delta=object[["delta"]],
 		  gamma2=object[["gamma2"]],
 		  rho=object[["rho"]],
 		  sigma2=object[["sigma2"]],
@@ -285,12 +278,10 @@ rupdateNu <- function(object,
 }
 
 rupdateDDelta <- function(object,
-			  nTry=10L,
 			  nAccept=0L,
 			  dryrun=FALSE){
 	if(dryrun){
 		res <- list(seed=object[["seed"]],
-			    nTry=nTry,
 			    nAccept=nAccept,
 			    Delta=object[["Delta"]],
 			    Q=object[["Q"]],
@@ -310,7 +301,6 @@ rupdateDDelta <- function(object,
 	}
 	res <- .C("updateDDelta",
 		  seed=object[["seed"]],
-		  nTry=nTry,
 		  nAccept=nAccept,
 		  Delta=object[["Delta"]],
 			    Q=object[["Q"]],
@@ -425,12 +415,10 @@ rupdateC2DDelta <- function(object,
 
 
 rupdateGamma2 <- function(object,
-			  nTry=10L,
 			  nAccept=0L,
 			  dryrun=FALSE){
 	if(dryrun){
 		res <- list(seed=object[["seed"]],
-			    nTry=nTry,
 			    nAccept=nAccept,
 			    gamma2=object[["gamma2"]],
 			    Q=object[["Q"]],
@@ -444,7 +432,6 @@ rupdateGamma2 <- function(object,
 	}
 	res <- .C("updateGamma2",
 		  seed=object[["seed"]],
-			    nTry=nTry,
 			    nAccept=nAccept,
 			    gamma2=object[["gamma2"]],
 			    Q=object[["Q"]],
@@ -474,7 +461,6 @@ rupdateGamma2Nu <- function(object,
 			    Q=object[["Q"]],
 			    G=object[["G"]],
 			    S=object[["S"]],
-			    nu=object[["nu"]],
 			    x=exprs(object),
 			    psi=object[["phenodata"]],
 			    delta=object[["delta"]],
@@ -496,7 +482,6 @@ rupdateGamma2Nu <- function(object,
 			    Q=object[["Q"]],
 			    G=object[["G"]],
 			    S=object[["S"]],
-			    nu=object[["nu"]],
 			    x=exprs(object),
 			    psi=object[["phenodata"]],
 			    delta=object[["delta"]],
@@ -637,9 +622,29 @@ rupdateRhoNu <- function(object,
 			    nuRho=object[["nuRho"]])
 		return(res)
 	}
+		res <- .C("updateRhoNu",
+			  seed=object[["seed"]],
+			    nTry=nTry,
+			    nAccept=nAccept,
+			    epsilon=epsilon,
+			    rho=object[["rho"]],
+			    nu=object[["nu"]],
+			    Q=object[["Q"]],
+			    G=object[["G"]],
+			    S=object[["S"]],
+			    x=exprs(object),
+			    psi=object[["phenodata"]],
+			    delta=object[["delta"]],
+			    Delta=object[["Delta"]],
+			    gamma2=object[["gamma2"]],
+			    sigma2=object[["sigma2"]],
+			    phi=object[["phi"]],
+			    tau2Rho=object[["tau2Rho"]],
+			    a=object[["a"]],
+			    nuRho=object[["nuRho"]])
 	slot(object, "seed") <- res[["seed"]]
-	slot(object, "r") <- res[["r"]]
-	slot(object, "c2") <- res[["c2"]]
+	slot(object, "rho") <- res[["rho"]]
+	slot(object, "nu") <- res[["nu"]]
 	return(object)
 }
 
@@ -922,7 +927,6 @@ rupdateL <- function(object,
 }
 
 rupdateXi <- function(object,
-		      nTry=10L,
 		      nAccept=0L,
 		      dryrun=FALSE,
 		      one.delta=FALSE){
@@ -1349,7 +1353,7 @@ rupdateDeltaDDelta_MRF <- function(object,
 rupdateAlpha_MRF <- function(object,
 			     nTry=10L,
 			     nAccept=0L,
-			     epsilon=epsilon,
+			     epsilon=0.2,
 			     dryrun=FALSE,
 			     one.delta=FALSE){
 	if(dryrun){

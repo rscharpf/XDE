@@ -261,12 +261,20 @@ setMethod("show", signature(object="Parameters"),
 	  function(object){
 		  cat("class Parameters: elements of class include\n")
 		  nms <- slotNames(object)
+		  L <- rep(NA, length(nms))
+		  headers <- vector("list", length(nms))
+		  for(i in seq_len(length(L))){
+			  obj <- eval(substitute(object@NAME_ARG, list(NAME_ARG=nms[i])))
+			  L[i] <- length(obj)
+			  ##headers <- head(obj)
+		  }
 		  cls <- sapply(nms, function(x, object){
 			  class(eval(substitute(object@NAME_ARG, list(NAME_ARG=x))))
 		  }, object=object)
-		  res <- data.frame(nms=nms, cls=cls)
+		  size <- paste("[1:", L, "]", sep="")
+		  res <- data.frame(nms=nms, cls=substr(cls, 1,3), size=size)
 		  row.names(res) <- NULL
-		  colnames(res) <- c("slots", "type")
+		  colnames(res) <- c("slots", "type", "size")
 		  print(head(res))
 		  cat("\n...\n")
 		  colnames(res)<-
