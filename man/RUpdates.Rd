@@ -63,7 +63,7 @@ rupdateThetaPhi(object, nTry = 10L, nAccept = 0L, epsilon = 0.2, dryrun = FALSE)
 rupdateDeltaDDelta_MRF(object, nTry = 10L, nAccept = 0L, dryrun = FALSE, one.delta=FALSE)
 rupdateAlpha_MRF(object, nTry = 10L, nAccept = 0L, epsilon=0.2, dryrun = FALSE, one.delta=FALSE)
 rupdateBeta_MRF(object, nTry = 10L, nAccept = 0L, epsilon=0.2, dryrun = FALSE, one.delta=FALSE)
-rupdateBetag_MRF(object, nTry = 10L, nAccept = 0L, epsilon=0.2, dryrun = FALSE, one.delta=FALSE)
+rupdateBetag_MRF(object, nTry = 10L, nAccept = 0L, epsilon=0.2, dryrun = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -94,7 +94,7 @@ rupdateBetag_MRF(object, nTry = 10L, nAccept = 0L, epsilon=0.2, dryrun = FALSE, 
 
 \seealso{\code{\linkS4class{Parameters}}}
 
-\examples{models}
+\keyword{models}
 \keyword{interface}
 \keyword{iteration}
 

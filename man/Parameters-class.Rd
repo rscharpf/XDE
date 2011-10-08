@@ -63,9 +63,9 @@ Objects can be created by calls of the form \code{new("Parameters", ...)}.
 }
 \section{Methods}{
   \describe{
-    \item{[[<-}{\code{signature(x = "Parameters")}: ... }
-    \item{[[}{\code{signature(x = "Parameters")}: ... }
-    \item{$<-}{\code{signature(x = "Parameters")}: ... }
+    \item{"[[<-"}{\code{signature(x = "Parameters")}: ... }
+    \item{"[["}{\code{signature(x = "Parameters")}: ... }
+    \item{"$<-"}{\code{signature(x = "Parameters")}: ... }
     \item{$}{\code{signature(x = "Parameters")}: ... }
     \item{coerce}{\code{signature(from = "XdeParameter", to = "Parameters")}: ... }
     \item{show}{\code{signature(object = "Parameters")}: ... }
