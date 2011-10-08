@@ -1408,7 +1408,7 @@ rupdateAlpha_MRF <- function(object,
 rupdateBeta_MRF <- function(object,
 			     nTry=10L,
 			     nAccept=0L,
-			     epsilon=epsilon,
+			     epsilon=0.2,
 			     dryrun=FALSE,
 			     one.delta=FALSE){
 	if(dryrun){
@@ -1463,7 +1463,7 @@ rupdateBeta_MRF <- function(object,
 rupdateBetag_MRF <- function(object,
 			     nTry=10L,
 			     nAccept=0L,
-			     epsilon=epsilon,
+			     epsilon=0.2,
 			     dryrun=FALSE){
 	if(dryrun){
 		res <- list(seed=object[["seed"]],
