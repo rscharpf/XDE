@@ -63,6 +63,7 @@ rupdateANu <- function(object,
 		   alphaA=object[["alphaA"]],
 		   betaA=object[["betaA"]])
 	## update a and nu
+	slot(object, "seed") <- res[["seed"]]
 	slot(object, "a") <- res[["a"]]
 	slot(object, "nu") <- res[["nu"]]
 	return(object)
@@ -99,7 +100,7 @@ rupdateBDDelta <- function(object,
 		return(obj)
 	}
 	res <- .C("updateBDDelta",
-		  seed=as.integer(seed),
+		  seed=object[["seed"]],
 		  nTry=as.integer(nTry),
 		  nAccept=as.integer(nAccept),
 		  epsilon=as.numeric(epsilon),
@@ -108,7 +109,7 @@ rupdateBDDelta <- function(object,
 		  Q=object[["Q"]],
 		  G=object[["G"]],
 		  S=object[["S"]],
-		  x=x,
+		  x=exprs(object),
 		  psi=object[["phenodata"]],
 		  nu=object[["nu"]],
 		  delta=object[["delta"]],
@@ -121,6 +122,7 @@ rupdateBDDelta <- function(object,
 		  pB1=object[["pB1"]],
 		  alphaB=object[["alphaB"]],
 		  betaB=object[["betaB"]])
+	slot(object, "seed") <- res[["seed"]]
 	slot(object, "b") <- res[["b"]]
 	slot(object, "Delta") <- res[["Delta"]]
 	return(object)
