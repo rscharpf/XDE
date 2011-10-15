@@ -1,4 +1,5 @@
-useDynLib(XDE, updateANu, updateBDDelta, .registration=TRUE)
+##useDynLib(XDE, updateANu, updateBDDelta, .registration=TRUE)
+useDynLib(XDE, .registration=TRUE)
 import(Biobase, methods)
 #MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
 ##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
