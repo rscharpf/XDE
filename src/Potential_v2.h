@@ -6,7 +6,7 @@
 using namespace std;
 
 #include "Random.h"
-#include "Matrix.h"
+#include "Matrix_v2.h"
 
 
 double potentialXqg(int q,
@@ -103,6 +103,36 @@ double potentialDDelta(int Q,
 		       const double *r,
 		       const double *tau2R,
 		       const double *sigma2);
+
+
+double potentialDDeltaStar_HyperInverseWishart(const double *Delta,
+					       const double *b,
+					       const double *sigma2,
+					       const double *tau2R,
+					       const double *r,
+					       int Q,int G,
+					       const vector<vector<vector<double> > > &Omega,
+					       const vector<int> &oldClique,
+					       const vector<vector<int> > &oldComponents);
+
+double potentialDDeltaStar_HyperInverseWishart(int gene,
+					       const double *Delta,
+					       const double *b,
+					       const double *sigma2,
+					       const double *tau2R,
+					       const double *r,
+					       int Q,int G,
+					       const vector<vector<vector<double> > > &Omega,
+					       const vector<int> &oldClique,
+					       const vector<vector<int> > &oldComponents);
+
+
+
+double potentialOmega_HyperInverseWishart(const vector<vector<vector<double> > > &Omega,
+					  const vector<vector<vector<double> > > &D,
+					  double df,
+					  const vector<int> &oldClique,
+					  const vector<vector<int> > &oldComponents);
 
 
 double potentialA(int Q,
