@@ -1,7 +1,7 @@
 #ifndef INDEX_V2_H
 #define INDEX_V2_H
 
-#include "Matrix.h"
+#include "Matrix_v2.h"
 
 int qg2index(int q,int g,int Q,int G);
 
@@ -98,6 +98,38 @@ double perfectMRF2(int *delta,int Q,int G,
 		   const vector<double> &potOff,
 		   double alpha,double beta,
 		   double betag,unsigned int *seed,int draw);
+
+
+double OmegaGibbs(double df,const vector<vector<vector<double> > > &D,
+		  const vector<int> &oldClique,
+		  const vector<vector<int> > &oldComponents,
+		  int Q,int G,const double *Delta,
+		  const double *r,const double *sigma2,
+		  const double *tau2R,const double *b,
+		  vector<vector<vector<double> > > &Omega,
+		  Random &ran,int draw);
+
+double DeltaStarGibbs(const vector<int> &oldClique,
+		      const vector<vector<int> > &oldComponents,
+		      int Q, int G, const int *S,
+		      double *Delta,const double *r,
+		      const double *sigma2,const double *phi,
+		      const double *tau2R,const double *b,
+		      const double *nu,const int *delta,
+		      const int *psi,const double *x,
+		      const vector<vector<vector<double> > > &Omega,
+		      Random &ran,int draw);
+
+void transformGraph(const int *nClique,const int *oldClique,const int *nOldComponents,
+		    const int *oldComponents,vector<int> &oldCliqueTransformed,
+		    vector<vector<int> > &oldComponentsTransformed);
+
+void transformOmega(const int *nClique,const int *nOldComponents,
+		    const int *nNewComponents,const double *Omega,
+		    vector<vector<vector<double> > > &OmegaTransformed);
+
+void inverseTransformOmega(const vector<vector<vector<double> > > &OmegaTransformed,
+			  double *Omega);
 
 
 #endif

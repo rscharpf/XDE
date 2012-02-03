@@ -1,7 +1,7 @@
 #include <vector>
 
-#include "Random.h"
-#include "Matrix.h"
+#include "Random_v2.h"
+#include "Matrix_v2.h"
 #include "Potential_v2.h"
 #include "Utility_v2.h"
 
@@ -208,6 +208,195 @@ double potentialDDeltag(int g,
   return pot;
 }
 			      
+
+
+
+double potentialDDeltaStar_HyperInverseWishart(const double *Delta,
+					       const double *b,
+					       const double *sigma2,
+					       const double *tau2R,
+					       const double *r,
+					       int Q,int G,
+					       const vector<vector<vector<double> > > &Omega,
+					       const vector<int> &oldClique,
+					       const vector<vector<int> > &oldComponents) {
+  vector<vector<double> > zero;
+  zero.resize(G);
+  int q,g;
+  for (g = 0; g < G; g++) {
+    zero[g].resize(Q);
+    for (q = 0; q < Q; q++)
+      zero[g][q] = 0.0;
+  }
+  
+  vector<vector<double> > R;
+  R.resize(Q);
+  for (q = 0; q < Q; q++) {
+    R[q].resize(Q);
+  }
+  for (q = 0; q < Q; q++) {
+    R[q][q] = tau2R[q];
+    int p;
+    for (p = q + 1; p < Q; p++) {
+      R[q][p] = sqrt(tau2R[p] * tau2R[q]) * r[qq2index(p,q,Q)];
+      R[p][q] = R[q][p];
+    }
+  }
+  
+  vector<vector<double> > DeltaStar;
+  DeltaStar.resize(G);
+  for (g = 0; g < G; g++) {
+    DeltaStar[g].resize(Q);
+    for (q = 0; q < Q; q++) {
+      DeltaStar[g][q] = Delta[qg2index(q,g,Q,G)] / exp(0.5 * b[q] * log(sigma2[qg2index(q,g,Q,G)]));
+    }
+  }
+
+  Random ran(1);
+  double pot = ran.PotentialMatrixVariateNormal(zero,R,Omega,oldClique,oldComponents,DeltaStar);
+  
+  return pot;
+}
+  
+
+
+
+double potentialDDeltaStar_HyperInverseWishart(int gene,
+					       const double *Delta,
+					       const double *b,
+					       const double *sigma2,
+					       const double *tau2R,
+					       const double *r,
+					       int Q,int G,
+					       const vector<vector<vector<double> > > &Omega,
+					       const vector<int> &oldClique,
+					       const vector<vector<int> > &oldComponents) {
+  vector<vector<double> > R;
+  R.resize(Q);
+  int q,g;
+  for (q = 0; q < Q; q++) {
+    R[q].resize(Q);
+  }
+  for (q = 0; q < Q; q++) {
+    R[q][q] = tau2R[q];
+    int p;
+    for (p = q + 1; p < Q; p++) {
+      R[q][p] = sqrt(tau2R[p] * tau2R[q]) * r[qq2index(p,q,Q)];
+      R[p][q] = R[q][p];
+    }
+  }
+  
+  vector<vector<double> > DeltaStar;
+  DeltaStar.resize(G);
+  for (g = 0; g < G; g++) {
+    DeltaStar[g].resize(Q);
+    for (q = 0; q < Q; q++) {
+      DeltaStar[g][q] = Delta[qg2index(q,g,Q,G)] / exp(0.5 * b[q] * log(sigma2[qg2index(q,g,Q,G)]));
+    }
+  }
+
+  Random ran(1);
+  double pot = 0.0;
+  
+  vector<vector<double> > UU(DeltaStar);
+
+  // allocate space and initialise temporal storage of U in blocks
+
+  int k,i,j;
+  vector<vector<vector<double> > > UBlocks;
+  UBlocks.resize(Omega.size());
+  for (k = 0; k < UBlocks.size(); k++) {
+    UBlocks[k].resize(Omega[k].size());
+    for (i = 0; i < UBlocks[k].size(); i++)
+      UBlocks[k][i].resize(R.size());
+  }
+
+  vector<vector<int> > theGene;
+  theGene.resize(UBlocks.size());
+  for (k = 0; k < theGene.size(); k++) 
+    theGene[k].resize(UBlocks[k].size());  
+
+
+  int first = 0;
+  for (i = 0; i < Omega[0].size(); i++)
+    for (j = 0; j < UU[first].size(); j++) {
+      UBlocks[0][i][j] = UU[first + i][j];
+      theGene[0][i] = (first + i == gene);
+    }
+  first += Omega[0].size();
+
+  for (k = 1; k < Omega.size(); k++) {
+    for (i = 0; i < oldComponents[k].size(); i++)
+      for (j = 0; j < UU[first].size(); j++) {
+	UBlocks[k][i][j] = UBlocks[oldClique[k]][oldComponents[k][i]][j];
+	theGene[k][i] = theGene[oldClique[k]][oldComponents[k][i]];
+      }
+    
+    for (i = 0; i < Omega[k].size() - oldComponents[k].size(); i++)
+      for (j = 0; j < UU[first].size(); j++) {
+	UBlocks[k][i + oldComponents[k].size()][j] = UU[first + i][j];
+	theGene[k][i + oldComponents[k].size()] = (first + i == gene);
+      }
+    first += Omega[k].size() - oldComponents[k].size();
+  }
+  
+  // add potential for each clique
+  
+  for (k = 0; k < Omega.size(); k++) {
+    int include = 0;
+    for (i = 0; i < theGene[k].size(); i++)
+      if (theGene[k][i] == 1) include = 1;
+    
+    if (include == 1)
+      pot += ran.PotentialMatrixVariateNormal(Omega[k],R,UBlocks[k]);
+  }
+  
+  // subtract potential for each separator
+
+  for (k = 1; k < Omega.size(); k++) 
+    if (oldComponents[k].size() > 0) {
+      int include = 0;
+
+      vector<vector<double> > OmegaSub;
+      vector<vector<double> > USub;
+      OmegaSub.resize(oldComponents[k].size());
+      USub.resize(oldComponents[k].size());
+      for (i = 0; i < OmegaSub.size(); i++) {
+	OmegaSub[i].resize(oldComponents[k].size());
+	for (j = 0; j < OmegaSub[i].size(); j++)
+	  OmegaSub[i][j] = Omega[k][i][j];
+      }
+      for (i = 0; i < USub.size(); i++) {
+	USub[i].resize(UBlocks[k][i].size());
+	for (j = 0; j < USub[i].size(); j++)
+	  USub[i][j] = UBlocks[k][i][j];
+
+	if (theGene[k][i] == 1) include == 1;
+      }
+      
+      if (include == 1)
+	pot -= ran.PotentialMatrixVariateNormal(OmegaSub,R,USub);
+    }
+  
+
+  return pot;
+}
+  
+
+
+
+double potentialOmega_HyperInverseWishart(const vector<vector<vector<double> > > &Omega,
+					  const vector<vector<vector<double> > > &D,
+					  double df,
+					  const vector<int> &oldClique,
+					  const vector<vector<int> > &oldComponents) {
+  Random ran(1);
+  double pot = ran.PotentialHyperInverseWishart(df,D,oldClique,oldComponents,Omega);
+
+  return pot;
+}
+					  
+
 
 
 
