@@ -26,8 +26,6 @@ xmcmc@directory <- pathToLogFiles
 ##The $ operator can be used to extract chains. For instance, here we
 ##extract the c2 chain
 c2 <- xmcmc$c2
-if(require(coda)){
-  plot(as.mcmc(c2))
-}
+plot.ts(c2)
 }
 \keyword{datasets}
