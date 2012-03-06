@@ -11,6 +11,7 @@ importMethodsFrom("genefilter", rowttests)
 importFrom("genefilter", rowSds, rowVars)
 importFrom("gtools", permute)
 importFrom("graphics", legend, pairs, par, plot, smoothScatter)
+importFrom(BiocGenerics, lapply, nrow)
 importFrom("grDevices", colorRampPalette)
 importFrom("stats", as.ts, cor, median, princomp, quantile, rnorm, runif,
            var)

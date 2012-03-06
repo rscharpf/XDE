@@ -11,11 +11,9 @@ firstMcmc(object)
 \arguments{
   \item{object}{ An object of class \code{XdeParameter} }
 }
-\details{
-}
 \value{
   Returns a list of the values to be used in the first iteration of the
-  MCMC.  
+  MCMC.
 }
 \author{R. Scharpf}
 \seealso{\code{\link{XdeParameter-class}}, \code{\link{lastMcmc}}}
