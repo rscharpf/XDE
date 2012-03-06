@@ -4,7 +4,7 @@
 \title{How often to write MCMC iterations to file}
 \description{
 A value greater than one means that not every MCMC iteration is written
-to file. 
+to file.
 }
 \usage{
 thin(x, ...)
@@ -19,7 +19,7 @@ thin(x, ...)
 
   The replacement method replaces the first element in the \code{output}
   vector.
-  
+
 }
 
 \value{
@@ -28,6 +28,4 @@ An integer.
 \author{R. Scharpf}
 
 \seealso{\code{\link{output}}}
-\examples{
-}
 \keyword{methods}
