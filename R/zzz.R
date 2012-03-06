@@ -1,7 +1,7 @@
 THISPKG <- "XDE"
 
 .onAttach <- function(libname, pkgname) {
-	version <- packageDescription("XDE", field="Version")
+	version <- packageDescription("XDE", fields="Version")
 	packageStartupMessage("Welcome to XDE version ", version)
 }
 
