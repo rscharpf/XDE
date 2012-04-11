@@ -1,35 +1,101 @@
 library(XDE)
 data(expressionSetList)
 ## some initial values
-params <- XDE:::Parameters(object=expressionSetList,
-			   clinicalCovariate="adenoVsquamous")
-dms <- dims(params)
-params2 <- XDE:::startingValues(params,
-				expressionSetList,
-				"adenoVsquamous")
+## one.delta is 'model B'
+initial.paramsA <- XDE:::Parameters(object=expressionSetList,
+				    clinicalCovariate="adenoVsquamous",
+				    one.delta=TRUE)
+##
+## there should probably be a model specification here (model A or model B)
+##
+## There should be a C entry point to get initial values for all
+## parameters under model A or model B... could probably use the 'v1'
+## interface for this
+##
+paramsA <- XDE:::startingValues(initial.paramsA, expressionSetList,
+				"adenoVsquamous", one.delta=TRUE)
+
+## ideally, this should all be one step
+initial.paramsB <- XDE:::Parameters(object=expressionSetList, clinicalCovariate="adenoVsquamous",
+				    one.delta=FALSE)
+paramsB <- XDE:::startingValues(initial.paramsB, expressionSetList, "adenoVsquamous", one.delta=FALSE)
 orig <- params2
 dms2 <- dims(params2)
 one.delta <- FALSE
 all.equal(dms, dms2)
 for(i in 1:50){
-	params2 <- rupdateANu(object=params2,
-			      nTry=5L,
-			      epsilon=0.1,
-			      dryrun=FALSE)
+	##
+	## An entry point for each of the C routines in Rintervace_v2.cpp
+	##
+	## Updates that can be used by all model variants
+	##
+	a=paramsA@a
+	paramsA <- rupdateANu(object=paramsA, nTry=5L,
+			      epsilon=0.1, dryrun=FALSE)
+	paramsA <- rupdateTau2RhoNu(object=paramsA,
+				    nTry=5L, epsilon=0.1, dryrun=FALSE)
+	paramsA <- rupdateNu(object=paramsA, dryrun=FALSE)
+	paramsA <- rupdateGamma2(object=paramsA, dryrun=FALSE)
+	paramsA <- rupdateRhoNu(object=paramsA,
+				nTry=5L,
+				epsilon=0.1,
+				dryrun=FALSE)
+	paramsA <- rupdateRhoGamma2(object=paramsA,
+				    nTry=5L,
+				    epsilon=0.1,
+				    dryrun=FALSE)
+	paramsA <- rupdatePhi(object=paramsA,
+				 nTry=5L,
+				 epsilon=0.1,
+				 dryrun=FALSE)
+	paramsA <- rupdateTheta(object=paramsA,
+				 nTry=5L,
+				 epsilon=0.1,
+				 dryrun=FALSE)
+	paramsA <- rupdateLambda(object=paramsA,
+				 nTry=5L,
+				 epsilon=0.1,
+				 dryrun=FALSE)
+	paramsA <- rupdateT(object=paramsA,
+				 nTry=5L,
+				 epsilon=0.1,
+				 dryrun=FALSE)
+	paramsA <- rupdateL(object=paramsA,
+				 nTry=5L,
+				 epsilon=0.1,
+				 dryrun=FALSE)
+	paramsA <- rupdateLambdaPhi(object=paramsA,
+				      nTry=5L,
+				      epsilon=0.1,
+				      dryrun=FALSE)
+	paramsA <- rupdateThetaPhi(object=paramsA,
+				      nTry=5L,
+				      epsilon=0.1,
+				      dryrun=FALSE)
+	##
+	## finished: updates that can be used by all model variants
+	##
+	##
+	## updates only for model A
+	##
+	paramsA <- rupdateXi(object=paramsA, dryrun=FALSE, one.delta=TRUE)
+	##
+	## finished: updates that can be used only for model A
+	##
+	## updates only for model B
+	paramsB <- rupdateXi(object=paramsB, dryrun=FALSE, one.delta=FALSE)
+
 	params2 <- rupdateBDDelta(object=params2,
 				  nTry=5L,
 				  epsilon=0.1,
 				  dryrun=FALSE)
-	params2 <- rupdateTau2RhoNu(object=params2,
-				    nTry=5L,
-				    epsilon=0.1,
-				    dryrun=FALSE)
+	## stop
+
 	params2 <- rupdateTau2RDDelta(object=params2,
 				      nTry=5L,
 				      epsilon=0.1,
 				      dryrun=FALSE)
-	params2 <- rupdateNu(object=params2,
-			     dryrun=FALSE)
+
 	## NaN's appear in nu after the update...?
 	params2 <- rupdateDDelta(object=params2,
 				 dryrun=FALSE)
@@ -42,8 +108,7 @@ for(i in 1:50){
 				   nTry=5L,
 				   dryrun=FALSE)
 
-	params2 <- rupdateGamma2(object=params2,
-				 dryrun=FALSE)
+
 
 	params2 <- rupdateGamma2Nu(object=params2,
 				   nTry=5L,
@@ -60,44 +125,23 @@ for(i in 1:50){
 				 epsilon=0.1,
 				 dryrun=FALSE)
 
-	params2 <- rupdateRhoNu(object=params2,
-				nTry=5L,
-				epsilon=0.1,
-				dryrun=FALSE)
 
-	params2 <- rupdateRhoGamma2(object=params2,
-				    nTry=5L,
-				    epsilon=0.1,
-				    dryrun=FALSE)
+
+
 
 	params2 <- rupdateSigma2(object=params2,
 				    nTry=5L,
 				    epsilon=0.1,
 				    dryrun=FALSE)
 
-	params2 <- rupdatePhi(object=params2,
-				 nTry=5L,
-				 epsilon=0.1,
-				 dryrun=FALSE)
 
-	params2 <- rupdateTheta(object=params2,
-				 nTry=5L,
-				 epsilon=0.1,
-				 dryrun=FALSE)
 
-	params2 <- rupdateLambda(object=params2,
-				 nTry=5L,
-				 epsilon=0.1,
-				 dryrun=FALSE)
-	params2 <- rupdateT(object=params2,
-				 nTry=5L,
-				 epsilon=0.1,
-				 dryrun=FALSE)
 
-	params2 <- rupdateL(object=params2,
-				 nTry=5L,
-				 epsilon=0.1,
-				 dryrun=FALSE)
+
+
+
+
+
 
 	if(!one.delta){
 		params2 <- rupdateXi(object=params2,
@@ -111,9 +155,7 @@ for(i in 1:50){
 	if(one.delta){
 		## must make sure that the deltas
 		## for a gene are the same
-		params2 <- rupdateXi(object=params2,
-				     dryrun=FALSE,
-				     one.delta=TRUE)
+
 		params2 <- rupdateDeltaDDelta(object=params2,
 					      nTry=5L,
 					      dryrun=FALSE,
@@ -129,15 +171,9 @@ for(i in 1:50){
 				      epsilon=0.1,
 				      dryrun=FALSE)
 
-	params2 <- rupdateLambdaPhi(object=params2,
-				      nTry=5L,
-				      epsilon=0.1,
-				      dryrun=FALSE)
 
-	params2 <- rupdateThetaPhi(object=params2,
-				      nTry=5L,
-				      epsilon=0.1,
-				      dryrun=FALSE)
+
+
 
 	if(FALSE){
 		## add appropriate slots to Parameters object
