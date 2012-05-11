@@ -397,7 +397,7 @@ extern "C" {
 		      const double *beta,
 		      const double *betag) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     vector<vector<int> > nn;
     nn.resize(*G);
     int g;
@@ -552,12 +552,12 @@ extern "C" {
 		     const int *neighbour,
 		     const double *alpha) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     vector<vector<int> > nn;
     nn.resize(*G);
     int g;
     for (g = 0; g < *G; g++) nn[g].resize(0);
-    
+
     int i;
     for (i = 0; i < *nNeighbour; i++) {
       int g1 = neighbour[2 * i];
@@ -565,17 +565,17 @@ extern "C" {
       nn[g1].push_back(g2);
       nn[g2].push_back(g1);
     }
-    
+
     double alphaCopy = *alpha;
     updateAlphaBeta_MRF2_onedelta(&seedU,*nTry,nAccept,0.0,*epsilon,&alphaCopy,
 				  beta,*Q,*G,delta,nn);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
-  
-  
+
+
   // finished: updates for model D
 
 
@@ -606,7 +606,7 @@ extern "C" {
 			const double *alphaB,
 			const double *betaB) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     updateBDDelta(&seedU,*nTry,nAccept,*epsilon,b,Delta,*Q,*G,S,x,psi,nu,
 		  delta,*c2,r,sigma2,phi,tau2R,*pB0,*pB1,*alphaB,*betaB);
 
@@ -775,7 +775,7 @@ extern "C" {
 			const double *b,
 			const double *nuR) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     updateRDDelta(&seedU,*nTry,nAccept,*epsilon,r,Delta,*Q,*G,S,x,psi,
 		  nu,delta,*c2,sigma2,phi,tau2R,b,*nuR);
 
@@ -871,7 +871,7 @@ extern "C" {
 			const double *a,
 			const double *b) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     updateLSigma2(&seedU,*nTry,nAccept,*epsilon,l,sigma2,*Q,*G,S,x,psi,nu,
 		  delta,Delta,*c2,*gamma2,r,rho,phi,t,tau2R,tau2Rho,a,b);
 
@@ -956,13 +956,13 @@ extern "C" {
 			const int *oldComponents) {
     unsigned int seedU = (unsigned int) *seed;
 
-    
+
     vector<vector<vector<double> > > OmegaTransformed;
     vector<int> oldCliqueTransformed;
     vector<vector<int> > oldComponentsTransformed;
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
-    
+
     updateSigma2_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,sigma2,*Q,*G,S,x,psi,nu,
 				     delta,Delta,*gamma2,r,rho,phi,t,l,tau2R,tau2Rho,a,b,
 				     OmegaTransformed,oldCliqueTransformed,oldComponentsTransformed);
@@ -972,7 +972,7 @@ extern "C" {
     return;
   }
 
-  
+
   void updateLSigma2_MII(unsigned int *seed,
 			 const int *nTry,
 			 int *nAccept,
@@ -1009,13 +1009,13 @@ extern "C" {
     vector<vector<int> > oldComponentsTransformed;
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
-    
+
     updateLSigma2_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,l,sigma2,*Q,*G,S,x,psi,nu,
 				      delta,Delta,*gamma2,r,rho,phi,t,tau2R,tau2Rho,a,b,
 				      OmegaTransformed,oldCliqueTransformed,oldComponentsTransformed);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
 
@@ -1050,19 +1050,19 @@ extern "C" {
 			 const int *nNewComponents,
 			 const int *oldComponents) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     vector<vector<vector<double> > > OmegaTransformed;
     vector<int> oldCliqueTransformed;
     vector<vector<int> > oldComponentsTransformed;
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
-    
+
     updateLSigma2_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,t,sigma2,*Q,*G,S,x,psi,nu,
 				      delta,Delta,*gamma2,r,rho,phi,l,tau2R,tau2Rho,a,b,
 				      OmegaTransformed,oldCliqueTransformed,oldComponentsTransformed);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
 
@@ -1087,7 +1087,7 @@ extern "C" {
 		       const int *oldComponents) {
     unsigned int seedU = (unsigned int) *seed;
 
-		       
+
     vector<vector<vector<double> > > OmegaTransformed;
     vector<vector<vector<double> > > DTransformed;
     vector<int> oldCliqueTransformed;
@@ -1101,7 +1101,7 @@ extern "C" {
 				    oldComponentsTransformed);
 
     inverseTransformOmega(OmegaTransformed,Omega);
-		       
+
     *seed = (int) seedU;
   }
 
@@ -1128,21 +1128,21 @@ extern "C" {
 			   const int *nNewComponents,
 			   const int *oldComponents) {
     unsigned int seedU = (unsigned int) *seed;
-    
-    
+
+
     vector<vector<vector<double> > > OmegaTransformed;
     vector<int> oldCliqueTransformed;
     vector<vector<int> > oldComponentsTransformed;
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
-    
+
     updateDDeltaStar_HyperInverseWishart(&seedU,nAccept,Delta,*Q,*G,S,x,psi,nu,delta,r,sigma2,
 					 phi,tau2R,b,OmegaTransformed,oldCliqueTransformed,
 					 oldComponentsTransformed);
-    
+
     *seed = (int) seedU;
   }
-  
+
 
   void updateTau2RDDeltaStar_MII(unsigned int *seed,
 				 int *nTry,
@@ -1168,19 +1168,19 @@ extern "C" {
 				 const int *nNewComponents,
 				 const int *oldComponents) {
     unsigned int seedU = (unsigned int) *seed;
-    
-    
+
+
     vector<vector<vector<double> > > OmegaTransformed;
     vector<int> oldCliqueTransformed;
     vector<vector<int> > oldComponentsTransformed;
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
-    
+
     updateTau2RDDeltaStar_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,tau2R,Delta,*Q,
 					      *G,S,x,psi,nu,delta,r,sigma2,phi,b,
 					      OmegaTransformed,oldCliqueTransformed,
 					      oldComponentsTransformed);
-    
+
     *seed = (int) seedU;
   }
 
@@ -1213,20 +1213,20 @@ extern "C" {
 			     const int *nNewComponents,
 			     const int *oldComponents) {
     unsigned int seedU = (unsigned int) *seed;
-    
-    
+
+
     vector<vector<vector<double> > > OmegaTransformed;
     vector<int> oldCliqueTransformed;
     vector<vector<int> > oldComponentsTransformed;
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
-    
+
     updateBDDeltaStar_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,b,Delta,*Q,
 					  *G,S,x,psi,nu,delta,r,sigma2,phi,tau2R,
 					  *pB0,*pB1,*alphaB,*betaB,
 					  OmegaTransformed,oldCliqueTransformed,
 					  oldComponentsTransformed);
-    
+
     *seed = (int) seedU;
   }
 
@@ -1256,19 +1256,19 @@ extern "C" {
 			     const int *nNewComponents,
 			     const int *oldComponents) {
     unsigned int seedU = (unsigned int) *seed;
-    
-    
+
+
     vector<vector<vector<double> > > OmegaTransformed;
     vector<int> oldCliqueTransformed;
     vector<vector<int> > oldComponentsTransformed;
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
-    
+
     updateRDDeltaStar_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,r,Delta,*Q,
 					  *G,S,x,psi,nu,delta,sigma2,phi,tau2R,b,*nuR,
 					  OmegaTransformed,oldCliqueTransformed,
 					  oldComponentsTransformed);
-    
+
     *seed = (int) seedU;
   }
 
@@ -1309,7 +1309,7 @@ extern "C" {
   }
 
   // finished: updates for model AI
-  
+
 
 
   // updates only for model BI
@@ -1334,7 +1334,7 @@ extern "C" {
 			     const double *xi,
 			     const double *b) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     updateDeltaDDelta_onedelta(&seedU,*nTry,nAccept,delta,Delta,*Q,*G,S,x,psi,
 			       nu,*c2,r,sigma2,phi,tau2R,xi,b);
 
@@ -1425,12 +1425,12 @@ extern "C" {
 			     const double *alpha,
 			     const double *beta) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     vector<vector<int> > nn;
     nn.resize(*G);
     int g;
     for (g = 0; g < *G; g++) nn[g].resize(0);
-    
+
     int i;
     for (i = 0; i < *nNeighbour; i++) {
       int g1 = neighbour[2 * i];
@@ -1438,13 +1438,13 @@ extern "C" {
       nn[g1].push_back(g2);
       nn[g2].push_back(g1);
     }
-    
+
     updateDeltaDDelta_MRF2_onedelta(&seedU,*nTry,nAccept,delta,Delta,
 				    *Q,*G,S,x,psi,nu,*c2,r,sigma2,phi,
 				    tau2R,b,nn,*alpha,*beta);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
 
@@ -1471,17 +1471,17 @@ extern "C" {
 			const double *xi,
 			const double *b) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     updateDelta_HyperInverseWishart(&seedU,*nTry,nAccept,delta,*Q,*G,S,x,psi,
 				    nu,Delta,r,sigma2,phi,xi,b);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
-  
-  // finished: update for model AII  
-  
+
+  // finished: update for model AII
+
 
 
 
@@ -1504,17 +1504,17 @@ extern "C" {
 			const double *xi,
 			const double *b) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     updateDelta_HyperInverseWishart_onedelta(&seedU,*nTry,nAccept,delta,*Q,*G,S,x,psi,
 					     nu,Delta,r,sigma2,phi,xi,b);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
-  
-  // finished: update for model BII  
-  
+
+  // finished: update for model BII
+
 
 
   // updates only for model CII
@@ -1540,12 +1540,12 @@ extern "C" {
 			const double *beta,
 			const double *betag) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     vector<vector<int> > nn;
     nn.resize(*G);
     int g;
     for (g = 0; g < *G; g++) nn[g].resize(0);
-    
+
     int i;
     for (i = 0; i < *nNeighbour; i++) {
       int g1 = neighbour[2 * i];
@@ -1553,18 +1553,18 @@ extern "C" {
       nn[g1].push_back(g2);
       nn[g2].push_back(g1);
     }
-    
+
     updateDelta_HyperInverseWishart_MRF2(&seedU,*nTry,nAccept,delta,*Q,*G,S,x,psi,
 					 nu,Delta,r,sigma2,phi,b,nn,*alpha,
 					 *beta,*betag);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
-  
-  // finished: update for model CII  
-  
+
+  // finished: update for model CII
+
 
 
   // updates only for model DII
@@ -1589,12 +1589,12 @@ extern "C" {
 			const double *alpha,
 			const double *beta) {
     unsigned int seedU = (unsigned int) *seed;
-    
+
     vector<vector<int> > nn;
     nn.resize(*G);
     int g;
     for (g = 0; g < *G; g++) nn[g].resize(0);
-    
+
     int i;
     for (i = 0; i < *nNeighbour; i++) {
       int g1 = neighbour[2 * i];
@@ -1602,16 +1602,16 @@ extern "C" {
       nn[g1].push_back(g2);
       nn[g2].push_back(g1);
     }
-    
+
     updateDelta_HyperInverseWishart_MRF2_onedelta(&seedU,*nTry,nAccept,delta,*Q,*G,S,x,psi,
 						  nu,Delta,r,sigma2,phi,b,nn,*alpha,*beta);
-    
+
     *seed = (int) seedU;
-    
+
     return;
   }
-  
-  // finished: update for model DII  
+
+  // finished: update for model DII
 
 } // extern "C"
 

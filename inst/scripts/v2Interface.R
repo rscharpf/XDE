@@ -23,13 +23,14 @@ orig <- params2
 dms2 <- dims(params2)
 one.delta <- FALSE
 all.equal(dms, dms2)
-for(i in 1:50){
+##for(i in 1:50){
+i <- 1
 	##
 	## An entry point for each of the C routines in Rintervace_v2.cpp
 	##
 	## Updates that can be used by all model variants
 	##
-	a=paramsA@a
+##	a=paramsA@a
 	paramsA <- rupdateANu(object=paramsA, nTry=5L,
 			      epsilon=0.1, dryrun=FALSE)
 	paramsA <- rupdateTau2RhoNu(object=paramsA,
@@ -126,21 +127,10 @@ for(i in 1:50){
 				 dryrun=FALSE)
 
 
-
-
-
 	params2 <- rupdateSigma2(object=params2,
 				    nTry=5L,
 				    epsilon=0.1,
 				    dryrun=FALSE)
-
-
-
-
-
-
-
-
 
 
 	if(!one.delta){
@@ -207,19 +197,13 @@ for(i in 1:50){
 
 
 
-
-
-
-
-
-
-	rupdate <- function(object,
-			    type=c("ANu",
-			           "BDDelta",
-			           "Tau2Rho",
-			           "Tau2DDelta"),
-			    nTry=10L,
-			    epsilon=0.1,
-			    dryrun=FALSE){
-		update.type <- paste("rupdate", type, sep="")
-		.C(update.type, ...)
+##	rupdate <- function(object,
+##			    type=c("ANu",
+##			           "BDDelta",
+##			           "Tau2Rho",
+##			           "Tau2DDelta"),
+##			    nTry=10L,
+##			    epsilon=0.1,
+##			    dryrun=FALSE){
+##		update.type <- paste("rupdate", type, sep="")
+##		.C(update.type, ...)
