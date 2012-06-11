@@ -172,18 +172,18 @@ i <- 1
 						  epsilon=0.1,
 						  dryrun=FALSE)
 
-		params2 <- rupdateAlpha_MRF(object=params2,
-					    nTry=5L,
-					    epsilon=0.1,
-					    dryrun=FALSE)
-		params2 <- rupdateBeta_MRF(object=params2,
-					   nTry=5L,
-					   epsilon=0.1,
-					   dryrun=FALSE)
-		params2 <- rupdateBetag_MRF(object=params2,
-					    nTry=5L,
-					    epsilon=0.1,
-					    dryrun=FALSE)
+##		params2 <- rupdateAlpha_MRF(object=params2,
+##					    nTry=5L,
+##					    epsilon=0.1,
+##					    dryrun=FALSE)
+##		params2 <- rupdateBeta_MRF(object=params2,
+##					   nTry=5L,
+##					   epsilon=0.1,
+##					   dryrun=FALSE)
+##		params2 <- rupdateBetag_MRF(object=params2,
+##					    nTry=5L,
+##					    epsilon=0.1,
+##					    dryrun=FALSE)
 	}
 }
 
