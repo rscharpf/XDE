@@ -115,10 +115,11 @@ export(rupdateANu,
        rupdateTSigma2,
        rupdateLambdaPhi,
        rupdateThetaPhi,
-       rupdateDeltaDDelta_MRF,
-       rupdateAlpha_MRF,
-       rupdateBeta_MRF,
-       rupdateBetag_MRF)
+       rupdateDeltaDDelta_MRF)
+##       rupdateAlpha_MRF,
+##       rupdateBeta_MRF,
+##       rupdateBetag_MRF
+##       )
 
 
 
