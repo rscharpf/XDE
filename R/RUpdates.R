@@ -100,7 +100,7 @@ rupdateBDDelta <- function(object,
 		return(obj)
 	}
   
-	res <- .C("updateBDDelta",
+	res <- .C("updateBDDelta_MI",
 		  seed=object[["seed"]],
 		  nTry=as.integer(nTry),
 		  nAccept=as.integer(nAccept),
@@ -126,7 +126,7 @@ rupdateBDDelta <- function(object,
 	slot(object, "seed") <- res[["seed"]]
 	slot(object, "b") <- res[["b"]]
 	slot(object, "Delta") <- res[["Delta"]]
-	return(object)
+	return(object) ##nipun: changed updateBDDelta to updateBDDelta_MI
 }
 
 rupdateTau2RhoNu <- function(object,
@@ -208,7 +208,7 @@ rupdateTau2RDDelta <- function(object,
 			    b=object[["b"]])
 		return(res)
 	}
-	res <- .C("updateTau2RDDelta",
+	res <- .C("updateTau2RDDelta_MI",
 		  seed=object[["seed"]],
 		  nTry=nTry,
 		  nAccept=nAccept,
@@ -300,7 +300,7 @@ rupdateDDelta <- function(object,
 			    b=object[["b"]])
 		return(res)
 	}
-	res <- .C("updateDDelta",
+	res <- .C("updateDDelta_MI",
 		  seed=object[["seed"]],
 		  nAccept=nAccept,
 		  Delta=object[["Delta"]],
@@ -319,7 +319,7 @@ rupdateDDelta <- function(object,
 			    b=object[["b"]])
 	slot(object, "seed") <- res[["seed"]]
 	slot(object, "Delta") <- res[["Delta"]]
-	return(object)
+	return(object) ##nipun: changed updateDDelta to updateDDelta_MI
 }
 
 rupdateC2 <- function(object,
@@ -342,7 +342,7 @@ rupdateC2 <- function(object,
 			    c2Max=object[["c2Max"]])
 		return(res)
 	}
-	res <- .C("updateC2",
+	res <- .C("updateC2_MI",
 		  seed=object[["seed"]],
 			    nTry=nTry,
 			    nAccept=nAccept,
@@ -358,7 +358,7 @@ rupdateC2 <- function(object,
 			    c2Max=object[["c2Max"]])
 	slot(object, "seed") <- object[["seed"]]
 	slot(object, "c2") <- object[["c2"]]
-	return(object)
+	return(object) ##nipun: changed updateC2 to updateC2_MI
 }
 
 rupdateC2DDelta <- function(object,
@@ -388,7 +388,7 @@ rupdateC2DDelta <- function(object,
 			    c2Max=object[["c2Max"]])
 		return(res)
 	}
-	res <- .C("updateC2DDelta",
+	res <- .C("updateC2DDelta_MI",
 		  seed=object[["seed"]],
 			    nTry=nTry,
 			    nAccept=nAccept,
@@ -411,7 +411,7 @@ rupdateC2DDelta <- function(object,
 	slot(object, "seed") <- res[["seed"]]
 	slot(object, "c2") <- res[["c2"]]
 	slot(object, "Delta") <- res[["Delta"]]
-	return(object)
+	return(object) ##nipun: changed updateC2DDelta to updateC2DDelta_MI
 }
 
 
@@ -473,7 +473,7 @@ rupdateGamma2Nu <- function(object,
 			    a=object[["a"]])
 		return(res)
 	}
-		res <- .C("updateGamma2Nu",
+		res <- .C("updateGamma2Nu_MI",
 			  seed=object[["seed"]],
 			    nTry=nTry,
 			    nAccept=nAccept,
@@ -495,7 +495,7 @@ rupdateGamma2Nu <- function(object,
 	slot(object, "seed") <- res[["seed"]]
 	slot(object, "gamma2") <- res[["gamma2"]]
 	slot(object, "nu") <- res[["nu"]]
-	return(object)
+	return(object) ##nipun: changed updateGamma2Nu to updateGamma2Nu_MI
 }
 
 rupdateRDDelta <- function(object,
@@ -1045,6 +1045,82 @@ rupdateDeltaDDelta <- function(object,
 	return(object)
 }
 
+
+##nipun: added rupdateDeltaDDelta_MRF2
+rupdateDeltaDDelta_MRF2 <- function(object,
+                               nTry=10L,
+                               nAccept=0L,
+                               dryrun=FALSE,
+                               one.delta=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                delta=object[["delta"]],
+                Delta=object[["Delta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                c2=object[["c2"]],
+                r=object[["r"]],
+                sigma2=object[["sigma2"]],
+                phi=object[["phi"]],
+                tau2R=object[["tau2R"]],
+                xi=object[["xi"]],
+                b=object[["b"]])
+    return(res)
+  }
+  if(one.delta){
+    res <- .C("updateDeltaDDelta_MDI",
+              seed=object[["seed"]],
+              nTry=nTry,
+              nAccept=nAccept,
+              delta=object[["delta"]],
+              Delta=object[["Delta"]],
+              Q=object[["Q"]],
+              G=object[["G"]],
+              S=object[["S"]],
+              x=exprs(object),
+              psi=object[["phenodata"]],
+              nu=object[["nu"]],
+              c2=object[["c2"]],
+              r=object[["r"]],
+              sigma2=object[["sigma2"]],
+              phi=object[["phi"]],
+              tau2R=object[["tau2R"]],
+              xi=object[["xi"]],
+              b=object[["b"]]) ##nipun: changed updateDeltaDDelta_MRF2_onedelta to updateDeltaDDelta_MDI
+  } else {
+    res <- .C("updateDeltaDDelta_MCI",
+              seed=object[["seed"]],
+              nTry=nTry,
+              nAccept=nAccept,
+              delta=object[["delta"]],
+              Delta=object[["Delta"]],
+              Q=object[["Q"]],
+              G=object[["G"]],
+              S=object[["S"]],
+              x=exprs(object),
+              psi=object[["phenodata"]],
+              nu=object[["nu"]],
+              c2=object[["c2"]],
+              r=object[["r"]],
+              sigma2=object[["sigma2"]],
+              phi=object[["phi"]],
+              tau2R=object[["tau2R"]],
+              xi=object[["xi"]],
+              b=object[["b"]]) ##nipun: changed updateDeltaDDelta_MRF2 to updateDeltaDDelta_MCI 
+  }
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "delta") <- res[["delta"]]
+  slot(object, "Delta") <- res[["Delta"]]
+  return(object)
+}
+
+
 rupdateLSigma2 <- function(object,
 			   nTry=10L,
 			   nAccept=0L,
@@ -1137,7 +1213,7 @@ rupdateTSigma2 <- function(object,
 			    tau2R=object[["tau2R"]],
 			    tau2Rho=object[["tau2Rho"]],
 			    a=object[["a"]],
-			    b=object[["b"]])
+			    b=object[["b"]]) 
 		return(res)
 	}
 		res <- .C("updateTSigma2_MI",
@@ -1164,7 +1240,7 @@ rupdateTSigma2 <- function(object,
 			    tau2R=object[["tau2R"]],
 			    tau2Rho=object[["tau2Rho"]],
 			    a=object[["a"]],
-			    b=object[["b"]])
+			    b=object[["b"]])   ##nipun: Changed updateTSigma2 to updateTSigma2_MI
 	slot(object, "seed") <- res[["seed"]]
 	slot(object, "t") <- res[["t"]]
 	slot(object, "sigma2") <- res[["sigma2"]]
@@ -1265,236 +1341,1090 @@ rupdateThetaPhi <- function(object,
 	return(object)
 }
 
-rupdateDeltaDDelta_MRF <- function(object,
-				   nTry=10L,
-				   nAccept=0L,
-				   dryrun=FALSE,
-				   one.delta=FALSE){
-	if(dryrun){
-		res <- list(seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    delta=object[["delta"]],
-			    Delta=object[["Delta"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    S=object[["S"]],
-			    x=exprs(object),
-			    psi=object[["phenodata"]],
-			    nu=object[["nu"]],
-			    c2=object[["c2"]],
-			    r=object[["r"]],
-			    sigma2=object[["sigma2"]],
-			    phi=object[["phi"]],
-			    tau2R=object[["tau2R"]],
-			    b=object[["b"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]],
-			    beta=object[["beta"]],
-			    betag=object[["betag"]])
-		if(one.delta) res <- res[-length(res)]
-		return(res)
-	}
-	if(one.delta){
-		res <- .C("updateDeltaDDelta_MRF_onedelta",
-			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    delta=object[["delta"]],
-			    Delta=object[["Delta"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    S=object[["S"]],
-			    x=exprs(object),
-			    psi=object[["phenodata"]],
-			    nu=object[["nu"]],
-			    c2=object[["c2"]],
-			    r=object[["r"]],
-			    sigma2=object[["sigma2"]],
-			    phi=object[["phi"]],
-			    tau2R=object[["tau2R"]],
-			    b=object[["b"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]],
-			    beta=object[["beta"]])
-	} else {
-		res <- .C("updateDeltaDDelta_MRF",
-			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    delta=object[["delta"]],
-			    Delta=object[["Delta"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    S=object[["S"]],
-			    x=exprs(object),
-			    psi=object[["phenodata"]],
-			    nu=object[["nu"]],
-			    c2=object[["c2"]],
-			    r=object[["r"]],
-			    sigma2=object[["sigma2"]],
-			    phi=object[["phi"]],
-			    tau2R=object[["tau2R"]],
-			    b=object[["b"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]],
-			    beta=object[["beta"]],
-			  betag=object[["betag"]])
-	}
-	slot(object, "seed") <- res[["seed"]]
-	slot(object, "delta") <- res[["delta"]]
-	slot(object, "Delta") <- res[["Delta"]]
-	return(object)
+##rupdateDeltaDDelta_MRF <- function(object,
+##				   nTry=10L,
+##				   nAccept=0L,
+##			   dryrun=FALSE,
+##				   one.delta=FALSE){
+##	if(dryrun){
+##	res <- list(seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    delta=object[["delta"]],
+##		    Delta=object[["Delta"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    S=object[["S"]],
+##		    x=exprs(object),
+##		    psi=object[["phenodata"]],
+##		    nu=object[["nu"]],
+##		    c2=object[["c2"]],
+##		    r=object[["r"]],
+##		    sigma2=object[["sigma2"]],
+##		    phi=object[["phi"]],
+##		    tau2R=object[["tau2R"]],
+##		    b=object[["b"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]],
+##		    beta=object[["beta"]],
+##		    betag=object[["betag"]])
+##	if(one.delta) res <- res[-length(res)]
+##	return(res)
+##}
+##if(one.delta){
+##	res <- .C("updateDeltaDDelta_MRF_onedelta",
+##		  seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    delta=object[["delta"]],
+##		    Delta=object[["Delta"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    S=object[["S"]],
+##		    x=exprs(object),
+##		    psi=object[["phenodata"]],
+##		    nu=object[["nu"]],
+##		    c2=object[["c2"]],
+##		    r=object[["r"]],
+##		    sigma2=object[["sigma2"]],
+##		    phi=object[["phi"]],
+##		    tau2R=object[["tau2R"]],
+##		    b=object[["b"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]],
+##		    beta=object[["beta"]])##nipun:updateDeltaDDelta_MRF_onedelta missing
+##} else {
+##	res <- .C("updateDeltaDDelta_MRF",
+##		  seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    delta=object[["delta"]],
+##		    Delta=object[["Delta"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    S=object[["S"]],
+##		    x=exprs(object),
+##		    psi=object[["phenodata"]],
+##		    nu=object[["nu"]],
+##		    c2=object[["c2"]],
+##		    r=object[["r"]],
+##		    sigma2=object[["sigma2"]],
+##		    phi=object[["phi"]],
+##		    tau2R=object[["tau2R"]],
+##		    b=object[["b"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]],
+##		    beta=object[["beta"]],
+##		  betag=object[["betag"]]) ##nipun:updateDeltaDDelta_MRF missing
+##}
+##slot(object, "seed") <- res[["seed"]]
+##slot(object, "delta") <- res[["delta"]]
+##slot(object, "Delta") <- res[["Delta"]]
+##return(object)
+##}
+
+
+
+
+
+##rupdateAlpha_MRF <- function(object,
+##			     nTry=10L,
+##		     nAccept=0L,
+##		     epsilon=0.2,
+##		     dryrun=FALSE,
+##		     one.delta=FALSE){
+##if(dryrun){
+##	res <- list(seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    alpha=object[["alpha"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##			    nNeighbour=object[["nNeighbour"]],
+##			    neighbour=object[["neighbour"]],
+##		    beta=object[["beta"]],
+##		    betag=object[["betag"]])
+##	if(one.delta) res <- res[-length(res)]
+##	return(res)
+##}
+##if(one.delta){
+##	res <- .C("updateAlpha_MRF_onedelta",
+##		  seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    alpha=object[["alpha"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    beta=object[["beta"]])
+##} else {
+##	res <- .C("updateAlpha_MRF",
+##		  seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    alpha=object[["alpha"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    beta=object[["beta"]],
+##		    betag=object[["betag"]])
+##}
+##slot(object, "seed") <- res[["seed"]]
+##slot(object, "alpha") <- res[["alpha"]]
+##return(object)
+##}
+##
+##rupdateBeta_MRF <- function(object,
+##		     nTry=10L,
+##		     nAccept=0L,
+##		     epsilon=0.2,
+##		     dryrun=FALSE,
+##		     one.delta=FALSE){
+##if(dryrun){
+##	res <- list(seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    beta=object[["beta"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]],
+##		    betag=object[["betag"]])
+##	if(one.delta) res <- res[-length(res)]
+##	return(res)
+##}
+##if(one.delta){
+##	res <- .C("updateBeta_MRF_onedelta",
+##		  seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    beta=object[["beta"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]])
+##} else {
+##	res <- .C("updateBeta_MRF",
+##		  seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    beta=object[["beta"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]],
+##		    betag=object[["betag"]])
+##}
+##slot(object, "seed") <- res[["seed"]]
+##slot(object, "beta") <- res[["beta"]]
+##return(object)
+##}
+##
+
+##rupdateBetag_MRF <- function(object,
+##		     nTry=10L,
+##		     nAccept=0L,
+##		     epsilon=0.2,
+##		     dryrun=FALSE){
+##if(dryrun){
+##	res <- list(seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    betag=object[["betag"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]],
+##		    beta=object[["beta"]])
+##	return(res)
+##}
+##	res <- .C("updateBetag_MRF",
+##		  seed=object[["seed"]],
+##		    nTry=nTry,
+##		    nAccept=nAccept,
+##		    epsilon=epsilon,
+##		    betag=object[["betag"]],
+##		    Q=object[["Q"]],
+##		    G=object[["G"]],
+##		    delta=object[["delta"]],
+##		    nNeighbour=object[["nNeighbour"]],
+##		    neighbour=object[["neighbour"]],
+##		    alpha=object[["alpha"]],
+##		    beta=object[["beta"]])
+##slot(object, "seed") <- res[["seed"]]
+##slot(object, "betag") <- res[["betag"]]
+##	return(object)
+##}
+
+##nipun: wrappers for the remaining functions
+
+rupdateAlpha <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                alpha=object[["alpha"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                delta=object[["delta"]],
+                nNeighbour=object[["nNeighbour"]],
+                neighbour=object[["neighbour"]],
+                beta=object[["beta"]],
+                betag=object[["betag"]])
+    return(res)
+  }
+  res <- .C("updateAlpha_MC",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            alpha=object[["alpha"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            delta=object[["delta"]],
+            nNeighbour=object[["nNeighbour"]],
+            neighbour=object[["neighbour"]],
+            beta=object[["beta"]],
+            betag=object[["betag"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "alpha") <- res[["alpha"]]
+  return(object)
+}
+
+rupdateAlpha_onedelta <- function(object,
+                         nTry=10L,
+                         nAccept=0L,
+                         epsilon=0.2,
+                         dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                alpha=object[["alpha"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                delta=object[["delta"]],
+                nNeighbour=object[["nNeighbour"]],
+                neighbour=object[["neighbour"]],
+                beta=object[["beta"]])
+    return(res)
+  }
+  res <- .C("updateAlpha_MD",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            alpha=object[["alpha"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            delta=object[["delta"]],
+            nNeighbour=object[["nNeighbour"]],
+            neighbour=object[["neighbour"]],
+            beta=object[["beta"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "alpha") <- res[["alpha"]]
+  return(object)
+}
+
+rupdateBeta <- function(object,
+                         nTry=10L,
+                         nAccept=0L,
+                         epsilon=0.2,
+                         dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                beta=object[["beta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                delta=object[["delta"]],
+                nNeighbour=object[["nNeighbour"]],
+                neighbour=object[["neighbour"]],
+                alpha=object[["alpha"]],
+                betag=object[["betag"]])
+    return(res)
+  }
+  res <- .C("updateBeta_MC",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            beta=object[["beta"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            delta=object[["delta"]],
+            nNeighbour=object[["nNeighbour"]],
+            neighbour=object[["neighbour"]],
+            alpha=object[["alpha"]],
+            betag=object[["betag"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "beta") <- res[["beta"]]
+  return(object)
+}
+
+rupdateBeta_onedelta <- function(object,
+                        nTry=10L,
+                        nAccept=0L,
+                        epsilon=0.2,
+                        dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                beta=object[["beta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                delta=object[["delta"]],
+                nNeighbour=object[["nNeighbour"]],
+                neighbour=object[["neighbour"]],
+                alpha=object[["alpha"]])
+    return(res)
+  }
+  res <- .C("updateBeta_MD",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            beta=object[["beta"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            delta=object[["delta"]],
+            nNeighbour=object[["nNeighbour"]],
+            neighbour=object[["neighbour"]],
+            alpha=object[["alpha"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "beta") <- res[["beta"]]
+  return(object)
+}
+
+rupdateBetag <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                betag=object[["betag"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                delta=object[["delta"]],
+                nNeighbour=object[["nNeighbour"]],
+                neighbour=object[["neighbour"]],
+                alpha=object[["alpha"]],
+                beta=object[["beta"]])
+    return(res)
+  }
+  res <- .C("updateBetag_MC",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            betag=object[["betag"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            delta=object[["delta"]],
+            nNeighbour=object[["nNeighbour"]],
+            neighbour=object[["neighbour"]],
+            alpha=object[["alpha"]],
+            beta=object[["beta"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "betag") <- res[["betag"]]
+  return(object)
 }
 
 
-rupdateAlpha_MRF <- function(object,
-			     nTry=10L,
-			     nAccept=0L,
-			     epsilon=0.2,
-			     dryrun=FALSE,
-			     one.delta=FALSE){
-	if(dryrun){
-		res <- list(seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    alpha=object[["alpha"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    beta=object[["beta"]],
-			    betag=object[["betag"]])
-		if(one.delta) res <- res[-length(res)]
-		return(res)
-	}
-	if(one.delta){
-		res <- .C("updateAlpha_MRF_onedelta",
-			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    alpha=object[["alpha"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    beta=object[["beta"]])
-	} else {
-		res <- .C("updateAlpha_MRF",
-			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    alpha=object[["alpha"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    beta=object[["beta"]],
-			    betag=object[["betag"]])
-	}
-	slot(object, "seed") <- res[["seed"]]
-	slot(object, "alpha") <- res[["alpha"]]
-	return(object)
+rupdateDelta <- function(object,
+                        nTry=10L,
+                        nAccept=0L,
+                        dryrun=FALSE,
+                        one.delta=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                delta=object[["delta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                Delta=object[["Delta"]],
+                r=object[["r"]],
+                sigma2=object[["sigma2"]],
+                phi=object[["phi"]],
+                xi=object[["xi"]],
+                b=object[["b"]])
+    
+    if(one.delta) res <- res[-length(res)]
+    return(res)
+  }
+  if(one.delta){
+    res <- .C("updateDelta_MBII",
+              seed=object[["seed"]],
+              nTry=nTry,
+              nAccept=nAccept,
+              delta=object[["delta"]],
+              Q=object[["Q"]],
+              G=object[["G"]],
+              S=object[["S"]],
+              x=exprs(object),
+              psi=object[["phenodata"]],
+              nu=object[["nu"]],
+              Delta=object[["Delta"]],
+              r=object[["r"]],
+              sigma2=object[["sigma2"]],
+              phi=object[["phi"]],
+              xi=object[["xi"]],
+              b=object[["b"]])
+  } else {
+    res <- .C("updateDelta_MAII",
+              seed=object[["seed"]],
+              nTry=nTry,
+              nAccept=nAccept,
+              delta=object[["delta"]],
+              Q=object[["Q"]],
+              G=object[["G"]],
+              S=object[["S"]],
+              x=exprs(object),
+              psi=object[["phenodata"]],
+              nu=object[["nu"]],
+              Delta=object[["Delta"]],
+              r=object[["r"]],
+              sigma2=object[["sigma2"]],
+              phi=object[["phi"]],
+              xi=object[["xi"]],
+              b=object[["b"]])
+  }
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "delta") <- res[["delta"]]
+  return(object)
 }
 
-rupdateBeta_MRF <- function(object,
-			     nTry=10L,
-			     nAccept=0L,
-			     epsilon=0.2,
-			     dryrun=FALSE,
-			     one.delta=FALSE){
-	if(dryrun){
-		res <- list(seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    beta=object[["beta"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]],
-			    betag=object[["betag"]])
-		if(one.delta) res <- res[-length(res)]
-		return(res)
-	}
-	if(one.delta){
-		res <- .C("updateBeta_MRF_onedelta",
-			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    beta=object[["beta"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]])
-	} else {
-		res <- .C("updateBeta_MRF",
-			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    beta=object[["beta"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]],
-			    betag=object[["betag"]])
-	}
-	slot(object, "seed") <- res[["seed"]]
-	slot(object, "beta") <- res[["beta"]]
-	return(object)
+rupdateDelta_MRF2 <- function(object,
+                                   nTry=10L,
+                                   nAccept=0L,
+                                   dryrun=FALSE,
+                                   one.delta=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                delta=object[["delta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                Delta=object[["Delta"]],
+                r=object[["r"]],
+                sigma2=object[["sigma2"]],
+                phi=object[["phi"]],
+                b=object[["b"]],
+                nNeighbour=object[["nNeighbour"]],
+                neighbour=object[["neighbour"]],
+                alpha=object[["alpha"]],
+                beta=object[["beta"]],
+                betag=object[["betag"]])
+    if(one.delta) res <- res[-length(res)]
+    return(res)
+  }
+  if(one.delta){
+    res <- .C("updateDelta_MDII",
+              seed=object[["seed"]],
+              nTry=nTry,
+              nAccept=nAccept,
+              delta=object[["delta"]],
+              Q=object[["Q"]],
+              G=object[["G"]],
+              S=object[["S"]],
+              x=exprs(object),
+              psi=object[["phenodata"]],
+              nu=object[["nu"]],
+              Delta=object[["Delta"]],
+              r=object[["r"]],
+              sigma2=object[["sigma2"]],
+              phi=object[["phi"]],
+              b=object[["b"]],
+              nNeighbour=object[["nNeighbour"]],
+              neighbour=object[["neighbour"]],
+              alpha=object[["alpha"]],
+              beta=object[["beta"]],
+              betag=object[["betag"]])
+   }else {
+    res <- .C("updateDelta_MCII",
+              seed=object[["seed"]],
+              nTry=nTry,
+              nAccept=nAccept,
+              delta=object[["delta"]],
+              Q=object[["Q"]],
+              G=object[["G"]],
+              S=object[["S"]],
+              x=exprs(object),
+              psi=object[["phenodata"]],
+              nu=object[["nu"]],
+              Delta=object[["Delta"]],
+              r=object[["r"]],
+              sigma2=object[["sigma2"]],
+              phi=object[["phi"]],
+              b=object[["b"]],
+              nNeighbour=object[["nNeighbour"]],
+              neighbour=object[["neighbour"]],
+              alpha=object[["alpha"]],
+              beta=object[["beta"]],
+              betag=object[["betag"]])
+  }
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "delta") <- res[["delta"]]
+  return(object)
 }
 
-rupdateBetag_MRF <- function(object,
-			     nTry=10L,
-			     nAccept=0L,
-			     epsilon=0.2,
-			     dryrun=FALSE){
-	if(dryrun){
-		res <- list(seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    betag=object[["betag"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]],
-			    beta=object[["beta"]])
-		return(res)
-	}
-		res <- .C("updateBetag_MRF",
-			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    betag=object[["betag"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    nNeighbour=object[["nNeighbour"]],
-			    neighbour=object[["neighbour"]],
-			    alpha=object[["alpha"]],
-			    beta=object[["beta"]])
-	slot(object, "seed") <- res[["seed"]]
-	slot(object, "betag") <- res[["betag"]]
-	return(object)
+rupdateSigma2_HyperInverseWishart <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                sigma2=object[["sigma2"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                delta=object[["delta"]],
+                Delta=object[["Delta"]],
+                gamma2=object[["gamma2"]],
+                r=object[["r"]],
+                rho=object[["rho"]],
+                phi=object[["phi"]],
+                t=object[["t"]],
+                l=object[["l"]],
+                tau2R=object[["tau2R"]],
+                tau2Rho=object[["tau2Rho"]],
+                a=object[["a"]],
+                b=object[["b"]],
+                Omega=object[["Omega"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateSigma2_MII",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            sigma2=object[["sigma2"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            S=object[["S"]],
+            x=exprs(object),
+            psi=object[["phenodata"]],
+            nu=object[["nu"]],
+            delta=object[["delta"]],
+            Delta=object[["Delta"]],
+            gamma2=object[["gamma2"]],
+            r=object[["r"]],
+            rho=object[["rho"]],
+            phi=object[["phi"]],
+            t=object[["t"]],
+            l=object[["l"]],
+            tau2R=object[["tau2R"]],
+            tau2Rho=object[["tau2Rho"]],
+            a=object[["a"]],
+            b=object[["b"]],
+            Omega=object[["Omega"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "sigma2") <- res[["sigma2"]]
+  return(object)
+}
+
+rupdateLSigma2_HyperInverseWishart <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                l=object[["l"]],
+                sigma2=object[["sigma2"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                delta=object[["delta"]],
+                Delta=object[["Delta"]],
+                gamma2=object[["gamma2"]],
+                r=object[["r"]],
+                rho=object[["rho"]],
+                phi=object[["phi"]],
+                t=object[["t"]],
+                tau2R=object[["tau2R"]],
+                tau2Rho=object[["tau2Rho"]],
+                a=object[["a"]],
+                b=object[["b"]],
+                Omega=object[["Omega"]],
+                S=object[["S"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateLSigma2_MII",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            l=object[["l"]],
+            sigma2=object[["sigma2"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            S=object[["S"]],
+            x=exprs(object),
+            psi=object[["phenodata"]],
+            nu=object[["nu"]],
+            delta=object[["delta"]],
+            Delta=object[["Delta"]],
+            gamma2=object[["gamma2"]],
+            r=object[["r"]],
+            rho=object[["rho"]],
+            phi=object[["phi"]],
+            t=object[["t"]],
+            tau2R=object[["tau2R"]],
+            tau2Rho=object[["tau2Rho"]],
+            a=object[["a"]],
+            b=object[["b"]],
+            Omega=object[["Omega"]],
+            S=object[["S"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "l") <- res[["l"]]
+  return(object)
+}
+
+rupdateTSigma2_HyperInverseWishart <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                t=object[["t"]],
+                sigma2=object[["sigma2"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                delta=object[["delta"]],
+                Delta=object[["Delta"]],
+                gamma2=object[["gamma2"]],
+                r=object[["r"]],
+                rho=object[["rho"]],
+                phi=object[["phi"]],
+                l=object[["l"]],
+                tau2R=object[["tau2R"]],
+                tau2Rho=object[["tau2Rho"]],
+                a=object[["a"]],
+                b=object[["b"]],
+                Omega=object[["Omega"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateTSigma2_MII",
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            t=object[["t"]],
+            sigma2=object[["sigma2"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            S=object[["S"]],
+            x=exprs(object),
+            psi=object[["phenodata"]],
+            nu=object[["nu"]],
+            delta=object[["delta"]],
+            Delta=object[["Delta"]],
+            gamma2=object[["gamma2"]],
+            r=object[["r"]],
+            rho=object[["rho"]],
+            phi=object[["phi"]],
+            l=object[["l"]],
+            tau2R=object[["tau2R"]],
+            tau2Rho=object[["tau2Rho"]],
+            a=object[["a"]],
+            b=object[["b"]],
+            Omega=object[["Omega"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "t") <- res[["t"]]
+  return(object)
+}
+
+rupdateOmega_HyperInverseWishart <- function(object,
+                     nAccept=0L,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nAccept=nAccept,
+                Omega=object[["Omega"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                Delta=object[["Delta"]],
+                r=object[["r"]],
+                sigma2=object[["sigma2"]],
+                tau2R=object[["tau2R"]],
+                b=object[["b"]],
+                zeta=object[["zeta"]],
+                D=object[["D"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateOmega_MII",
+            seed=object[["seed"]],
+            nAccept=nAccept,
+            Omega=object[["Omega"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            Delta=object[["Delta"]],
+            r=object[["r"]],
+            sigma2=object[["sigma2"]],
+            tau2R=object[["tau2R"]],
+            b=object[["b"]],
+            zeta=object[["zeta"]],
+            D=object[["D"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "Omega") <- res[["Omega"]]
+  return(object)
+}
+
+
+rupdateDDeltaStar_HyperInverseWishart <- function(object,
+                     nAccept=0L,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nAccept=nAccept,
+                Delta=object[["Delta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                delta=object[["delta"]],
+                r=object[["r"]],
+                sigma2=object[["sigma2"]],
+                phi=object[["phi"]],
+                tau2R=object[["tau2R"]],
+                b=object[["b"]],
+                Omega=object[["Omega"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateDeltaStar_MII",
+            seed=object[["seed"]],
+            nAccept=nAccept,
+            Delta=object[["Delta"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            S=object[["S"]],
+            x=exprs(object),
+            psi=object[["phenodata"]],
+            nu=object[["nu"]],
+            delta=object[["delta"]],
+            r=object[["r"]],
+            sigma2=object[["sigma2"]],
+            phi=object[["phi"]],
+            tau2R=object[["tau2R"]],
+            b=object[["b"]],
+            Omega=object[["Omega"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "Delta") <- res[["Delta"]]
+  return(object)
+}
+
+
+rupdateTau2RDDeltaStar_HyperInverseWishart <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                tau2R=object[["tau2R"]],
+                Delta=object[["Delta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                delta=object[["delta"]],
+                r=object[["r"]],
+                sigma2=object[["sigma2"]],
+                phi=object[["phi"]],
+                b=object[["b"]],
+                Omega=object[["Omega"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateTau2RDDeltaStar_MII",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            tau2R=object[["tau2R"]],
+            Delta=object[["Delta"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            S=object[["S"]],
+            x=exprs(object),
+            psi=object[["phenodata"]],
+            nu=object[["nu"]],
+            delta=object[["delta"]],
+            r=object[["r"]],
+            sigma2=object[["sigma2"]],
+            phi=object[["phi"]],
+            b=object[["b"]],
+            Omega=object[["Omega"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "tau2R") <- res[["tau2R"]]
+  return(object)
+}
+
+
+rupdateBDDeltaStar_HyperInverseWishart <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                b=object[["b"]],
+                Delta=object[["Delta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                delta=object[["delta"]],
+                r=object[["r"]],
+                sigma2=object[["sigma2"]],
+                phi=object[["phi"]],
+                tau2R=object[["tau2R"]],
+                pB0=object[["pB0"]],
+                pB1=object[["pB1"]],
+                alphaB=object[["alphaB"]],
+                betaB=object[["betaB"]],
+                Omega=object[["Omega"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateBDDeltaStar_MII",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            b=object[["b"]],
+            Delta=object[["Delta"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            S=object[["S"]],
+            x=exprs(object),
+            psi=object[["phenodata"]],
+            nu=object[["nu"]],
+            delta=object[["delta"]],
+            r=object[["r"]],
+            sigma2=object[["sigma2"]],
+            phi=object[["phi"]],
+            tau2R=object[["tau2R"]],
+            pB0=object[["pB0"]],
+            pB1=object[["pB1"]],
+            alphaB=object[["alphaB"]],
+            betaB=object[["betaB"]],
+            Omega=object[["Omega"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "b") <- res[["b"]]
+  return(object)
+}
+
+
+rupdateRDDeltaStar_HyperInverseWishart <- function(object,
+                     nTry=10L,
+                     nAccept=0L,
+                     epsilon=0.2,
+                     dryrun=FALSE){
+  if(dryrun){
+    res <- list(seed=object[["seed"]],
+                nTry=nTry,
+                nAccept=nAccept,
+                epsilon=epsilon,
+                r=object[["r"]],
+                Delta=object[["Delta"]],
+                Q=object[["Q"]],
+                G=object[["G"]],
+                S=object[["S"]],
+                x=exprs(object),
+                psi=object[["phenodata"]],
+                nu=object[["nu"]],
+                delta=object[["delta"]],
+                sigma2=object[["sigma2"]],
+                phi=object[["phi"]],
+                tau2R=object[["tau2R"]],
+                b=object[["b"]],
+                nuR=object[["nuR"]],
+                Omega=object[["Omega"]],
+                nClique=object[["nClique"]],
+                oldClique=object[["oldClique"]],
+                nOldComponents=object[["nOldComponents"]],
+                nNewComponents=object[["nNewComponents"]],
+                oldComponents=object[["oldComponents"]])
+    return(res)
+  }
+  res <- .C("updateRDDeltaStar_MII",
+            seed=object[["seed"]],
+            nTry=nTry,
+            nAccept=nAccept,
+            epsilon=epsilon,
+            r=object[["r"]],
+            Delta=object[["Delta"]],
+            Q=object[["Q"]],
+            G=object[["G"]],
+            S=object[["S"]],
+            x=exprs(object),
+            psi=object[["phenodata"]],
+            nu=object[["nu"]],
+            delta=object[["delta"]],
+            sigma2=object[["sigma2"]],
+            phi=object[["phi"]],
+            tau2R=object[["tau2R"]],
+            b=object[["b"]],
+            nuR=object[["nuR"]],
+            Omega=object[["Omega"]],
+            nClique=object[["nClique"]],
+            oldClique=object[["oldClique"]],
+            nOldComponents=object[["nOldComponents"]],
+            nNewComponents=object[["nNewComponents"]],
+            oldComponents=object[["oldComponents"]])
+  slot(object, "seed") <- res[["seed"]]
+  slot(object, "r") <- res[["r"]]
+  return(object)
 }
