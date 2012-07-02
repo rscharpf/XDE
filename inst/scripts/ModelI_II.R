@@ -97,21 +97,21 @@ objectMII <- rupdateTSigma2_HyperInverseWishart(object=objectMII,
 objectMII <- rupdateOmega_HyperInverseWishart(object=objectMII,
                                             dryrun=FALSE) 
 
-objectMII <- rupdateDDeltaStar_HyperInverseWishart(object=objectMII,
-                                                 dryrun=FALSE) ##crashes R
+#objectMII <- rupdateDDeltaStar_HyperInverseWishart(object=objectMII,
+#                                                dryrun=FALSE) 
 
-objectMII <- rupdateTau2RDDeltaStar_HyperInverseWishart(object=objectMII,
-                                                      nTry=5L,
-                                                      epsilon=0.1,
-                                                      dryrun=FALSE)  ##crashes R
+#objectMII <- rupdateTau2RDDeltaStar_HyperInverseWishart(object=objectMII,
+#                                                      nTry=5L,
+#                                                      epsilon=0.1,
+#                                                     dryrun=FALSE)  
 
-objectMII <- rupdateBDDeltaStar_HyperInverseWishart(object=objectMII,
-                                                  nTry=5L,
-                                                  epsilon=0.1,
-                                                  dryrun=FALSE)##crashes R
+#objectMII <- rupdateBDDeltaStar_HyperInverseWishart(object=objectMII,
+#                                                  nTry=5L,
+#                                                 epsilon=0.1,
+#                                                  dryrun=FALSE)
 
-objectMII <- rupdateRDDeltaStar_HyperInverseWishart(object=objectMII,
-                                                  nTry=5L,
-                                                  epsilon=0.1,
-                                                  dryrun=FALSE)   ##crashes R                           
+#objectMII <- rupdateRDDeltaStar_HyperInverseWishart(object=objectMII,
+#                                                  nTry=5L,
+#                                                  epsilon=0.1,
+#                                                  dryrun=FALSE)                            
 
