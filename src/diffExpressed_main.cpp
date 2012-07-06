@@ -1,3 +1,6 @@
+//wrapper for etc.. R interface for the same?
+
+
 #include <R.h>
 
 #include <string>

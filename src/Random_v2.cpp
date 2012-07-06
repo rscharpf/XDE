@@ -250,7 +250,7 @@ double Random::Gamma(double p,double lambda)
 
   return x;
 
-  /*
+    /*
   double prob;
   double u,am,e,s,v1,v2,xx,yy;
   double fp,temp;

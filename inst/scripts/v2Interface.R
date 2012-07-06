@@ -20,7 +20,7 @@ all.equal(dms, dms2)
 	params2 <- rupdateBDDelta(object=params2,
 				  nTry=5L,
 				  epsilon=0.1,
-				  dryrun=FALSE) //Error in .C("updateBDDelta", seed = object[["seed"]], nTry = as.integer(nTry),  :C symbol name "updateBDDelta" not in load table
+				  dryrun=FALSE) 
                                       
 	params2 <- rupdateTau2RhoNu(object=params2,
 				    nTry=5L,
@@ -30,22 +30,22 @@ all.equal(dms, dms2)
 	params2 <- rupdateTau2RDDelta(object=params2,
 				      nTry=5L,
 				      epsilon=0.1,
-				      dryrun=FALSE) //error
+				      dryrun=FALSE) 
                                       
 	params2 <- rupdateNu(object=params2,
 			     dryrun=FALSE)
 	## NaN's appear in nu after the update...?
 	
   params2 <- rupdateDDelta(object=params2,
-				 dryrun=FALSE) //error
+				 dryrun=FALSE) 
 
 	params2 <- rupdateC2(object=params2,
 			     nTry=5L,
-			     dryrun=FALSE) // error
+			     dryrun=FALSE)
 
 	params2 <- rupdateC2DDelta(object=params2,
 				   nTry=5L,
-				   dryrun=FALSE) //error
+				   dryrun=FALSE) 
 
 	params2 <- rupdateGamma2(object=params2,
 				 dryrun=FALSE)
@@ -53,17 +53,17 @@ all.equal(dms, dms2)
 	params2 <- rupdateGamma2Nu(object=params2,
 				   nTry=5L,
 				   epsilon=0.1,
-				   dryrun=FALSE) //error
+				   dryrun=FALSE) 
 
 	params2 <- rupdateRDDelta(object=params2,
 				 nTry=5L,
 				 epsilon=0.1,
-				 dryrun=FALSE) //error
+				 dryrun=FALSE) 
 
 	params2 <- rupdateRC2(object=params2,
 				 nTry=5L,
 				 epsilon=0.1,
-				 dryrun=FALSE) //error
+				 dryrun=FALSE) 
 
 	params2 <- rupdateRhoNu(object=params2,
 				nTry=5L,
@@ -78,7 +78,7 @@ all.equal(dms, dms2)
 	params2 <- rupdateSigma2(object=params2,
 				    nTry=5L,
 				    epsilon=0.1,
-				    dryrun=FALSE) ///error
+				    dryrun=FALSE) 
 
 	params2 <- rupdatePhi(object=params2,
 				 nTry=5L,
@@ -108,11 +108,11 @@ all.equal(dms, dms2)
 	if(!one.delta){
 		params2 <- rupdateXi(object=params2,
 				     dryrun=FALSE,
-				     one.delta=FALSE) //error
+				     one.delta=FALSE) 
 		params2 <- rupdateDeltaDDelta(object=params2,
 					      nTry=5L,
 					      dryrun=FALSE,
-					      one.delta=FALSE) //error
+					      one.delta=FALSE) 
     
     ##nipun: for  new wrappers{
 		params2 <- rupdateDeltaDDelta_MRF2(object=params2,
@@ -136,11 +136,11 @@ all.equal(dms, dms2)
 		## for a gene are the same
 		params2 <- rupdateXi(object=params2,
 				     dryrun=FALSE,
-				     one.delta=TRUE) //error
+				     one.delta=TRUE) 
 		params2 <- rupdateDeltaDDelta(object=params2,
 					      nTry=5L,
 					      dryrun=FALSE,
-					      one.delta=TRUE) //error
+					      one.delta=TRUE) 
     
 		##nipun: for new wrappers{
 		params2 <- rupdateDeltaDDelta_MRF2(object=params2,
@@ -163,12 +163,12 @@ all.equal(dms, dms2)
 	params2 <- rupdateLSigma2(object=params2,
 				  nTry=5L,
 				  epsilon=0.1,
-				  dryrun=FALSE) //error
+				  dryrun=FALSE) 
 
 	params2 <- rupdateTSigma2(object=params2,
 				      nTry=5L,
 				      epsilon=0.1,
-				      dryrun=FALSE) //error
+				      dryrun=FALSE) 
 
 	params2 <- rupdateLambdaPhi(object=params2,
 				      nTry=5L,
@@ -249,17 +249,17 @@ all.equal(dms, dms2)
                                       
 	if(FALSE){
 		## add appropriate slots to Parameters object
-		
+    
     params2 <- rupdateDeltaDDelta_MRF(object=params2,
 						  nTry=5L,
 					  epsilon=0.1,
-						  dryrun=FALSE) //error Error in rupdateDeltaDDelta_MRF(object = params2, nTry = 5L, epsilon = 0.1,  : 
-						    //unused argument(s) (epsilon = 0.1)
+						  dryrun=FALSE) 
+						    
 
 		params2 <- rupdateAlpha_MRF(object=params2,
 					    nTry=5L,
 					    epsilon=0.1,
-					    dryrun=FALSE) //Error in slot(x, i) : 
+					    dryrun=FALSE) 
 					      
                                                                     
 		params2 <- rupdateBeta_MRF(object=params2,
