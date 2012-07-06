@@ -1,5 +1,6 @@
 library(XDE)
 data(expressionSetList)
+
 ## some initial values
 ## one.delta is 'model B'
 initial.paramsA <- XDE:::Parameters(object=expressionSetList,
