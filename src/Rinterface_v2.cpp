@@ -3,7 +3,7 @@
 #include "Utility_v2.h"
 
 extern "C" {
-
+  
   // updates that can be used for all model variants
 
   // nu|... ~ N(0, Sigma)
@@ -266,7 +266,7 @@ extern "C" {
 	       const double *t) {
     unsigned int seedU = (unsigned int) *seed;
 
-    updateT(&seedU,*nTry,nAccept,*epsilon,l,*Q,*G,sigma2,t);
+    updateL(&seedU,*nTry,nAccept,*epsilon,l,*Q,*G,sigma2,t); 
 
     *seed = (int) seedU;
 
@@ -908,7 +908,7 @@ extern "C" {
 			const double *b) {
     unsigned int seedU = (unsigned int) *seed;
 
-    updateLSigma2(&seedU,*nTry,nAccept,*epsilon,t,sigma2,*Q,*G,S,x,psi,nu,
+    updateTSigma2(&seedU,*nTry,nAccept,*epsilon,t,sigma2,*Q,*G,S,x,psi,nu,
 		  delta,Delta,*c2,*gamma2,r,rho,phi,l,tau2R,tau2Rho,a,b); // should it be updateTSigma2?
 
     *seed = (int) seedU;
@@ -1057,7 +1057,7 @@ extern "C" {
     transformGraph(nClique,oldClique,nOldComponents,oldComponents,oldCliqueTransformed,oldComponentsTransformed);
     transformOmega(nClique,nOldComponents,nNewComponents,Omega,OmegaTransformed);
     
-    updateLSigma2_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,t,sigma2,*Q,*G,S,x,psi,nu,
+    updateTSigma2_HyperInverseWishart(&seedU,*nTry,nAccept,*epsilon,t,sigma2,*Q,*G,S,x,psi,nu,
 				      delta,Delta,*gamma2,r,rho,phi,l,tau2R,tau2Rho,a,b,
 				      OmegaTransformed,oldCliqueTransformed,oldComponentsTransformed);
     

@@ -1,3 +1,5 @@
+//C code that is wrapped by Rinterface.cpp
+
 #include <vector>
 #include <iostream>
 #include <fstream>
