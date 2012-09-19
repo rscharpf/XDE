@@ -15,6 +15,7 @@ one.delta <- FALSE
 all.equal(dms, dms2)
 
 ##objectA updates (no specific updates for MA)
+trace(modelA_B_MIupdates, browser)
 objectA <- modelA_B_MIupdates(objectA)
 
 

@@ -358,6 +358,7 @@ setMethod("dims", "Parameters", function(object){
 	L <- length(nms)
 	res <- rep(NA, L)
 	for(i in seq_len(L)) res[i] <- length(slot(object, nms[i]))
+	names(res) <- nms
 	return(res)
 })
 
@@ -379,34 +380,34 @@ startingValues <- function(params, expressionSetList, phenotypeLabel, one.delta=
 
 
 
-          ##nipun: for ParametersD 
-          
+          ##nipun: for ParametersD
+
           ParametersD <- function(object,...){
             tmp <- Parameters(object,...)
             object <- as(tmp, "ParametersD")
             object@alpha <- 1.0
             object@beta <- 1.0
-            
+
           }
-          
-          
-          ##nipun: for ParametersC 
-          
+
+
+          ##nipun: for ParametersC
+
           ParametersC <- function(object,...){
             tmp <- ParametersD(object,...)
             object <- as(tmp, "ParametersC")
             object@betag <- 1.0
           }
-          
-          
-          
-          ##nipun: for ParametersMII 
-          
+
+
+
+          ##nipun: for ParametersMII
+
           ParametersMII <- function(object,...){
             tmp <- Parameters(object,...)
             object <- as(tmp, "ParametersMII")
             object@Omega <- 1.0
           }
-          
+
 
 
