@@ -1,10 +1,10 @@
 Package: Test
 Type: Package
-Title: What the package does (short line)
-Version: 1.0.1
+Title: Testing R interface for MRF
+Version: 1.0.2
 Date: 2012-06-10
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: HT, RS, MF
+Maintainer:  <yourfault@somewhere.net>
+Description: Testing R interface for MRF
+License: GPL
 Packaged: 2012-10-02 18:13:27 UTC; rscharpf
