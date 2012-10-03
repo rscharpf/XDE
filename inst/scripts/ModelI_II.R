@@ -3,7 +3,13 @@ data(expressionSetList)
 
 ### Initializing slots common to all models
 commonParams <- XDE:::Parameters(object=expressionSetList, clinicalCovariate="adenoVsquamous")
+## need to specify: sumS
+## not specified by HT: c2, gamma2, a, b, l, t, lambda, theta, ...
+## initialize clique
+##
 commonObject <- XDE:::startingValues(commonParams, expressionSetList, "adenoVsquamous")
+
+
 
 
 
@@ -65,7 +71,7 @@ setMethod("initialize", signature(.Object="ParametersMII"), function(.Object, ..
 ##paramsMII <- new("ParametersMII")
 ##tmp=XDE:::Parameters(expressionSetList, clinicalCovariate="adenoVsquamous")
 ##objMII=as(tmp, "ParametersMII")
-          
+
 #dms <- dims(commonParams)
 #objectMII <- XDE:::startingValues(paramsMII,expressionSetList,"adenoVsquamous")
 orig <- objectMII
@@ -87,23 +93,23 @@ objectMII <- rupdateSigma2_HyperInverseWishart(object=objectMII,
 objectMII <- rupdateLSigma2_HyperInverseWishart(object=objectMII,
                                               nTry=5L,
                                               epsilon=0.1,
-                                              dryrun=FALSE) 
+                                              dryrun=FALSE)
 
 objectMII <- rupdateTSigma2_HyperInverseWishart(object=objectMII,
                                               nTry=5L,
                                               epsilon=0.1,
-                                              dryrun=FALSE) 
+                                              dryrun=FALSE)
 
 objectMII <- rupdateOmega_HyperInverseWishart(object=objectMII,
-                                            dryrun=FALSE) 
+                                            dryrun=FALSE)
 
 #objectMII <- rupdateDDeltaStar_HyperInverseWishart(object=objectMII,
-#                                                dryrun=FALSE) 
+#                                                dryrun=FALSE)
 
 #objectMII <- rupdateTau2RDDeltaStar_HyperInverseWishart(object=objectMII,
 #                                                      nTry=5L,
 #                                                      epsilon=0.1,
-#                                                     dryrun=FALSE)  
+#                                                     dryrun=FALSE)
 
 #objectMII <- rupdateBDDeltaStar_HyperInverseWishart(object=objectMII,
 #                                                  nTry=5L,
@@ -113,5 +119,5 @@ objectMII <- rupdateOmega_HyperInverseWishart(object=objectMII,
 #objectMII <- rupdateRDDeltaStar_HyperInverseWishart(object=objectMII,
 #                                                  nTry=5L,
 #                                                  epsilon=0.1,
-#                                                  dryrun=FALSE)                            
+#                                                  dryrun=FALSE)
 
