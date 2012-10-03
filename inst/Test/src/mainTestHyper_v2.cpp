@@ -30,8 +30,10 @@ extern "C" {
 			double *alphaXi,
 			double *betaXi,
 			double *c2Max,
+			double *sigma2,
 			int *aOut,
-			int *sigma2Out){
+			int *sigma2Out,
+			int *simulateSigma2){
     unsigned int seed = 4435213;
     Random ran(seed);
     // initialise fixed hyper-parameters
@@ -181,15 +183,17 @@ extern "C" {
   // RS : simulating sigma2 from the prior.
   //      - perhaps add an option for simulating sigma2 from prior
   //         or using the value of sigma2 passed in from R
-  double *sigma2 = (double *) calloc(*Q * *G,sizeof(double));
-  for (q = 0; q < *Q; q++){
-    for (g = 0; g < *G; g++) {
-      int k = qg2index(q,g,*Q,*G);
-      double param2 = l[q] / t[q];
-      double param1 = l[q] * param2;
+  if (*simulateSigma2 == 1){
+    //double *sigma2 = (double *) calloc(*Q * *G,sizeof(double));
+    for (q = 0; q < *Q; q++){
+      for (g = 0; g < *G; g++) {
+	int k = qg2index(q,g,*Q,*G);
+	double param2 = l[q] / t[q];
+	double param1 = l[q] * param2;
 
-      sigma2[k] = ran.Gamma(param1,param2);
-      //sigma2file << q << " " << g << " " << sigma2[k] << endl;
+	sigma2[k] = ran.Gamma(param1,param2);
+	//sigma2file << q << " " << g << " " << sigma2[k] << endl;
+      }
     }
   }
 
@@ -210,8 +214,7 @@ extern "C" {
 
       phi[k] = ran.Gamma(param1,param2);
 
-      phifile << q << " " << g << " " << phi[k] << " " <<
-	sigma2[k] * phi[k] << " " << sigma2[k] / phi[k] << endl;
+      phifile << q << " " << g << " " << phi[k] << " " << sigma2[k] * phi[k] << " " << sigma2[k] / phi[k] << endl;
     }
   phifile.close();
 

@@ -4,6 +4,7 @@ library(Test)
 ## have updated parameters written to files
 ##
 G <- 3592
+## Can only pass 65 arguments
 tmp <- .C("initializeParams",
 	  nIt=1L,
 	  G=3592L,
@@ -22,8 +23,10 @@ tmp <- .C("initializeParams",
 	  alphaXi=1.0,
 	  betaXi=1.0,
 	  c2Max=10.0,
+	  sigma2=rep(0.0, 3592*3), ## G * Q
 	  aOut=1L,
-	  sigma2Out=1L)
+	  sigma2Out=1L,
+	  simulateSigma2=1L)
 ## only last iteration written to file...
 phi <- as.matrix(read.table("phi.txt", sep=" ", header=FALSE,
 			    colClasses=c("NULL", "NULL", rep("numeric", 3))))
