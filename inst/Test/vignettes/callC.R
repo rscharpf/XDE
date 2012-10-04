@@ -7,6 +7,7 @@ G <- 3592
 ## Can only pass 65 arguments
 tmp <- .C("initializeParams",
 	  nIt=1L,
+	  seedR=123L,
 	  G=3592L,
 	  Q=3L,
 	  S=c(100L, 50L, 75L),

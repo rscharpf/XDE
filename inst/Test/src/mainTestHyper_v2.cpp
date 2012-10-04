@@ -16,7 +16,7 @@
 extern "C" {
 
   // int main(void) {
-  void initializeParams(int *nIt, int *G, int *Q, int *S,
+  void initializeParams(int *nIt, int *seedR, int *G, int *Q, int *S,
 			double *alphaA,
 			double *betaA,
 			double *pA0,
@@ -34,7 +34,9 @@ extern "C" {
 			int *aOut,
 			int *sigma2Out,
 			int *simulateSigma2){
-    unsigned int seed = 4435213;
+    // unsigned int seed = 4435213;
+    unsigned int seed;
+    seed = *seedR;
     Random ran(seed);
     // initialise fixed hyper-parameters
     // int G = 3592;
@@ -75,8 +77,7 @@ extern "C" {
 
     double c2Max = 10.0;
     */
-    ofstream aFile("a.txt");
-    ofstream sigma2File("sigma2.txt");
+
 
     vector<int> oldClique;
     vector<vector<int> > oldComponents;
@@ -190,8 +191,7 @@ extern "C" {
 	int k = qg2index(q,g,*Q,*G);
 	double param2 = l[q] / t[q];
 	double param1 = l[q] * param2;
-
-	sigma2[k] = ran.Gamma(param1,param2);
+	//sigma2[k] = ran.Gamma(param1,param2);
 	//sigma2file << q << " " << g << " " << sigma2[k] << endl;
       }
     }
@@ -407,10 +407,6 @@ extern "C" {
     xfile.close();
   }
 
-  // random start
-
-  seed = 784348215;
-
   // Initialise parameters to be simulated
 
   gamma2 = 0.1 * 0.1;
@@ -470,21 +466,7 @@ extern "C" {
   }
 
 
-  if(*sigma2Out == 1){
-    for (q = 0; q < *Q; q++)
-      for (g = 0; g < *G; g++) {
-	int k = qg2index(q,g,*Q,*G);
-	double param2 = l[q] / t[q];
-	double param1 = l[q] * param2;
-
-	sigma2[k] = ran.Gamma(param1,param2);
-	sigma2File << sigma2[k] << " ";
-      }
-    sigma2File << endl;
-    sigma2File.flush();
-    sigma2File.close();
-  }
-  else {
+  if(*simulateSigma2 == 1){
     for (q = 0; q < *Q; q++)
       for (g = 0; g < *G; g++) {
 	int k = qg2index(q,g,*Q,*G);
@@ -493,6 +475,7 @@ extern "C" {
 	sigma2[k] = ran.Gamma(param1,param2);
       }
   }
+  // else assume supplied sigma2 is a valid variance
 
   for (q = 0; q < *Q; q++) {
     lambda[q] = 5.0;
@@ -557,7 +540,8 @@ extern "C" {
 
   // end random start
 
-
+  ofstream aFile("a.txt");
+  ofstream sigma2File("sigma2.txt");
   // run Metropolis-Hastings updates
 
 
@@ -624,7 +608,6 @@ extern "C" {
 	  aFile << a[q] << " ";
 	aFile << endl;
 	aFile.flush();
-	aFile.close();
       }
       else{
 	for (q = 0; q < *Q; q++)
@@ -952,7 +935,26 @@ extern "C" {
       cout << "potentialDelta: " << potentialDelta(*Q,*G,delta,xi) << endl;
       cout << "potentialXi: " << potentialXi(*Q,xi,*alphaXi,*betaXi) << endl;
       cout << endl;
-    }
+
+      if(*sigma2Out == 1){
+	for (q = 0; q < *Q; q++)
+	  for (g = 0; g < *G; g++) {
+	    int k = qg2index(q,g,*Q,*G);
+	    sigma2File << sigma2[k] << " ";
+	  }
+	sigma2File << endl;
+	sigma2File.flush();
+      }
+      else {
+	for (q = 0; q < *Q; q++)
+	  for (g = 0; g < *G; g++) {
+	    int k = qg2index(q,g,*Q,*G);
+	    sigma2File << sigma2[k] << " ";
+	  }
+      }
+    } // MH-iteration
+    aFile.close();
+    sigma2File.close();
 
     //return 0;
   }
