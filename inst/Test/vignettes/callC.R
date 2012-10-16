@@ -4,6 +4,44 @@ library(Test)
 ## have updated parameters written to files
 ##
 G <- 3592
+#########################################
+# Not sure this is the right position
+clique <- rep(0,G)
+rU <- runif(G)
+for (g in 2:G){
+	if (rU[g]<0.85){
+		clique[g] <- clique[g-1]}
+	else clique[g] <- clique[g-1]+1
+	}
+nNewInClique <- tabulate(clique+1)
+oldComponents <- vector("list", length(nNewInClique))
+oldClique <- nNewInClique
+oldClique[1] <- -1
+nTotalInClique <- nNewInClique
+rU <- runif(length(nNewInClique)-1)
+rU2 <- runif(length(nNewInClique)-1)
+for (c in 2:length(nNewInClique)){
+	oldClique[c] =  round(rU[c-1]*(c-2))
+	nOld = round(rU2[c-1]*rU2[c-1]*(nTotalInClique[oldClique[c]+1]-1))
+	nTotalInClique[c] = nTotalInClique[c] + nOld
+	oldComponents[[c]] = rep(0,nOld)
+	nSampled = 0
+	while(nSampled < nOld) {
+		oldComponents[[c]][nSampled+1] = round(runif(1)*nTotalInClique[oldClique[c]+1])
+		existAlready = 0
+		oldComponents[[c]][nSampled+1]
+		if (nSampled>1){
+			for (i in 1:(nSampled-1)){
+				if (oldComponents[[c]][i]==oldComponents[[c]][nSampled+1]){
+			    		existAlready = 1
+					}
+				}
+			}		
+		if (existAlready==0) {nSampled=nSampled+1}
+		}
+	}
+#################################################################################	
+
 ## Can only pass 65 arguments
 tmp <- .C("initializeParams",
 	  nIt=1L,
@@ -27,7 +65,12 @@ tmp <- .C("initializeParams",
 	  sigma2=rep(0.0, 3592*3), ## G * Q
 	  aOut=1L,
 	  sigma2Out=1L,
-	  simulateSigma2=1L)
+	  simulateSigma2=1L,
+    oldClique,
+		oldComponents,
+		clique,
+		nNewInClique,
+    nTotalInClique)
 ## only last iteration written to file...
 phi <- as.matrix(read.table("phi.txt", sep=" ", header=FALSE,
 			    colClasses=c("NULL", "NULL", rep("numeric", 3))))

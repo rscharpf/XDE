@@ -33,7 +33,12 @@ extern "C" {
 			double *sigma2,
 			int *aOut,
 			int *sigma2Out,
-			int *simulateSigma2){
+			int *simulateSigma2
+			vector<int> oldClique
+			vector<vector<int>> oldComponents
+			vector<int> clique
+			vector<int> nNewInClique
+			vector<int> nTotalInClique){
     // unsigned int seed = 4435213;
     unsigned int seed;
     seed = *seedR;
@@ -78,7 +83,7 @@ extern "C" {
     double c2Max = 10.0;
     */
 
-
+    /*	
     vector<int> oldClique;
     vector<vector<int> > oldComponents;
     vector<int> clique(*G,0);
@@ -123,6 +128,8 @@ extern "C" {
 	  nSampled++;
       }
     }
+    */
+
     for (c = 0; c < nTotalInClique.size(); c++)
       cout << "nTotalInClique: " << c << " " << nTotalInClique[c] << endl;
 
