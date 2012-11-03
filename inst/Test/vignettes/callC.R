@@ -1,5 +1,5 @@
 library(Test)
-initializeParams()
+initializeParams(G=100L, nIt=1L, Q=3L, S=c(10L, 10L, 10L), seed=1L)
 
 	## #################################################################################
 	##str(oldClique)

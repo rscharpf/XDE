@@ -17,6 +17,7 @@ extern "C" {
 
   // int main(void) {
   void initializeParams(int *nIt, int *seedR, int *G, int *Q, int *S,
+			int *psi,
 			double *alphaA,
 			double *betaA,
 			double *pA0,
@@ -31,9 +32,19 @@ extern "C" {
 			double *betaXi,
 			double *c2Max,
 			double *sigma2,
+			double *tau2Rho,
+			double *gamma2,
+			double *tau2R,
+			int *simulateExpression, // whether to simulate data from the prior
+			//double *x, // expression data
 			int *aOut,
 			int *sigma2Out,
-			int *simulateSigma2){//22
+			int *simulateSigma2,
+			int *oldCliqueInput,
+			int *oldComponentsInput,
+			int *nClique,
+			int *nOldClique,
+			int *nTotalInCliqueInput){//22
     unsigned int seed;
     seed = *seedR;
     Random ran(seed);
@@ -46,6 +57,15 @@ extern "C" {
     vector<vector<int> > oldComponents;
     vector<int> clique(*G,0);
     vector<int> nNewInClique(0,0);
+
+    // goal: to pass cliques from R to C, we need to transform the input parameters
+    //       oldCliqueInput and oldComponentsInput
+    //       This transformation requires variables nClique, oldCliqueInput, nOldClique
+    // what is nClique?
+    // transformGraph(nClique, oldCliqueInput, nOldClique, oldComponentsInput, oldClique, oldComponents);
+
+    // This section defines oldClique, oldComponents, and nTotalInClique.
+    // The remaining vars are temporary
     clique[0] = 0;
     int g;
     for (g = 1; g < *G; g++) {
@@ -88,321 +108,297 @@ extern "C" {
     }
     for (c = 0; c < nTotalInClique.size(); c++)
       cout << "nTotalInClique: " << c << " " << nTotalInClique[c] << endl;
+    // initialise clinical variables
 
-  // initialise clinical variables
+    int s;
 
-  int *psi = (int *) calloc(sumS,sizeof(int));
-  int s;
-  for (q = 0; q < *Q; q++)
-    for (s = 0; s < S[q]; s++) {
-      int ksq = sq2index(s,q,S,*Q);
-      psi[ksq] = (ran.Unif01() <= 0.5);
+    double *a = (double *) calloc(*Q,sizeof(double));
+    for (q = 0; q < *Q; q++) {
+      double u = ran.Unif01();
+      if (u < *pA0)
+	a[q] = 0.0;
+      else if (u < *pA0 + *pA1)
+	a[q] = 1.0;
+      else
+	a[q] = ran.Unif01();
+    }
+    a[0] = 0.0;
+    a[1] = 0.5;
+    a[2] = 1.0;
+    double *b = (double *) calloc(*Q,sizeof(double));
+    for (q = 0; q < *Q; q++) {
+      double u = ran.Unif01();
+      if (u < *pB0)
+	b[q] = 0.0;
+      else if (u < *pB0 + *pB1)
+	b[q] = 1.0;
+      else
+	b[q] = ran.Unif01();
+    }
+    b[0] = 1.0;
+    b[1] = 0.0;
+    b[2] = 0.5;
+
+    double *l = (double *) calloc(*Q,sizeof(double));
+    double *t = (double *) calloc(*Q,sizeof(double));
+    for (q = 0; q < *Q; q++) {
+      l[q] = 1.0;
+      t[q] = 0.5 * 0.5;
     }
 
-  // Initialise parameters to be simulated
+    // RS : simulating sigma2 from the prior.
+    //      - perhaps add an option for simulating sigma2 from prior
+    //         or using the value of sigma2 passed in from R
+    if (*simulateSigma2 == 1){
+      for (q = 0; q < *Q; q++){
+	for (g = 0; g < *G; g++) {
+	  int k = qg2index(q,g,*Q,*G);
+	  double param2 = l[q] / t[q];
+	  double param1 = l[q] * param2;
+	}
+      }
+    }
 
-  double gamma2 = 0.5 * 0.5;
-  double *tau2Rho = (double *) calloc(*Q,sizeof(double));
-  for (q = 0; q < *Q; q++)
-    tau2Rho[q] = 1.0;
+    double *lambda = (double *) calloc(*Q,sizeof(double));
+    double *theta = (double *) calloc(*Q,sizeof(double));
+    for (q = 0; q < *Q; q++) {
+      lambda[q] = 0.9;
+      theta[q] = 0.1 * 0.1;
+    }
 
-  double *tau2R = (double *) calloc(*Q,sizeof(double));
-  for (q = 0; q < *Q; q++)
-    tau2R[q] = 1.0;
-
-  double *a = (double *) calloc(*Q,sizeof(double));
-  for (q = 0; q < *Q; q++) {
-    double u = ran.Unif01();
-    if (u < *pA0)
-      a[q] = 0.0;
-    else if (u < *pA0 + *pA1)
-      a[q] = 1.0;
-    else
-      a[q] = ran.Unif01();
-  }
-  a[0] = 0.0;
-  a[1] = 0.5;
-  a[2] = 1.0;
-  double *b = (double *) calloc(*Q,sizeof(double));
-  for (q = 0; q < *Q; q++) {
-    double u = ran.Unif01();
-    if (u < *pB0)
-      b[q] = 0.0;
-    else if (u < *pB0 + *pB1)
-      b[q] = 1.0;
-    else
-      b[q] = ran.Unif01();
-  }
-  b[0] = 1.0;
-  b[1] = 0.0;
-  b[2] = 0.5;
-
-  double *l = (double *) calloc(*Q,sizeof(double));
-  double *t = (double *) calloc(*Q,sizeof(double));
-  for (q = 0; q < *Q; q++) {
-    l[q] = 1.0;
-    t[q] = 0.5 * 0.5;
-  }
-
-  // RS : simulating sigma2 from the prior.
-  //      - perhaps add an option for simulating sigma2 from prior
-  //         or using the value of sigma2 passed in from R
-  if (*simulateSigma2 == 1){
-    //double *sigma2 = (double *) calloc(*Q * *G,sizeof(double));
-    for (q = 0; q < *Q; q++){
+    ofstream phifile("phi.txt");
+    double *phi = (double *) calloc(*Q * *G,sizeof(double));
+    for (q = 0; q < *Q; q++)
       for (g = 0; g < *G; g++) {
 	int k = qg2index(q,g,*Q,*G);
-	double param2 = l[q] / t[q];
-	double param1 = l[q] * param2;
-	//sigma2[k] = ran.Gamma(param1,param2);
-	//sigma2file << q << " " << g << " " << sigma2[k] << endl;
+	double param2 = lambda[q] / theta[q];
+	double param1 = lambda[q] * param2;
+	phi[k] = ran.Gamma(param1,param2);
+
+	phifile << q << " " << g << " " << phi[k] << " " << sigma2[k] * phi[k] << " " << sigma2[k] / phi[k] << endl;
+      }
+    phifile.close();
+
+    double *rho = (double *) calloc(*Q * (*Q - 1) / 2,sizeof(double));
+    int q1,q2;
+    for (q1 = 0; q1 < *Q; q1++) {
+      int q2;
+      for (q2 = q1 + 1; q2 < *Q; q2++) {
+	int k = qq2index(q1,q2,*Q);
+	rho[k] = 0.5;
       }
     }
-  }
 
-  double *lambda = (double *) calloc(*Q,sizeof(double));
-  double *theta = (double *) calloc(*Q,sizeof(double));
-  for (q = 0; q < *Q; q++) {
-    lambda[q] = 0.9;
-    theta[q] = 0.1 * 0.1;
-  }
+    double *r = (double *) calloc(*Q * (*Q - 1) / 2,sizeof(double));
+    for (q1 = 0; q1 < *Q; q1++) {
+      int q2;
+      for (q2 = q1 + 1; q2 < *Q; q2++) {
+	int k = qq2index(q1,q2,*Q);
+	r[k] = 0.5;
+      }
+    }
 
-  ofstream phifile("phi.txt");
-  double *phi = (double *) calloc(*Q * *G,sizeof(double));
-  for (q = 0; q < *Q; q++)
+    double *nu = (double *) calloc(*Q * *G,sizeof(double));
     for (g = 0; g < *G; g++) {
-      int k = qg2index(q,g,*Q,*G);
-      double param2 = lambda[q] / theta[q];
-      double param1 = lambda[q] * param2;
+      std::vector<std::vector<double> > Sigma;
+      makeSigma(g,*G,Sigma,*Q,*gamma2,tau2Rho,a,sigma2,rho);
+      std::vector<double> zero(*Q,0.0);
+      std::vector<double> rr(ran.MultiGaussian(Sigma,zero));
 
-      phi[k] = ran.Gamma(param1,param2);
-
-      phifile << q << " " << g << " " << phi[k] << " " << sigma2[k] * phi[k] << " " << sigma2[k] / phi[k] << endl;
-    }
-  phifile.close();
-
-  double *rho = (double *) calloc(*Q * (*Q - 1) / 2,sizeof(double));
-  int q1,q2;
-  for (q1 = 0; q1 < *Q; q1++) {
-    int q2;
-    for (q2 = q1 + 1; q2 < *Q; q2++) {
-      int k = qq2index(q1,q2,*Q);
-      rho[k] = 0.5;
-    }
-  }
-
-  double *r = (double *) calloc(*Q * (*Q - 1) / 2,sizeof(double));
-  for (q1 = 0; q1 < *Q; q1++) {
-    int q2;
-    for (q2 = q1 + 1; q2 < *Q; q2++) {
-      int k = qq2index(q1,q2,*Q);
-      r[k] = 0.5;
-    }
-  }
-
-  double *nu = (double *) calloc(*Q * *G,sizeof(double));
-  for (g = 0; g < *G; g++) {
-    std::vector<std::vector<double> > Sigma;
-    makeSigma(g,*G,Sigma,*Q,gamma2,tau2Rho,a,sigma2,rho);
-    std::vector<double> zero(*Q,0.0);
-    std::vector<double> rr(ran.MultiGaussian(Sigma,zero));
-
-    int q;
-    for (q = 0; q < *Q; q++) {
-      int kqg = qg2index(q,g,*Q,*G);
-      nu[kqg] = rr[q];
-    }
-  }
-
-
-  int *delta = (int *) calloc(*Q * *G,sizeof(int));
-
-  // simulate delta from an MRF
-
-  vector<vector<int> > neighbour;
-  neighbour.resize(*G);
-
-  ifstream in("R.txt");
-  for (g = 0; g < *G; g++) {
-    neighbour[g].resize(0);
-    int gg;
-    for (gg = 0; gg < *G; gg++) {
-      int vv;
-      in >> vv;
-      if (vv == 1 && g != gg) {
-	neighbour[g].push_back(gg);
+      int q;
+      for (q = 0; q < *Q; q++) {
+	int kqg = qg2index(q,g,*Q,*G);
+	nu[kqg] = rr[q];
       }
     }
-  }
 
-  vector<double> potOn(*G,0.0);
-  vector<double> potOff(*G,0.0);
 
-  double alpha = -0.2; alpha = 0.0;
-  double beta = 3.0; beta = 0.42;
-  double betag = 0.25; betag = 2.0;
+    int *delta = (int *) calloc(*Q * *G,sizeof(int));
 
-  double *xi = (double *) calloc(*Q,sizeof(double));
-  for (q = 0; q < *Q; q++) {
-    xi[q] = 0.5;
-  }
+    // simulate delta from an MRF
 
-  int oneDelta = 1; oneDelta = 1;
-  int *dd = NULL;
-  if (oneDelta == 1) {
-    dd = (int *) calloc(*G,sizeof(int));
-    for (g = 0; g < *G; g++)
-      dd[g] = (ran.Unif01() <= xi[0]);
-  }
-  else {
-    dd = (int *) calloc(*Q * *G,sizeof(int));
-    for (g = 0; g < *Q * *G; g++)
-      dd[g] = (ran.Unif01() <= xi[0]);
-  }
+    vector<vector<int> > neighbour;
+    neighbour.resize(*G);
 
-  int *deltaTrue = (int *) calloc(*Q * *G,sizeof(int));
-  for (g = 0; g < *G; g++) {
-    int q;
-    for (q = 0; q < *Q; q++) {
-      int kqg = qg2index(q,g,*Q,*G);
-      if (oneDelta == 1) {
-	delta[kqg] = dd[g];
-	deltaTrue[kqg] = dd[g];
-      }
-      else {
-	delta[kqg] = dd[kqg];
-	deltaTrue[kqg] = dd[kqg];
-      }
-    }
-  }
-
-  vector<vector<vector<double> > > D;
-  D.resize(oldComponents.size());
-  for (c = 0; c < D.size(); c++) {
-    D[c].resize(nTotalInClique[c]);
-    int g1;
-    for (g1 = 0; g1 < D[c].size(); g1++) {
-      D[c][g1].resize(nTotalInClique[c]);
-      int g2;
-      for (g2 = 0; g2 < D[c][g1].size(); g2++)
-	D[c][g1][g2] = 2.0 * (g1 == g2);
-    }
-  }
-
-  double df = 1.0;
-
-  vector<vector<vector<double> > > Omega(ran.HyperInverseWishart(df,D,oldClique,oldComponents));
-
-  vector<vector<double> > zero;
-  zero.resize(*G);
-  for (g = 0; g < *G; g++) {
-    zero[g].resize(*Q);
-    for (q = 0; q < *Q; q++)
-      zero[g][q] = 0.0;
-  }
-  vector<vector<double> > R;
-  R.resize(*Q);
-  for (q = 0; q < *Q; q++) {
-    R[q].resize(*Q);
-  }
-  for (q = 0; q < *Q; q++) {
-    R[q][q] = tau2R[q];
-    int p;
-    for (p = q + 1; p < *Q; p++) {
-      R[q][p] = sqrt(tau2R[p] * tau2R[q]) * r[qq2index(p,q,*Q)];
-      R[p][q] = R[q][p];
-    }
-  }
-
-  vector<vector<double> > DeltaStar(ran.MatrixVariateNormal(zero,R,Omega,oldClique,oldComponents));
-
-  double *Delta = (double *) calloc(*Q * *G,sizeof(double));
-  for (g = 0; g < *G; g++) {
-    for (q = 0; q < *Q; q++)
-      Delta[qg2index(q,g,*Q,*G)] = DeltaStar[g][q] * exp(0.5 * b[q] * log(sigma2[qg2index(q,g,*Q,*G)]));
-  }
-
-  // I believe this is simulating the expression data
-  ofstream xfile("x.txt");
-  double *x = (double *) calloc(*G * sumS,sizeof(double));
-  for (q = 0; q < *Q; q++) {
-    int tt = 5;
+    ifstream in("R.txt");
     for (g = 0; g < *G; g++) {
-      int kqg = qg2index(q,g,*Q,*G);
+      neighbour[g].resize(0);
+      int gg;
+      for (gg = 0; gg < *G; gg++) {
+	int vv;
+	in >> vv;
+	if (vv == 1 && g != gg) {
+	  neighbour[g].push_back(gg);
+	}
+      }
+    }
 
-      double var0 = sigma2[kqg] * phi[kqg];
-      double var1 = sigma2[kqg] / phi[kqg];
-      double mm = nu[kqg];
+    vector<double> potOn(*G,0.0);
+    vector<double> potOff(*G,0.0);
 
-      if (delta[kqg] != 0) {
-	int s;
-	for (s = 0; s < S[q]; s++) {
-	  double mean;
-	  double var;
-	  int ksq = sq2index(s,q,S,*Q);
-	  if (psi[ksq] == 0) {
-	    mean = mm - Delta[kqg];
-	    var = var0;
+    double alpha = -0.2; alpha = 0.0;
+    double beta = 3.0; beta = 0.42;
+    double betag = 0.25; betag = 2.0;
+
+    double *xi = (double *) calloc(*Q,sizeof(double));
+    for (q = 0; q < *Q; q++) {
+      xi[q] = 0.5;
+    }
+
+    int oneDelta = 1; oneDelta = 1;
+    int *dd = NULL;
+    if (oneDelta == 1) {
+      dd = (int *) calloc(*G,sizeof(int));
+      for (g = 0; g < *G; g++)
+	dd[g] = (ran.Unif01() <= xi[0]);
+    }
+    else {
+      dd = (int *) calloc(*Q * *G,sizeof(int));
+      for (g = 0; g < *Q * *G; g++)
+	dd[g] = (ran.Unif01() <= xi[0]);
+    }
+
+    int *deltaTrue = (int *) calloc(*Q * *G,sizeof(int));
+    for (g = 0; g < *G; g++) {
+      int q;
+      for (q = 0; q < *Q; q++) {
+	int kqg = qg2index(q,g,*Q,*G);
+	if (oneDelta == 1) {
+	  delta[kqg] = dd[g];
+	  deltaTrue[kqg] = dd[g];
+	}
+	else {
+	  delta[kqg] = dd[kqg];
+	  deltaTrue[kqg] = dd[kqg];
+	}
+      }
+    }
+
+    vector<vector<vector<double> > > D;
+    D.resize(oldComponents.size());
+    for (c = 0; c < D.size(); c++) {
+      D[c].resize(nTotalInClique[c]);
+      int g1;
+      for (g1 = 0; g1 < D[c].size(); g1++) {
+	D[c][g1].resize(nTotalInClique[c]);
+	int g2;
+	for (g2 = 0; g2 < D[c][g1].size(); g2++)
+	  D[c][g1][g2] = 2.0 * (g1 == g2);
+      }
+    }
+
+    double df = 1.0;
+
+    vector<vector<vector<double> > > Omega(ran.HyperInverseWishart(df,D,oldClique,oldComponents));
+
+    vector<vector<double> > zero;
+    zero.resize(*G);
+    for (g = 0; g < *G; g++) {
+      zero[g].resize(*Q);
+      for (q = 0; q < *Q; q++)
+	zero[g][q] = 0.0;
+    }
+    vector<vector<double> > R;
+    R.resize(*Q);
+    for (q = 0; q < *Q; q++) {
+      R[q].resize(*Q);
+    }
+    for (q = 0; q < *Q; q++) {
+      R[q][q] = tau2R[q];
+      int p;
+      for (p = q + 1; p < *Q; p++) {
+	R[q][p] = sqrt(tau2R[p] * tau2R[q]) * r[qq2index(p,q,*Q)];
+	R[p][q] = R[q][p];
+      }
+    }
+
+    vector<vector<double> > DeltaStar(ran.MatrixVariateNormal(zero,R,Omega,oldClique,oldComponents));
+
+    double *Delta = (double *) calloc(*Q * *G,sizeof(double));
+    for (g = 0; g < *G; g++) {
+      for (q = 0; q < *Q; q++)
+	Delta[qg2index(q,g,*Q,*G)] = DeltaStar[g][q] * exp(0.5 * b[q] * log(sigma2[qg2index(q,g,*Q,*G)]));
+    }
+
+    // I believe this is simulating the expression data
+    //if(*simulateExpression == 1){
+      ofstream xfile("x.txt");
+      double *x = (double *) calloc(*G * sumS,sizeof(double));
+      for (q = 0; q < *Q; q++) {
+	int tt = 5;
+	for (g = 0; g < *G; g++) {
+	  int kqg = qg2index(q,g,*Q,*G);
+
+	  double var0 = sigma2[kqg] * phi[kqg];
+	  double var1 = sigma2[kqg] / phi[kqg];
+	  double mm = nu[kqg];
+
+	  if (delta[kqg] != 0) {
+	    int s;
+	    for (s = 0; s < S[q]; s++) {
+	      double mean;
+	      double var;
+	      int ksq = sq2index(s,q,S,*Q);
+	      if (psi[ksq] == 0) {
+		mean = mm - Delta[kqg];
+		var = var0;
+	      }
+	      else {
+		mean = mm + Delta[kqg];
+		var = var1;
+	      }
+
+	      int ksqg = sqg2index(s,q,g,S,*Q,*G);
+	      x[ksqg] = mean + sqrt(var) * ran.Norm01();
+	      xfile << q << " " << g << " " << s << " " << x[ksqg] << endl;
+	    }
 	  }
 	  else {
-	    mean = mm + Delta[kqg];
-	    var = var1;
+	    int s;
+	    double mean = mm;
+	    for (s = 0; s < S[q]; s++) {
+	      int ksq = sq2index(s,q,S,*Q);
+	      double var = psi[ksq] == 0 ? var0 : var1;
+
+	      int ksqg = sqg2index(s,q,g,S,*Q,*G);
+	      x[ksqg] = mean + sqrt(var) * ran.Norm01();
+	      xfile << q << " " << g << " " << s << " " << x[ksqg] << endl;
+	    }
 	  }
-
-	  int ksqg = sqg2index(s,q,g,S,*Q,*G);
-	  x[ksqg] = mean + sqrt(var) * ran.Norm01();
-	  xfile << q << " " << g << " " << s << " " << x[ksqg] << endl;
 	}
+	xfile.close();
       }
-      else {
-	int s;
-	double mean = mm;
-	for (s = 0; s < S[q]; s++) {
-	  int ksq = sq2index(s,q,S,*Q);
-	  double var = psi[ksq] == 0 ? var0 : var1;
+      //}
 
-	  int ksqg = sqg2index(s,q,g,S,*Q,*G);
-	  x[ksqg] = mean + sqrt(var) * ran.Norm01();
-	  xfile << q << " " << g << " " << s << " " << x[ksqg] << endl;
-	}
+    // random start
+    // seed = 784348215;
+    // Initialise parameters to be simulated
+    //gamma2 = 0.1 * 0.1;
+    for (q = 0; q < *Q; q++)
+      tau2Rho[q] = 1.0;
+    int ss;
+    for (ss = 0; ss < 25; ss++) {
+      int q1 = (int) (ran.Unif01() * *Q);
+      int q2 = (int) (ran.Unif01() * *Q);
+      if (q1 != q2) {
+	double u = 0.5 + ran.Unif01();
+	tau2Rho[q1] *= u;
+	tau2Rho[q2] /= u;
       }
     }
-    xfile.close();
-  }
 
-  // random start
 
-  // seed = 784348215;
-
-  // Initialise parameters to be simulated
-
-  gamma2 = 0.1 * 0.1;
-
-  for (q = 0; q < *Q; q++)
-    tau2Rho[q] = 1.0;
-  int ss;
-  for (ss = 0; ss < 25; ss++) {
-    int q1 = (int) (ran.Unif01() * *Q);
-    int q2 = (int) (ran.Unif01() * *Q);
-    if (q1 != q2) {
-      double u = 0.5 + ran.Unif01();
-      tau2Rho[q1] *= u;
-      tau2Rho[q2] /= u;
+    for (q = 0; q < *Q; q++)
+      tau2R[q] = 1.0;
+    for (s = 0; s < 25; s++) {
+      int q1 = (int) (ran.Unif01() * *Q);
+      int q2 = (int) (ran.Unif01() * *Q);
+      if (q1 != q2) {
+	double u = 0.5 + ran.Unif01();
+	tau2R[q1] *= u;
+	tau2R[q2] /= u;
+      }
     }
-  }
-
-
-  for (q = 0; q < *Q; q++)
-    tau2R[q] = 1.0;
-  for (s = 0; s < 25; s++) {
-    int q1 = (int) (ran.Unif01() * *Q);
-    int q2 = (int) (ran.Unif01() * *Q);
-    if (q1 != q2) {
-      double u = 0.5 + ran.Unif01();
-      tau2R[q1] *= u;
-      tau2R[q2] /= u;
-    }
-  }
 
 
 
@@ -478,7 +474,7 @@ extern "C" {
 
   for (g = 0; g < *G; g++) {
     std::vector<std::vector<double> > Sigma;
-    makeSigma(g,*G,Sigma,*Q,gamma2,tau2Rho,a,sigma2,rho);
+    makeSigma(g,*G,Sigma,*Q,*gamma2,tau2Rho,a,sigma2,rho);
     std::vector<double> zero(*Q,0.0);
     std::vector<double> rr(ran.MultiGaussian(Sigma,zero));
 
@@ -517,7 +513,7 @@ extern "C" {
   cout << "fraction correct: " << ((double) nCorrect) / ((double) (*Q * *G)) << endl;
 
   double pot = potentialX(*Q,*G,S,x,psi,nu,delta,Delta,sigma2,phi) +
-    potentialNu(*Q,*G,nu,gamma2,a,rho,tau2Rho,sigma2) +
+    potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) +
     potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) +
     potentialOmega_HyperInverseWishart(Omega,D,df,oldClique,oldComponents) +
     potentialA(*Q,a,*pA0,*pA1,*alphaA,*betaA) +
@@ -542,7 +538,7 @@ extern "C" {
 	cout << "potentialX: " <<
 	  potentialX(*Q,*G,S,x,psi,nu,delta,Delta,sigma2,phi) << endl;
 	cout << "potentialNu: " <<
-	  potentialNu(*Q,*G,nu,gamma2,a,rho,tau2Rho,sigma2) << endl;
+	  potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) << endl;
 	cout << "potentialDDeltaStar: " <<
 	  potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) << endl;
 	cout << "potentialOmega: " <<
@@ -565,7 +561,7 @@ extern "C" {
       // We have R updates for many of these
 
       updateANu(&seed,nTry,&nAccept,epsilonANu,a,nu,*Q,*G,S,x,psi,delta,Delta,
-		gamma2,rho,sigma2,phi,tau2Rho,*pA0,*pA1,*alphaA,*betaA);
+		*gamma2,rho,sigma2,phi,tau2Rho,*pA0,*pA1,*alphaA,*betaA);
       cout << "updateANu: " << nTry << " " << nAccept << endl;
       cout << "a: ";
       if(*aOut == 1){
@@ -651,7 +647,7 @@ extern "C" {
       nAccept = 0;
       double epsilonTau2RhoNu = 0.02;
       updateTau2RhoNu(&seed,nTry,&nAccept,epsilonTau2RhoNu,tau2Rho,
-		      nu,*Q,*G,S,x,psi,delta,Delta,gamma2,rho,sigma2,
+		      nu,*Q,*G,S,x,psi,delta,Delta,*gamma2,rho,sigma2,
 		      phi,a);
       cout << "updateTau2RhoNu: " << nTry << " " << nAccept << endl;
       cout << "tau2Rho: ";
@@ -675,7 +671,7 @@ extern "C" {
 
       nTry = *Q * *G;
       nAccept = 0;
-      updateNu(&seed,&nAccept,nu,*Q,*G,S,x,psi,delta,Delta,gamma2,rho,sigma2,
+      updateNu(&seed,&nAccept,nu,*Q,*G,S,x,psi,delta,Delta,*gamma2,rho,sigma2,
 	       phi,tau2Rho,a);
       cout << "updateNu: " << nTry << " " << nAccept << endl;
 
@@ -697,7 +693,7 @@ extern "C" {
 
       nTry = 1;
       nAccept = 0;
-      updateGamma2(&seed,&nAccept,&gamma2,*Q,*G,nu,rho,sigma2,tau2Rho,a);
+      updateGamma2(&seed,&nAccept,&(*gamma2),*Q,*G,nu,rho,sigma2,tau2Rho,a);
       cout << "updateGamma2: " << nTry << " " << nAccept << endl;
       cout << "gamma2: " << gamma2 << endl;
 
@@ -705,7 +701,7 @@ extern "C" {
       nTry = 4;
       nAccept = 0;
       double epsilonGamma2Nu = 0.2;
-      updateGamma2Nu(&seed,nTry,&nAccept,epsilonGamma2Nu,&gamma2,nu,*Q,*G,S,x,psi,
+      updateGamma2Nu(&seed,nTry,&nAccept,epsilonGamma2Nu,&(*gamma2),nu,*Q,*G,S,x,psi,
 		     delta,Delta,rho,sigma2,phi,tau2Rho,a);
       cout << "updateGamma2Nu: " << nTry << " " << nAccept << endl;
       cout << "gamma2: " << gamma2 << endl;
@@ -714,7 +710,7 @@ extern "C" {
       nTry = *Q * (*Q - 1) / 2;
       nAccept = 0;
       double epsilonRhoGamma2 = 0.2;
-      updateRhoGamma2(&seed,nTry,&nAccept,epsilonRhoGamma2,rho,&gamma2,
+      updateRhoGamma2(&seed,nTry,&nAccept,epsilonRhoGamma2,rho,&(*gamma2),
 		      *Q,*G,nu,sigma2,tau2Rho,a,*nuRho);
       cout << "updateRhoGamma2: " << nTry << " " << nAccept << endl;
       cout << "gamma2: " << gamma2 << endl;
@@ -731,7 +727,7 @@ extern "C" {
       nAccept = 0;
       double epsilonRhoNu = 0.2;
       updateRhoNu(&seed,nTry,&nAccept,epsilonRhoNu,rho,nu,
-		  *Q,*G,S,x,psi,delta,Delta,gamma2,sigma2,phi,tau2Rho,a,*nuRho);
+		  *Q,*G,S,x,psi,delta,Delta,*gamma2,sigma2,phi,tau2Rho,a,*nuRho);
       cout << "updateRhoNu: " << nTry << " " << nAccept << endl;
       cout << "rho: ";
       for (q1 = 0; q1 < *Q; q1++)
@@ -746,7 +742,7 @@ extern "C" {
       nAccept = 0;
       double epsilonSigma2 = 0.5;
       updateSigma2_HyperInverseWishart(&seed,nTry,&nAccept,epsilonSigma2,sigma2,*Q,*G,S,x,psi,nu,
-				       delta,Delta,gamma2,r,rho,phi,t,l,tau2R,tau2Rho,a,b,
+				       delta,Delta,*gamma2,r,rho,phi,t,l,tau2R,tau2Rho,a,b,
 				       Omega,oldClique,oldComponents);
       cout << "updateSigma2_HyperInverseWishart: " << nTry << " " << nAccept << endl;
 
@@ -834,7 +830,7 @@ extern "C" {
       nAccept = 0;
       double epsilonLSigma2 = 0.025;
       updateLSigma2_HyperInverseWishart(&seed,nTry,&nAccept,epsilonLSigma2,l,sigma2,*Q,*G,S,x,psi,nu,
-					delta,Delta,gamma2,r,rho,phi,t,tau2R,tau2Rho,a,b,
+					delta,Delta,*gamma2,r,rho,phi,t,tau2R,tau2Rho,a,b,
 					Omega,oldClique,oldComponents);
       cout << "updateLSigma2_HyperInverseWishart: " << nTry << " " << nAccept << endl;
       cout << "l: ";
@@ -847,7 +843,7 @@ extern "C" {
       nAccept = 0;
       double epsilonTSigma2 = 0.05;
       updateTSigma2_HyperInverseWishart(&seed,nTry,&nAccept,epsilonTSigma2,t,sigma2,*Q,*G,S,x,psi,nu,
-					delta,Delta,gamma2,r,rho,phi,l,tau2R,tau2Rho,a,b,
+					delta,Delta,*gamma2,r,rho,phi,l,tau2R,tau2Rho,a,b,
 					Omega,oldClique,oldComponents);
       cout << "updateTSigma2_HyperInverseWishart: " << nTry << " " << nAccept << endl;
       cout << "t: ";
@@ -863,7 +859,7 @@ extern "C" {
       cout << "fraction correct: " << ((double) nCorrect) / ((double) (*Q * *G)) << endl;
 
       double pot = potentialX(*Q,*G,S,x,psi,nu,delta,Delta,sigma2,phi) +
-	potentialNu(*Q,*G,nu,gamma2,a,rho,tau2Rho,sigma2) +
+	potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) +
 	potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) +
 	potentialA(*Q,a,*pA0,*pA1,*alphaA,*betaA) +
 	potentialB(*Q,b,*pB0,*pB1,*alphaB,*betaB) +
@@ -887,7 +883,7 @@ extern "C" {
       cout << "potentialX: " <<
 	potentialX(*Q,*G,S,x,psi,nu,delta,Delta,sigma2,phi) << endl;
       cout << "potentialNu: " <<
-	potentialNu(*Q,*G,nu,gamma2,a,rho,tau2Rho,sigma2) << endl;
+	potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) << endl;
       cout << "potentialDDeltaStar: " <<
 	potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) << endl;
       cout << "potentialOmega: " <<
@@ -901,7 +897,26 @@ extern "C" {
       cout << "potentialDelta: " << potentialDelta(*Q,*G,delta,xi) << endl;
       cout << "potentialXi: " << potentialXi(*Q,xi,*alphaXi,*betaXi) << endl;
       cout << endl;
-    }
+
+      if(*sigma2Out == 1){
+	for (q = 0; q < *Q; q++)
+	  for (g = 0; g < *G; g++) {
+	    int k = qg2index(q,g,*Q,*G);
+	    sigma2File << sigma2[k] << " ";
+	  }
+	sigma2File << endl;
+	sigma2File.flush();
+      }
+      else {
+	for (q = 0; q < *Q; q++)
+	  for (g = 0; g < *G; g++) {
+	    int k = qg2index(q,g,*Q,*G);
+	    sigma2File << sigma2[k] << " ";
+	  }
+      }
+    } // MH-iteration
+    aFile.close();
+    sigma2File.close();
 
     //return 0;
   }

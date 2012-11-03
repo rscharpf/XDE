@@ -1,5 +1,5 @@
-initializeParams <- function(...){
-	G <- 3592
+initializeParams <- function(G=3592L, nIt=1L, Q=3L, S=c(100L, 50L, 75L), seed=123L, x, ...){
+	simulateExpression <- if(missing(x)) TRUE else FALSE
 	## #########################################
 	## Not sure this is the right position
 	clique <- rep(0,G)
@@ -9,6 +9,7 @@ initializeParams <- function(...){
 			clique[g] <- clique[g-1]}
 		else clique[g] <- clique[g-1]+1
 	}
+	if(length(unique(clique)) < 2) stop("must have at least 2 cliques")
 	nNewInClique <- tabulate(clique+1)
 	oldComponents <- vector("list", length(nNewInClique))
 	oldClique <- nNewInClique
@@ -41,12 +42,17 @@ initializeParams <- function(...){
 	for (i in 2:nClique){
 		nOldClique[i] = length(oldComponents[[i]])
 	}
+	gamma2 <- 0.5^2
+	tau2Rho <- rep(1.0, Q)
+	psi <- as.integer(runif(sum(S)) > 0.5)
+	if(!simulateExpression) stop("C function not set up to handle input expression data yet")
 	tmp <- .C("initializeParams",
-		  nIt=1L,
-		  seedR=123L,
-		  G=3592L,
-		  Q=3L,
-		  S=c(100L, 50L, 75L),
+		  nIt=nIt,
+		  seedR=as.integer(seed),
+		  G=as.integer(G),
+		  Q=as.integer(Q),
+		  S=as.integer(S),
+		  psi=as.integer(psi),
 		  alphaA=1.0,
 		  betaA=1.0,
 		  pA0=0.1,
@@ -60,16 +66,25 @@ initializeParams <- function(...){
 		  alphaXi=1.0,
 		  betaXi=1.0,
 		  c2Max=10.0,
-		  sigma2=rep(0.0, 3592*3), ## G * Q
+		  sigma2=rep(0.0, G*Q), ## G * Q
+		  tau2Rho=as.numeric(tau2Rho),
+		  gamma2=as.numeric(gamma2),
+		  tau2R=as.numeric(tau2Rho),
+		  simulateExpression=simulateExpression,
 		  aOut=1L,
 		  sigma2Out=1L,
 		  simulateSigma2=1L,
-		  clique=as.integer(clique),
+		  oldCliqueInput=as.integer(oldClique),
+		  oldComponentsInput=as.integer(unlist(oldComponents)),
 		  nClique=as.integer(nClique),
-		  oldClique=as.integer(oldClique),
-		  oldComponents=as.integer(unlist(oldComponents)), ## not sure if this is the right order
-		  nOldClique=as.integer(nOldClique), ## length nClique, number of elements of the seperator i
-		  nNewClique=as.integer(nNewInClique), ## length nClique, the number of elements of P_i\S_i
+		  nOldClique=as.integer(nOldClique),
 		  nTotalInClique=as.integer(nTotalInClique))
+##		  clique=as.integer(clique),
+##		  nClique=as.integer(nClique),
+##		  oldClique=as.integer(oldClique),
+##		  oldComponents=as.integer(unlist(oldComponents)), ## not sure if this is the right order
+##		  nOldClique=as.integer(nOldClique), ## length nClique, number of elements of the seperator i
+##		  nNewClique=as.integer(nNewInClique), ## length nClique, the number of elements of P_i\S_i
+##		  nTotalInClique=as.integer(nTotalInClique))
 		  ##OmegaInput=Omega)
 }
