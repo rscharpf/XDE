@@ -1,5 +1,9 @@
 library(Test)
-initializeParams()
+##trace(initializeParams, browser)
+
+## break mainTestHyper_v2.cpp:200
+set.seed(1)
+initializeParams(G=100)
 
 ## add arguments for number genes, etc. so that these are not hardcoded
 ##

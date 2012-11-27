@@ -43,31 +43,36 @@ extern "C" {
 			int *oldCliqueInput,
 			int *oldComponentsInput,
 			int *nClique,
-			int *nOldClique,
-			int *nTotalInCliqueInput){//22
-    unsigned int seed;
-    seed = *seedR;
+			int *nOldClique,  // or nOldComponents
+			int *nTotalInCliqueInput,
+			int *nNewClique,  // or nNewComponents
+			double *OmegaInput){//22
+    unsigned int seed = (unsigned int) *seedR;
+    //unsigned int seed;
+    //seed = *seedR;
     Random ran(seed);
     int sumS = 0;
     int q;
     for (q = 0; q < *Q; q++)
       sumS += S[q];
-
     vector<int> oldClique;
     vector<vector<int> > oldComponents;
     vector<int> clique(*G,0);
-    vector<int> nNewInClique(0,0);
+    //vector<int> nNewInClique(0,0);
+    vector<vector<vector<double> > > OmegaTransformed;
 
     // goal: to pass cliques from R to C, we need to transform the input parameters
     //       oldCliqueInput and oldComponentsInput
     //       This transformation requires variables nClique, oldCliqueInput, nOldClique
     // what is nClique?
-    // transformGraph(nClique, oldCliqueInput, nOldClique, oldComponentsInput, oldClique, oldComponents);
+    transformGraph(nClique, oldCliqueInput, nOldClique, oldComponentsInput, oldClique, oldComponents);
+    transformOmega(nClique, nOldClique, nNewClique, OmegaInput, OmegaTransformed);
 
     // This section defines oldClique, oldComponents, and nTotalInClique.
     // The remaining vars are temporary
+    int c, g;
+    /*
     clique[0] = 0;
-    int g;
     for (g = 1; g < *G; g++) {
       if (ran.Unif01() < 0.95)
 	clique[g] = clique[g - 1];
@@ -108,6 +113,7 @@ extern "C" {
     }
     for (c = 0; c < nTotalInClique.size(); c++)
       cout << "nTotalInClique: " << c << " " << nTotalInClique[c] << endl;
+    */
     // initialise clinical variables
 
     int s;
@@ -166,6 +172,7 @@ extern "C" {
       theta[q] = 0.1 * 0.1;
     }
 
+    // this takes a while in gdb
     ofstream phifile("phi.txt");
     double *phi = (double *) calloc(*Q * *G,sizeof(double));
     for (q = 0; q < *Q; q++)
@@ -207,7 +214,7 @@ extern "C" {
 
       int q;
       for (q = 0; q < *Q; q++) {
-	int kqg = qg2index(q,g,*Q,*G);
+	int kqg = qg2index(q, g,*Q,*G);
 	nu[kqg] = rr[q];
       }
     }
@@ -277,10 +284,12 @@ extern "C" {
     vector<vector<vector<double> > > D;
     D.resize(oldComponents.size());
     for (c = 0; c < D.size(); c++) {
-      D[c].resize(nTotalInClique[c]);
+      D[c].resize(OmegaTransformed[c].size());
+      //D[c].resize(nTotalInClique[c]);
       int g1;
       for (g1 = 0; g1 < D[c].size(); g1++) {
-	D[c][g1].resize(nTotalInClique[c]);
+	D[c][g1].resize(OmegaTransformed[c][g1].size());
+	//D[c][g1].resize(nTotalInClique[c]);
 	int g2;
 	for (g2 = 0; g2 < D[c][g1].size(); g2++)
 	  D[c][g1][g2] = 2.0 * (g1 == g2);
@@ -288,7 +297,7 @@ extern "C" {
     }
 
     double df = 1.0;
-
+    // error here.  Something is not of the correct size.
     vector<vector<vector<double> > > Omega(ran.HyperInverseWishart(df,D,oldClique,oldComponents));
 
     vector<vector<double> > zero;
@@ -312,7 +321,7 @@ extern "C" {
       }
     }
 
-    vector<vector<double> > DeltaStar(ran.MatrixVariateNormal(zero,R,Omega,oldClique,oldComponents));
+    vector<vector<double> > DeltaStar(ran.MatrixVariateNormal(zero,R,OmegaTransformed,oldClique,oldComponents));
 
     double *Delta = (double *) calloc(*Q * *G,sizeof(double));
     for (g = 0; g < *G; g++) {
@@ -514,8 +523,8 @@ extern "C" {
 
   double pot = potentialX(*Q,*G,S,x,psi,nu,delta,Delta,sigma2,phi) +
     potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) +
-    potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) +
-    potentialOmega_HyperInverseWishart(Omega,D,df,oldClique,oldComponents) +
+    potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,OmegaTransformed,oldClique,oldComponents) +
+    potentialOmega_HyperInverseWishart(OmegaTransformed,D,df,oldClique,oldComponents) +
     potentialA(*Q,a,*pA0,*pA1,*alphaA,*betaA) +
     potentialB(*Q,b,*pB0,*pB1,*alphaB,*betaB) +
     potentialR(*Q,r,*nuR) +
@@ -540,9 +549,9 @@ extern "C" {
 	cout << "potentialNu: " <<
 	  potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) << endl;
 	cout << "potentialDDeltaStar: " <<
-	  potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) << endl;
+	  potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,OmegaTransformed,oldClique,oldComponents) << endl;
 	cout << "potentialOmega: " <<
-	  potentialOmega_HyperInverseWishart(Omega,D,df,oldClique,oldComponents) << endl;
+	  potentialOmega_HyperInverseWishart(OmegaTransformed,D,df,oldClique,oldComponents) << endl;
 	cout << "potentialA: " << potentialA(*Q,a,*pA0,*pA1,*alphaA,*betaA) << endl;
 	cout << "potentialB: " << potentialB(*Q,b,*pB0,*pB1,*alphaB,*betaB) << endl;
 	cout << "potentialR: " << potentialR(*Q,r,*nuR) << endl;
@@ -620,7 +629,7 @@ extern "C" {
       nAccept = 0;
       double epsilonBDDelta = 0.1;
       updateBDDeltaStar_HyperInverseWishart(&seed,nTry,&nAccept,epsilonBDDelta,b,Delta,*Q,*G,S,x,psi,
-					    nu,delta,r,sigma2,phi,tau2R,*pB0,*pB1,*alphaB,*betaB,Omega,
+					    nu,delta,r,sigma2,phi,tau2R,*pB0,*pB1,*alphaB,*betaB,OmegaTransformed,
 					    oldClique,oldComponents);
       cout << "updateBDDelta_HyperInverseWishart: " << nTry << " " << nAccept << endl;
       cout << "b: ";
@@ -633,7 +642,7 @@ extern "C" {
       nAccept = 0;
       double epsilonRDDelta = 0.1;
       updateRDDeltaStar_HyperInverseWishart(&seed,nTry,&nAccept,epsilonRDDelta,r,Delta,*Q,*G,S,x,psi,
-					    nu,delta,sigma2,phi,tau2R,b,*nuR,Omega,
+					    nu,delta,sigma2,phi,tau2R,b,*nuR,OmegaTransformed,
 					    oldClique,oldComponents);
       cout << "updateRDDelta_HyperInverseWishart: " << nTry << " " << nAccept << endl;
       cout << "r: ";
@@ -660,7 +669,7 @@ extern "C" {
       nAccept = 0;
       double epsilonTau2RDDelta = 0.02;
       updateTau2RDDeltaStar_HyperInverseWishart(&seed,nTry,&nAccept,epsilonTau2RDDelta,tau2R,
-						Delta,*Q,*G,S,x,psi,nu,delta,r,sigma2,phi,b,Omega,
+						Delta,*Q,*G,S,x,psi,nu,delta,r,sigma2,phi,b,OmegaTransformed,
 						oldClique,oldComponents);
       cout << "updateTau2RDDelta_HyperInverseWishart: " << nTry << " " << nAccept << endl;
       cout << "tau2R: ";
@@ -678,7 +687,7 @@ extern "C" {
 
       nTry = 1;
       nAccept = 0;
-      updateOmega_HyperInverseWishart(&seed,&nAccept,Omega,*Q,*G,Delta,r,sigma2,tau2R,b,df,D,
+      updateOmega_HyperInverseWishart(&seed,&nAccept,OmegaTransformed,*Q,*G,Delta,r,sigma2,tau2R,b,df,D,
 				      oldClique,oldComponents);
       cout << "updateOmega_HyperInverseWishart: " << nTry << " " << nAccept << endl;
 
@@ -686,7 +695,7 @@ extern "C" {
       nTry = 1;
       nAccept = 0;
       updateDDeltaStar_HyperInverseWishart(&seed,&nAccept,Delta,*Q,*G,S,x,psi,nu,delta,r,sigma2,phi,tau2R,b,
-					   Omega,oldClique,oldComponents);
+					   OmegaTransformed,oldClique,oldComponents);
       cout << "updateDeltaStar_HyperInverseWishart: " << nTry << " " << nAccept << endl;
 
 
@@ -743,7 +752,7 @@ extern "C" {
       double epsilonSigma2 = 0.5;
       updateSigma2_HyperInverseWishart(&seed,nTry,&nAccept,epsilonSigma2,sigma2,*Q,*G,S,x,psi,nu,
 				       delta,Delta,*gamma2,r,rho,phi,t,l,tau2R,tau2Rho,a,b,
-				       Omega,oldClique,oldComponents);
+				       OmegaTransformed,oldClique,oldComponents);
       cout << "updateSigma2_HyperInverseWishart: " << nTry << " " << nAccept << endl;
 
 
@@ -831,7 +840,7 @@ extern "C" {
       double epsilonLSigma2 = 0.025;
       updateLSigma2_HyperInverseWishart(&seed,nTry,&nAccept,epsilonLSigma2,l,sigma2,*Q,*G,S,x,psi,nu,
 					delta,Delta,*gamma2,r,rho,phi,t,tau2R,tau2Rho,a,b,
-					Omega,oldClique,oldComponents);
+					OmegaTransformed,oldClique,oldComponents);
       cout << "updateLSigma2_HyperInverseWishart: " << nTry << " " << nAccept << endl;
       cout << "l: ";
       for (q = 0; q < *Q; q++)
@@ -844,7 +853,7 @@ extern "C" {
       double epsilonTSigma2 = 0.05;
       updateTSigma2_HyperInverseWishart(&seed,nTry,&nAccept,epsilonTSigma2,t,sigma2,*Q,*G,S,x,psi,nu,
 					delta,Delta,*gamma2,r,rho,phi,l,tau2R,tau2Rho,a,b,
-					Omega,oldClique,oldComponents);
+					OmegaTransformed,oldClique,oldComponents);
       cout << "updateTSigma2_HyperInverseWishart: " << nTry << " " << nAccept << endl;
       cout << "t: ";
       for (q = 0; q < *Q; q++)
@@ -860,7 +869,7 @@ extern "C" {
 
       double pot = potentialX(*Q,*G,S,x,psi,nu,delta,Delta,sigma2,phi) +
 	potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) +
-	potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) +
+	potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,OmegaTransformed,oldClique,oldComponents) +
 	potentialA(*Q,a,*pA0,*pA1,*alphaA,*betaA) +
 	potentialB(*Q,b,*pB0,*pB1,*alphaB,*betaB) +
 	potentialR(*Q,r,*nuR) +
@@ -885,9 +894,9 @@ extern "C" {
       cout << "potentialNu: " <<
 	potentialNu(*Q,*G,nu,*gamma2,a,rho,tau2Rho,sigma2) << endl;
       cout << "potentialDDeltaStar: " <<
-	potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,Omega,oldClique,oldComponents) << endl;
+	potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,*Q,*G,OmegaTransformed,oldClique,oldComponents) << endl;
       cout << "potentialOmega: " <<
-	potentialOmega_HyperInverseWishart(Omega,D,df,oldClique,oldComponents) << endl;
+	potentialOmega_HyperInverseWishart(OmegaTransformed,D,df,oldClique,oldComponents) << endl;
       cout << "potentialA: " << potentialA(*Q,a,*pA0,*pA1,*alphaA,*betaA) << endl;
       cout << "potentialB: " << potentialB(*Q,b,*pB0,*pB1,*alphaB,*betaB) << endl;
       cout << "potentialR: " << potentialR(*Q,r,*nuR) << endl;

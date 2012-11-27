@@ -1,7 +1,7 @@
 Package: Test
 Type: Package
 Title: Testing R interface for MRF
-Version: 1.0.5
+Version: 1.0.6
 Date: 2012-06-10
 Author: HT, RS, MF
 Maintainer:  <yourfault@somewhere.net>
