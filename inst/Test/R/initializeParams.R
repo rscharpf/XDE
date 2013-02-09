@@ -89,7 +89,7 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L, S=c(100L, 50L, 75L), seed=12
 		  tau2Rho=as.numeric(tau2Rho),
 		  gamma2=as.numeric(gamma2),
 		  tau2R=as.numeric(tau2Rho),
-		  simulateExpression=simulateExpression,
+		  simulateExpression=as.integer(simulateExpression),
 		  aOut=1L,
 		  sigma2Out=1L,
 		  simulateSigma2=1L,
