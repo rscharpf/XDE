@@ -46,7 +46,7 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L, S=c(100L, 50L, 75L), seed=12
 	Si = NULL
 	Omega = NULL
 	CliquesF <- vector("list", nClique+1)
-	for (i in 1:(nClique)){
+	for (i in 1:(nClique+1)){
 		Ci = which(clique==i-1)
 		cli = oldClique[i]
 		if (cli>=0){
@@ -66,6 +66,7 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L, S=c(100L, 50L, 75L), seed=12
 	gamma2 <- 0.5^2
 	tau2Rho <- rep(1.0, Q)
 	psi <- as.integer(runif(sum(S)) > 0.5)
+	##return(nClique)
 	tmp <- .C("initializeParams",
 		  nIt=nIt,
 		  seedR=as.integer(seed),
