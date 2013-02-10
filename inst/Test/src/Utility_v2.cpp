@@ -984,7 +984,7 @@ double OmegaGibbs(double df,const vector<vector<vector<double> > > &D,
 		  vector<vector<vector<double> > > &Omega,
 		  Random &ran,int draw) {
   double dfNew = df + ((double) Q);
-  
+
   // construct R matrix
 
   vector<vector<double> > R;
@@ -1011,25 +1011,25 @@ double OmegaGibbs(double df,const vector<vector<vector<double> > > &D,
   DeltaStar.resize(DNew.size());
 
   // update first component of D
-  
+
   int cliqueSize = DNew[0].size();
   DeltaStar[0].resize(cliqueSize);
   int g;
   for (g = 0; g < cliqueSize; g++) {
     DeltaStar[0][g].resize(Q);
-    for (q = 0; q < Q; q++) 
+    for (q = 0; q < Q; q++)
       DeltaStar[0][g][q] = Delta[qg2index(q,g,Q,G)] / exp(0.5 * b[q] * log(sigma2[qg2index(q,g,Q,G)]));
   }
-  
+
   vector<vector<double> > temp;
   quadratic2(DeltaStar[0],RInverse,temp);
   int g1,g2;
   for (g1 = 0; g1 < DNew[0].size(); g1++)
     for (g2 = 0; g2 < DNew[0][g1].size(); g2++)
       DNew[0][g1][g2] += temp[g1][g2];
-  
+
   int first = cliqueSize;
-  
+
   // update remaining components of D
 
   int k;
@@ -1043,7 +1043,7 @@ double OmegaGibbs(double df,const vector<vector<vector<double> > > &D,
       for (q = 0; q < Q; q++)
 	DeltaStar[k][g][q] = DeltaStar[oldClique[k]][oldComponents[k][g]][q];
     }
-    
+
     for (g = 0; g < cliqueSize - oldComponents[k].size(); g++) {
       DeltaStar[k][g + oldComponents[k].size()].resize(Q);
       int gg = g + oldComponents[k].size();
@@ -1059,7 +1059,7 @@ double OmegaGibbs(double df,const vector<vector<vector<double> > > &D,
     for (g1 = 0; g1 < DNew[k].size(); g1++)
       for (g2 = 0; g2 < DNew[k][g1].size(); g2++)
 	DNew[k][g1][g2] += temp[g1][g2];
-    
+
     first += cliqueSize - oldComponents[k].size();
   }
 
@@ -1070,11 +1070,11 @@ double OmegaGibbs(double df,const vector<vector<vector<double> > > &D,
 
   return pot;
 }
-  
 
-    
 
-    
+
+
+
 double DeltaStarGibbs(const vector<int> &oldClique,
 		      const vector<vector<int> > &oldComponents,
 		      int Q, int G, const int *S,
@@ -1310,7 +1310,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
   vector<vector<double> > RInverse;
 
   inverse(R,RInverse);
-  
+
   // print RInverse to file
   /*
   {
@@ -1343,14 +1343,14 @@ double DeltaStarGibbs(const vector<int> &oldClique,
     for (it = OmegaInvSparse[g].begin(); it != OmegaInvSparse[g].end(); it++) {
       int gg = it->first;
       double value = it->second;
-      
+
       int qq;
       for (q = 0; q < Q; q++) {
 	for (qq = 0; qq < Q; qq++) {
 	  int index = g * Q + q;
       	  int indexindex = gg * Q + qq;
 	  double cov = value * RInverse[q][qq];
-	  
+
 	  VinvSparse[index].insert(pair<int,double>(indexindex,cov));
 	}
       }
@@ -1455,7 +1455,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
 
   vector<map<int,double> > VinvSparseReversed;
   VinvSparseReversed.resize(VinvSparse.size());
-  for (k = 0; k < VinvSparseReversed.size(); k++) 
+  for (k = 0; k < VinvSparseReversed.size(); k++)
     VinvSparseReversed[k].clear();
   for (k = 0; k < VinvSparseReversed.size(); k++) {
     map<int,double>::iterator it;
@@ -1528,7 +1528,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
 	exit(-1);
       }
 
-      if (i == j) 
+      if (i == j)
 	cholReversed[j].insert(pair<int,double>(i,sqrt(sum)));
       else
 	cholReversed[j].insert(pair<int,double>(i,sum / cholReversed[i][i]));
@@ -1597,7 +1597,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
 
   vector<map<int,double> > cholT;
   cholT.resize(chol.size());
-  for (k = 0; k < cholT.size(); k++) 
+  for (k = 0; k < cholT.size(); k++)
     cholT[k].clear();
   for (i = 0; i < chol.size(); i++) {
     map<int,double>::iterator it;
@@ -1640,7 +1640,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
     for (it = cholT[i].begin(); it != cholT[i].end(); it++) {
       int j= it->first;
       double value = it->second;
-      
+
       if (i == j)
 	diag = value;
       else
@@ -1665,7 +1665,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
     }
     mean[i] = (u[i] - sum) / diag;
   }
-   
+
   // print mean value
   /*
   {
@@ -1680,13 +1680,13 @@ double DeltaStarGibbs(const vector<int> &oldClique,
   }
   */
   // finished printing
-  
- 
+
+
 
   // generate a sample with zero mean, or compute the sample that should have been sampled
 
   //  cout << "start sampling" << endl;
-  
+
   vector<double> sample(chol.size(),0.0);
   if (draw == 1) {
     vector<double> z(chol.size(),0.0);
@@ -1709,7 +1709,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
     // finished printing
 
 
-    
+
     for (i = 0; i < sample.size(); i++) {
       double diag = 0.0;
       double sum = 0.0;
@@ -1717,7 +1717,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
       for (it = chol[i].begin(); it != chol[i].end(); it++) {
 	int j = it->first;
 	double value = it->second;
-	
+
 	if (j == i)
 	  diag = value;
 	else
@@ -1744,7 +1744,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
   }
   else {  // compute sample[i] necessary to generate the current values
     // compute DeltaStar
-    
+
     vector<vector<double> > DeltaStar;
     DeltaStar.resize(G);
     for (g = 0; g < G; g++) {
@@ -1783,7 +1783,7 @@ double DeltaStarGibbs(const vector<int> &oldClique,
     for (it = chol[i].begin(); it != chol[i].end(); it++) {
       int j = it->first;
       double value = it->second;
-      
+
       if (j == i)
 	diag = value;
       else
@@ -1803,11 +1803,11 @@ double DeltaStarGibbs(const vector<int> &oldClique,
 	int index = g * Q + q;
 
 	double DeltaStar = sample[index];
-	
+
 	Delta[qg2index(q,g,Q,G)] = DeltaStar * exp(0.5 * b[q] * log(sigma2[qg2index(q,g,Q,G)]));
       }
   }
-  
+
   //  cout << "finished" << endl;
 
   return pot;
@@ -1821,12 +1821,10 @@ void transformGraph(const int *nClique,const int *oldClique,const int *nOldCompo
 		    vector<vector<int> > &oldComponentsTransformed) {
   oldCliqueTransformed.resize(*nClique);
   oldComponentsTransformed.resize(*nClique);
-
   int nr = 0;
   int k;
   for (k = 0; k < *nClique; k++) {
     oldCliqueTransformed[k] = oldClique[k];
-
     oldComponentsTransformed[k].resize(nOldComponents[k]);
     int i;
     for (i = 0; i < nOldComponents[k]; i++) {
@@ -1834,17 +1832,16 @@ void transformGraph(const int *nClique,const int *oldClique,const int *nOldCompo
       nr++;
     }
   }
-
   return;
 }
-  
+
 
 
 void transformOmega(const int *nClique,const int *nOldComponents,
 		    const int *nNewComponents,const double *Omega,
 		    vector<vector<vector<double> > > &OmegaTransformed) {
   OmegaTransformed.resize(*nClique);
-  
+
   int nr = 0;
   int k;
   for (k = 0; k < *nClique; k++) {
@@ -1853,8 +1850,8 @@ void transformOmega(const int *nClique,const int *nOldComponents,
     int i,j;
     for (i = 0; i < size; i++)
       OmegaTransformed[k][i].resize(size);
-    
-    for (i = 0; i < size; i++) 
+
+    for (i = 0; i < size; i++)
       for (j = 0; j <= i; j++) {
 	OmegaTransformed[k][i][j] = Omega[nr];
 	OmegaTransformed[k][j][i] = Omega[nr];

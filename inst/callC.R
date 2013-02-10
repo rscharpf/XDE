@@ -1,9 +1,20 @@
 library(Test)
-##
-## break mainTestHyper_v2.cpp:200
 set.seed(1)
-trace(initializeParams, browser)
-initializeParams(G=100)
+source("Test/R/initializeParams.R")
+S <- c(100L, 50L, 75L)
+G <- 100L
+x <- rnorm(G*sum(S))
+cliques <- simulateCliques(G=100L)
+clique.params <- cliqueParams(cliques)
+initializeParams(nIt=2L, G=100L,
+		 x=x,
+		 clique=cliques,
+		 clique.params=clique.params,
+		 a=c(0.0, 0.5, 1.0),
+		 b=c(0.0, 0.5, 1.0),
+		 l=rep(1.0,3),
+		 t=rep(0.5^2,3),
+		 writeout=rep(1L, 20))
 ## add arguments for number genes, etc. so that these are not hardcoded
 ##
 ## have updated parameters written to files
@@ -31,7 +42,7 @@ initializeParams(G=100)
 ##   -> initializeParams could be changed to only provide initial parameters
 ##   -> using .C, we would need to specify the correct size for each parameter as input
 ##      to initializeParams function
-##
+
 
 
 
