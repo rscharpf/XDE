@@ -35,16 +35,17 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L, S=c(100L, 50L, 75L), seed=12
 			if (existAlready==0) {nSampled=nSampled+1}
 		}
 	}
-	nClique <- max(clique) + 1
-	nOldClique <- rep(0,nClique)
-	for (i in 2:nClique){
+	##nClique <- max(clique) + 1
+	nClique <- max(clique)
+	nOldClique <- rep(0,nClique+1)
+	for (i in 2:(nClique+1)){
 		nOldClique[i] = length(oldComponents[[i]])
 	}
 	## Omega
 	OmegaM = diag(rep(0,G))
 	Si = NULL
 	Omega = NULL
-	CliquesF <- vector("list", nClique)
+	CliquesF <- vector("list", nClique+1)
 	for (i in 1:(nClique)){
 		Ci = which(clique==i-1)
 		cli = oldClique[i]
