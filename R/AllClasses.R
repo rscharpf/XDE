@@ -117,6 +117,48 @@ setGeneric("pnames", function(object) standardGeneric("pnames"))
 setValidity("Parameters", function(object){
 	if(length(exprs(object)) != object@G*sum(object@S))
 		return("data should have length G*sum(S)")
+})##nipun: slots are common to Models A,B and MI 
+
+
+##nipun: ParametersD
+setClass("ParametersD",contains= "Parameters",
+         representation(nNeighbour="integer",
+                        neighbour="integer",
+                        alpha="numeric",
+                        beta="numeric"))
+##setGeneric("pnamesII", function(object) standardGeneric("pnames")) ##:?
+
+setValidity("ParametersD", function(object){
+  if(length(exprs(object)) != object@G*sum(object@S))
+    return("data should have length G*sum(S)")
 })
 
 
+
+##nipun: Parameters specific to model C
+setClass("ParametersC",contains= "ParametersD",
+         representation(betag="numeric"))
+##setGeneric("pnamesII", function(object) standardGeneric("pnames")) ##??
+
+setValidity("ParametersC", function(object){
+  if(length(exprs(object)) != object@G*sum(object@S))
+    return("data should have length G*sum(S)")
+})
+
+
+##nipun: Parameters specific to model II
+setClass("ParametersMII",contains= "Parameters",
+         representation(Omega="numeric",
+                        zeta = "numeric",
+                        D = "numeric",
+                        nClique="integer",
+                        oldClique="integer",
+                        nOldComponents="integer",
+                        nNewComponents="integer",
+                        oldComponents="integer"))
+##setGeneric("pnamesII", function(object) standardGeneric("pnames")) ##??
+
+setValidity("ParametersMII", function(object){
+  if(length(exprs(object)) != object@G*sum(object@S))
+    return("data should have length G*sum(S)")
+})

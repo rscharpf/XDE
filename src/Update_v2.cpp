@@ -1,3 +1,5 @@
+//C code that is wrapped by Rinterface.cpp
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -34,18 +36,18 @@ void updateANu(unsigned int *seed,
   int k;
   for (k = 0; k < nTry; k++) {
     int q = (int) (ran.Unif01() * Q);
-    
+
     double oldValue = a[q];
     double p0 = 0.0;
     double p1 = 0.0;
     if (oldValue > 0.0 && oldValue < 1.0)
       {
-	if (pA0 > 0.0 && oldValue - epsilon < 0.0) 
+	if (pA0 > 0.0 && oldValue - epsilon < 0.0)
 	  p0 = (epsilon - oldValue) / (2.0 * epsilon);
-	if (pA1 > 0.0 && oldValue + epsilon > 1.0) 
+	if (pA1 > 0.0 && oldValue + epsilon > 1.0)
 	  p1 = (oldValue + epsilon - 1.0) / (2.0 * epsilon);
       }
-    
+
     double newValue;
     double lower = 0.0;
     double upper = 0.0;
@@ -62,18 +64,18 @@ void updateANu(unsigned int *seed,
 	if (upper > 1.0) upper = 1.0;
 	newValue = lower + (upper - lower) * ran.Unif01();
       }
-    
-    
+
+
     double p0Back = 0.0;
     double p1Back = 0.0;
     if (newValue > 0.0 && newValue < 1.0)
       {
-	if (pA0 > 0.0 && newValue - epsilon < 0.0) 
+	if (pA0 > 0.0 && newValue - epsilon < 0.0)
 	  p0Back = (epsilon - newValue) / (2.0 * epsilon);
-	if (pA1 > 0.0 && newValue + epsilon > 1.0) 
+	if (pA1 > 0.0 && newValue + epsilon > 1.0)
 	  p1Back = (newValue + epsilon - 1.0) / (2.0 * epsilon);
       }
-    
+
     double lowerBack = 0.0;
     double upperBack = 1.0;
     if (oldValue > 0.0 && oldValue < 1.0)
@@ -83,8 +85,8 @@ void updateANu(unsigned int *seed,
 	if (lowerBack < 0.0) lowerBack = 0.0;
 	if (upperBack > 1.0) upperBack = 1.0;
       }
-    
-    
+
+
     double pot = 0.0;
     if (oldValue == 0.0)  // then (newValue > 0.0 && newValue < 1.0)
       {
@@ -120,13 +122,13 @@ void updateANu(unsigned int *seed,
 	    pot += - log(1.0 / (upperBack - lowerBack));
 	  }
       }
-    
+
     //
     // propose new values for nu from full conditionals
     //
-    
+
     double *newNu = (double *) calloc(Q * G,sizeof(double));
-    
+
     a[q] = newValue;
     pot -= nuGibbs(newNu,Q,G,S,gamma2,tau2Rho,a,rho,sigma2,
 		   phi,psi,x,delta,Delta,ran,1);
@@ -144,24 +146,24 @@ void updateANu(unsigned int *seed,
     pot += potentialNu(Q,G,newNu,gamma2,a,rho,tau2Rho,sigma2);
     pot += potentialX(Q,G,S,x,psi,newNu,delta,Delta,sigma2,phi);
     a[q] = oldValue;
-    
+
     if (ran.Unif01() <= exp(- pot)) {
       a[q] = newValue;
       int k;
       for (k = 0; k < Q * G; k++)
 	nu[k] = newNu[k];
-      
+
       (*nAccept)++;
     }
 
     free(newNu);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
 
   return;
 }
-		       
+
 
 
 
@@ -194,18 +196,18 @@ void updateBDDelta(unsigned int *seed,
   int k;
   for (k = 0; k < nTry; k++) {
     int q = (int) (ran.Unif01() * Q);
-    
+
     double oldValue = b[q];
     double p0 = 0.0;
     double p1 = 0.0;
     if (oldValue > 0.0 && oldValue < 1.0)
       {
-	if (pB0 > 0.0 && oldValue - epsilon < 0.0) 
+	if (pB0 > 0.0 && oldValue - epsilon < 0.0)
 	  p0 = (epsilon - oldValue) / (2.0 * epsilon);
-	if (pB1 > 0.0 && oldValue + epsilon > 1.0) 
+	if (pB1 > 0.0 && oldValue + epsilon > 1.0)
 	  p1 = (oldValue + epsilon - 1.0) / (2.0 * epsilon);
       }
-    
+
     double newValue;
     double lower = 0.0;
     double upper = 0.0;
@@ -222,18 +224,18 @@ void updateBDDelta(unsigned int *seed,
 	if (upper > 1.0) upper = 1.0;
 	newValue = lower + (upper - lower) * ran.Unif01();
       }
-    
-    
+
+
     double p0Back = 0.0;
     double p1Back = 0.0;
     if (newValue > 0.0 && newValue < 1.0)
       {
-	if (pB0 > 0.0 && newValue - epsilon < 0.0) 
+	if (pB0 > 0.0 && newValue - epsilon < 0.0)
 	  p0Back = (epsilon - newValue) / (2.0 * epsilon);
-	if (pB1 > 0.0 && newValue + epsilon > 1.0) 
+	if (pB1 > 0.0 && newValue + epsilon > 1.0)
 	  p1Back = (newValue + epsilon - 1.0) / (2.0 * epsilon);
       }
-    
+
     double lowerBack = 0.0;
     double upperBack = 1.0;
     if (oldValue > 0.0 && oldValue < 1.0)
@@ -243,8 +245,8 @@ void updateBDDelta(unsigned int *seed,
 	if (lowerBack < 0.0) lowerBack = 0.0;
 	if (upperBack > 1.0) upperBack = 1.0;
       }
-    
-    
+
+
     double pot = 0.0;
     if (oldValue == 0.0)  // then (newValue > 0.0 && newValue < 1.0)
       {
@@ -280,13 +282,13 @@ void updateBDDelta(unsigned int *seed,
 	    pot += - log(1.0 / (upperBack - lowerBack));
 	  }
       }
-    
+
     //
     // propose new values for Delta from full conditionals
     //
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
-    
+
     b[q] = newValue;
     pot -= DeltaGibbs(newDDelta,Q,G,S,c2,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
@@ -304,24 +306,24 @@ void updateBDDelta(unsigned int *seed,
     pot += potentialDDelta(Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
     pot += potentialX(Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
     b[q] = oldValue;
-    
+
     if (ran.Unif01() <= exp(- pot)) {
       b[q] = newValue;
       int k;
       for (k = 0; k < Q * G; k++)
 	Delta[k] = newDDelta[k];
-      
+
       (*nAccept)++;
     }
 
     free(newDDelta);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
 
   return;
 }
-		       
+
 
 
 
@@ -348,52 +350,52 @@ void updateTau2RhoNu(unsigned int *seed,
 		     const double *phi,
 		     const double *a) {
   Random ran(*seed);
-  
+
   if (Q > 1) {
     int k;
     for (k = 0; k < nTry; k++) {
       int q = (int) (Q * ran.Unif01());
       int p = (int) ((Q - 1) * ran.Unif01());
       if (p >= q) p++;
-      
+
       double upper = 1.0 + epsilon;
       double lower = 1.0 / upper;
-      
+
       double u = lower + (upper - lower) * ran.Unif01();
       double *oldValues = (double *) calloc(Q,sizeof(double));
       double *newValues = (double *) calloc(Q,sizeof(double));
-      
+
       int i;
       for (i = 0; i < Q; i++)
 	{
 	  oldValues[i] = tau2Rho[i];
 	  newValues[i] = tau2Rho[i];
 	}
-      
+
       newValues[q] *= u;
       newValues[p] /= u;
-      
+
       double prod = 1.0;
       for (i = 0; i < Q; i++)
 	prod *= newValues[i];
-      
+
       prod = exp(log(prod) / Q);
       for (i = 0; i < Q; i++)
 	newValues[i] /= prod;
-      
+
       double pot = - log(1.0 / (u * u));
 
       //
       // propose new values for nu from full conditionals
       //
-      
+
       double *newNu = (double *) calloc(Q * G,sizeof(double));
 
       pot -= nuGibbs(newNu,Q,G,S,gamma2,newValues,a,rho,sigma2,
 		     phi,psi,x,delta,Delta,ran,1);
       pot += nuGibbs(nu,Q,G,S,gamma2,oldValues,a,rho,sigma2,
 		     phi,psi,x,delta,Delta,ran,1);
-      
+
       pot -= potentialTau2Rho();
       pot -= potentialNu(Q,G,nu,gamma2,a,rho,oldValues,sigma2);
       pot -= potentialX(Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
@@ -409,7 +411,7 @@ void updateTau2RhoNu(unsigned int *seed,
 	int k;
 	for (k = 0; k < Q * G; k++)
 	  nu[k] = newNu[k];
-	
+
 	(*nAccept)++;
       }
 
@@ -426,7 +428,7 @@ void updateTau2RhoNu(unsigned int *seed,
 
 
 
-  
+
 void updateTau2RDDelta(unsigned int *seed,
 		       int nTry,
 		       int *nAccept,
@@ -453,38 +455,38 @@ void updateTau2RDDelta(unsigned int *seed,
       int q = (int) (Q * ran.Unif01());
       int p = (int) ((Q - 1) * ran.Unif01());
       if (p >= q) p++;
-      
+
       double upper = 1.0 + epsilon;
       double lower = 1.0 / upper;
-      
+
       double u = lower + (upper - lower) * ran.Unif01();
       double *oldValues = (double *) calloc(Q,sizeof(double));
       double *newValues = (double *) calloc(Q,sizeof(double));
-      
+
       int i;
       for (i = 0; i < Q; i++)
 	{
 	  oldValues[i] = tau2R[i];
 	  newValues[i] = tau2R[i];
 	}
-      
+
       newValues[q] *= u;
       newValues[p] /= u;
-      
+
       double prod = 1.0;
       for (i = 0; i < Q; i++)
 	prod *= newValues[i];
-      
+
       prod = exp(log(prod) / Q);
       for (i = 0; i < Q; i++)
 	newValues[i] /= prod;
-      
+
       double pot = - log(1.0 / (u * u));
 
       //
       // propose new values for Delta from full conditionals
       //
-      
+
       double *newDDelta = (double *) calloc(Q * G,sizeof(double));
 
       pot -= DeltaGibbs(newDDelta,Q,G,S,c2,newValues,b,r,sigma2,
@@ -492,7 +494,7 @@ void updateTau2RDDelta(unsigned int *seed,
       pot += DeltaGibbs(Delta,Q,G,S,c2,oldValues,b,r,sigma2,
 			phi,psi,x,delta,nu,ran,1);
 
-      
+
       pot -= potentialTau2R();
       pot -= potentialDDelta(Q,G,delta,Delta,c2,b,r,tau2R,sigma2);
       pot -= potentialX(Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
@@ -509,7 +511,7 @@ void updateTau2RDDelta(unsigned int *seed,
 	int k;
 	for (k = 0; k < Q * G; k++)
 	  Delta[k] = newDDelta[k];
-	
+
 	(*nAccept)++;
       }
 
@@ -543,11 +545,11 @@ void updateNu(unsigned int *seed,
 	      const double *tau2Rho,
 	      const double *a) {
   Random ran(*seed);
-  
+
   //
   // propose new values for nu from full conditionals
   //
-  
+
   nuGibbs(nu,Q,G,S,gamma2,tau2Rho,a,rho,sigma2,
 	  phi,psi,x,delta,Delta,ran,1);
   (*nAccept) += Q * G;
@@ -560,7 +562,7 @@ void updateNu(unsigned int *seed,
 
 
 
-  
+
 void updateDDelta(unsigned int *seed,
 		  int *nAccept,
 		  double *Delta,
@@ -578,12 +580,12 @@ void updateDDelta(unsigned int *seed,
 		  const double *tau2R,
 		  const double *b) {
   Random ran(*seed);
-  
+
   DeltaGibbs(Delta,Q,G,S,c2,tau2R,b,r,sigma2,phi,psi,x,delta,nu,ran,1);
   (*nAccept) += Q * G;
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -612,14 +614,14 @@ void updateC2(unsigned int *seed,
     //
     // set prior parameters
     //
-    
+
     double s = -1.0;
     double lambda = 0.0;
-    
+
     //
     // update parameters based on available observations
     //
-    
+
     int g;
     for (g = 0; g < G; g++)
       {
@@ -631,16 +633,16 @@ void updateC2(unsigned int *seed,
 	  on[q] = delta[kqg];
 	  nOn += delta[kqg];
 	}
-	
+
 	if (nOn >= 1)
 	  {
 	    vector<vector<double> > varInv;
 	    makeSigma(g,G,varInv,on,Q,1.0,tau2R,b,sigma2,r);
-	    
+
 	    //
 	    // pick out the elements of Delta that are active
 	    //
-	    
+
 	    vector<double> DeltaActive(nOn,0.0);
 	    int qq = 0;
 	    for (q = 0; q < Q; q++)
@@ -652,20 +654,20 @@ void updateC2(unsigned int *seed,
 		    qq++;
 		  }
 	      }
-	    
+
 	    vector<vector<double> > var;
 	    inverse(varInv,var);
-	    
+
 	    double value = quadratic(var,DeltaActive);
 	    lambda += 0.5 * value;
 	    s += 0.5 * nOn;
 	  }
       }
-    
+
     //
     // Draw new value
     //
-    
+
     double newValue;
     if (s > 0.0) // there exist at least one delta == 1
       {
@@ -712,7 +714,7 @@ void updateC2(unsigned int *seed,
 	  fmax = exp(-lambda/c2Max) / sqrt(c2Max);
 	int nTry = 0;
 	int accept = 0;
-	do 
+	do
 	  {
 	    nTry++;
 	    newValue = c2Max * ran.Unif01();
@@ -727,11 +729,11 @@ void updateC2(unsigned int *seed,
       }
     else
       newValue = c2Max * ran.Unif01();
-    
+
     //
     // Set new value
     //
-    
+
     *c2 = newValue;
   }
 
@@ -763,22 +765,22 @@ void updateC2DDelta(unsigned int *seed,
 		    const double *b,
 		    double c2Max) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
-    
+
     double u = lower + (upper - lower) * ran.Unif01();
-    double oldValue = *c2;     
+    double oldValue = *c2;
     double newValue = oldValue * u;
 
     if (newValue > c2Max) return;
-    
+
     double pot = - log(1.0 / u);
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
-    
+
     pot -= DeltaGibbs(newDDelta,Q,G,S,newValue,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
     pot += DeltaGibbs(Delta,Q,G,S,oldValue,tau2R,b,r,sigma2,
@@ -797,7 +799,7 @@ void updateC2DDelta(unsigned int *seed,
       int kk;
       for (kk = 0; kk < Q * G; kk++)
 	Delta[kk] = newDDelta[kk];
-      
+
       (*nAccept)++;
     }
 
@@ -840,7 +842,7 @@ void updateGamma2(unsigned int *seed,
     {
       vector<vector<double> > varInv;
       makeSigma(g,G,varInv,Q,1.0,tau2Rho,a,sigma2,rho);
-      
+
       vector<vector<double> > var;
       inverse(varInv,var);
 
@@ -850,22 +852,22 @@ void updateGamma2(unsigned int *seed,
 	int kqg = qg2index(q,g,Q,G);
 	nuActive[q] = nu[kqg];
       }
-      
+
       double value = quadratic(var,nuActive);
       lambda += 0.5 * value;
       s += 0.5 * Q;
     }
-  
+
   //
   // Draw new value
   //
-  
+
   double newValue = ran.InverseGamma(s,lambda);
-  
+
   //
   // Set new value
   //
-  
+
   *gamma2 = newValue;
 
   (*nAccept)++;
@@ -911,7 +913,7 @@ void updateGamma2Nu(unsigned int *seed,
     double pot = - log(1.0 / u);
 
     double *newNu = (double *) calloc(Q * G,sizeof(double));
-    
+
     pot -= nuGibbs(newNu,Q,G,S,newValue,tau2Rho,a,rho,sigma2,
 		   phi,psi,x,delta,Delta,ran,1);
     pot += nuGibbs(nu,Q,G,S,oldValue,tau2Rho,a,rho,sigma2,
@@ -931,7 +933,7 @@ void updateGamma2Nu(unsigned int *seed,
       int k;
       for (k = 0; k < Q * G; k++)
 	nu[k] = newNu[k];
-      
+
       (*nAccept)++;
     }
 
@@ -965,7 +967,7 @@ void updateRDDelta(unsigned int *seed,
 		   const double *b,
 		   double nuR) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     vector<vector<double> > oldR;
@@ -988,14 +990,14 @@ void updateRDDelta(unsigned int *seed,
 	newR[q][p] = r[kqq];
       }
     }
-    
+
     double pot = 0.0;
     double u = epsilon * ran.Norm01();
-    
+
     //
     // draw what element to change
     //
-    
+
     vector<double> prob(Q);
     for (p = 0; p < Q; p++)
       prob[p] = 1.0 / ((double) Q);
@@ -1003,15 +1005,15 @@ void updateRDDelta(unsigned int *seed,
     prob.resize(Q - 1);
     for (p = 0; p < Q - 1; p++)
       prob[p] = 1.0 / ((double) (Q - 1));
-    
+
     int qq = ran.Discrete(prob);
     qq += (qq >= pp);
-    
+
     //
     // compute potential new correlation value
     //
-    
-    newR[pp][qq] = oldR[pp][qq] * exp(u) / 
+
+    newR[pp][qq] = oldR[pp][qq] * exp(u) /
       (1 - oldR[pp][qq] + oldR[pp][qq] * exp(u));
     newR[qq][pp] = newR[pp][qq];
     double *newRVector = (double *) calloc(Q * (Q - 1) / 2,sizeof(double));
@@ -1019,11 +1021,11 @@ void updateRDDelta(unsigned int *seed,
       for (q = p + 1; q < Q; q++) {
 	int kqq = qq2index(p,q,Q);
 	newRVector[kqq] = newR[p][q];
-      }    
-    
+      }
+
     // check that potential new correlation matrix is positive definite
     //
-    
+
     int err = 0;
     Cholesky chol(newR,err);
     if (err == 0) {
@@ -1031,7 +1033,7 @@ void updateRDDelta(unsigned int *seed,
       //
       // compute Jacobian determinant
       //
-      
+
       double y = oldR[pp][qq];
       double xtilde = log(y) - log(1.0 - y) + u;
       double pot1;
@@ -1040,34 +1042,34 @@ void updateRDDelta(unsigned int *seed,
       else
 	pot1 = - xtilde - log(1.0 + exp(- xtilde));
       double potdytildedxtilde = - xtilde - 2.0 * pot1;
-      
+
       double potdxtildedy = log(1.0 - y) + log(y);
-      
+
       pot += potdytildedxtilde + potdxtildedy;
-      
+
       //
       // if any of the proposed new values are negative, reject the proposal
       //
-      
+
       int isNeg = 0;
       for (p = 0; p < Q; p++)
 	for (q = 0; q < Q; q++)
 	  isNeg += (newR[p][q] < 0.0);
 
       if (isNeg == 0) {
-	
+
 	//
 	// propose new values for Delta from full conditional
 	//
 
 	double *newDDelta = (double *) calloc(Q * G,sizeof(double));
-	
+
 	pot -= DeltaGibbs(newDDelta,Q,G,S,c2,tau2R,b,newRVector,sigma2,
 			  phi,psi,x,delta,nu,ran,1);
 	pot += DeltaGibbs(Delta,Q,G,S,c2,tau2R,b,r,sigma2,
 			  phi,psi,x,delta,nu,ran,1);
 
-	
+
 	pot -= potentialR(Q,r,nuR);
 	pot -= potentialDDelta(Q,G,delta,Delta,c2,b,r,tau2R,sigma2);
 	pot -= potentialX(Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
@@ -1076,15 +1078,15 @@ void updateRDDelta(unsigned int *seed,
 	pot += potentialDDelta(Q,G,delta,newDDelta,c2,b,newRVector,
 			       tau2R,sigma2);
 	pot += potentialX(Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
-	
+
 	if (ran.Unif01() <= exp(- pot)) {
 	  int kk;
 	  for (kk = 0; kk < Q * (Q - 1) / 2; kk++)
 	    r[kk] = newRVector[kk];
-	  
+
 	  for (kk = 0; kk < Q * G; kk++)
 	    Delta[kk] = newDDelta[kk];
-	  
+
 	  (*nAccept)++;
 	}
 
@@ -1092,7 +1094,7 @@ void updateRDDelta(unsigned int *seed,
       }
     }
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
 
   return;
@@ -1141,18 +1143,18 @@ void updateRC2(unsigned int *seed,
 	newR[q][p] = r[kqq];
       }
     }
-    
+
     //
     // propose new values for r
-    //  
-    
+    //
+
     double pot = 0.0;
     double u = epsilon * ran.Norm01();
-    
+
     //
     // draw what element to change
     //
-    
+
     vector<double> prob(Q);
     for (p = 0; p < Q; p++)
       prob[p] = 1.0 / ((double) Q);
@@ -1160,15 +1162,15 @@ void updateRC2(unsigned int *seed,
     prob.resize(Q - 1);
     for (p = 0; p < Q - 1; p++)
       prob[p] = 1.0 / ((double) (Q - 1));
-    
+
     int qq = ran.Discrete(prob);
     qq += (qq >= pp);
-    
+
     //
     // compute potential new correlation value
     //
-    
-    newR[pp][qq] = oldR[pp][qq] * exp(u) / 
+
+    newR[pp][qq] = oldR[pp][qq] * exp(u) /
       (1 - oldR[pp][qq] + oldR[pp][qq] * exp(u));
     newR[qq][pp] = newR[pp][qq];
     double *newRVector = (double *) calloc(Q * (Q - 1) / 2,sizeof(double));
@@ -1176,20 +1178,20 @@ void updateRC2(unsigned int *seed,
       for (q = p + 1; q < Q; q++) {
 	int kqq = qq2index(p,q,Q);
 	newRVector[kqq] = newR[p][q];
-      }    
+      }
 
     //
     // check that potential new correlation matrix is positive definite
     //
-    
+
     int err = 0;
     Cholesky chol(newR,err);
     if (err == 0) {
-      
+
       //
       // compute Jacobian determinant
       //
-      
+
       double y = oldR[pp][qq];
       double xtilde = log(y) - log(1.0 - y) + u;
       double pot1;
@@ -1198,32 +1200,32 @@ void updateRC2(unsigned int *seed,
       else
 	pot1 = - xtilde - log(1.0 + exp(- xtilde));
       double potdytildedxtilde = - xtilde - 2.0 * pot1;
-      
+
       double potdxtildedy = log(1.0 - y) + log(y);
-      
+
       pot += potdytildedxtilde + potdxtildedy;
-      
+
       //
       // if any of the proposed new values are negative, reject the proposal
       //
-      
+
       int isNeg = 0;
       for (p = 0; p < Q; p++)
 	for (q = 0; q < Q; q++)
 	  isNeg += (newR[p][q] < 0.0);
-      
+
       if (isNeg == 0) {
 
 	//
 	// propose new value for c2
 	//
-	
+
 	double oldC2 = *c2;
 	double newC2;
-	
+
 	double s = -1.0;
 	double lambda = 0.0;
-	
+
 	int g;
 	for (g = 0; g < G; g++)
 	  {
@@ -1237,10 +1239,10 @@ void updateRC2(unsigned int *seed,
 
 	    vector<vector<double> > varInv;
 	    makeSigma(g,G,varInv,on,Q,1.0,tau2R,b,sigma2,newRVector);
-	    
+
 	    vector<vector<double> > var;
 	    inverse(varInv,var);
-      
+
 	    //
 	    // pick out elements of Delta that are active
 	    //
@@ -1256,12 +1258,12 @@ void updateRC2(unsigned int *seed,
 		    qq++;
 		  }
 	      }
-	    
+
 	    double value = quadratic(var,DeltaActive);
 	    lambda += 0.5 * value;
 	    s += 0.5 * nOn;
 	  }
-	
+
 	if (s > 0.0)
 	  {
 	    newC2 = ran.InverseGamma(s,lambda);
@@ -1272,14 +1274,14 @@ void updateRC2(unsigned int *seed,
 	    newC2 = c2Max * ran.Unif01();
 	    pot -= - log(1.0 / c2Max);
 	  }
-  
+
 	//
 	// compute potential for inverse proposal for c2
 	//
-	
+
 	s = -1.0;
 	lambda = 0.0;
-	
+
 	for (g = 0; g < G; g++)
 	  {
 	    int nOn = 0;
@@ -1295,7 +1297,7 @@ void updateRC2(unsigned int *seed,
 
 	    vector<vector<double> > var;
 	    inverse(varInv,var);
-      
+
 	    //
 	    // pick out elements of Delta that are active
 	    //
@@ -1316,16 +1318,16 @@ void updateRC2(unsigned int *seed,
 	    lambda += 0.5 * value;
 	    s += 0.5 * nOn;
 	  }
-	
+
 	if (s > 0.0)
 	  pot += ran.PotentialInverseGamma(s,lambda,oldC2);
 	else
 	  pot += - log(1.0 / c2Max);
-  
+
 	//
 	// compute potentials for new and old states
 	//
-	
+
 	if (newC2 < c2Max) { // otherwise do not accept
 	  pot -= potentialR(Q,r,nuR);
 	  pot -= potentialC2();
@@ -1334,10 +1336,10 @@ void updateRC2(unsigned int *seed,
 	  pot += potentialR(Q,newRVector,nuR);
 	  pot += potentialC2();
 	  pot += potentialDDelta(Q,G,delta,Delta,newC2,b,newRVector,tau2R,sigma2);
-	  
+
 	  if (ran.Unif01() <= exp(- pot)) {
 	    (*nAccept)++;
-	    
+
 	    *c2 = newC2;
 	    int kk;
 	    for (kk = 0; kk < Q * (Q - 1) / 2; kk++)
@@ -1346,12 +1348,12 @@ void updateRC2(unsigned int *seed,
 	}
       }
     }
-    
+
     free(newRVector);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -1401,7 +1403,7 @@ void updateRhoNu(unsigned int *seed,
 	   newRho[q][p] = rho[kqq];
 	 }
      }
-     
+
      double pot = 0.0;
      double u = epsilon * ran.Norm01();
 
@@ -1424,7 +1426,7 @@ void updateRhoNu(unsigned int *seed,
      // compute potential new correlation value
      //
 
-     newRho[pp][qq] = oldRho[pp][qq] * exp(u) / 
+     newRho[pp][qq] = oldRho[pp][qq] * exp(u) /
        (1 - oldRho[pp][qq] + oldRho[pp][qq] * exp(u));
      newRho[qq][pp] = newRho[pp][qq];
      double *newRhoVector = (double *) calloc(Q * (Q - 1) / 2,sizeof(double));
@@ -1432,7 +1434,7 @@ void updateRhoNu(unsigned int *seed,
        for (q = p + 1; q < Q; q++) {
 	 int kqq = qq2index(p,q,Q);
 	 newRhoVector[kqq] = newRho[p][q];
-       }    
+       }
 
      // check that potential new correlation matrix is positive definite
      //
@@ -1574,7 +1576,7 @@ void updateRhoNu(unsigned int *seed,
      // compute potential new correlation value
      //
 
-     newRho[pp][qq] = oldRho[pp][qq] * exp(u) / 
+     newRho[pp][qq] = oldRho[pp][qq] * exp(u) /
        (1 - oldRho[pp][qq] + oldRho[pp][qq] * exp(u));
      newRho[qq][pp] = newRho[pp][qq];
      double *newRhoVector = (double *) calloc(Q * (Q - 1) / 2,sizeof(double));
@@ -1582,11 +1584,11 @@ void updateRhoNu(unsigned int *seed,
        for (q = p + 1; q < Q; q++) {
 	 int kqq = qq2index(p,q,Q);
 	 newRhoVector[kqq] = newRho[p][q];
-      }    
-    
+      }
+
     // check that potential new correlation matrix is positive definite
     //
-    
+
     int err = 0;
     Cholesky chol(newRho,err);
     if (err == 0) {
@@ -1594,7 +1596,7 @@ void updateRhoNu(unsigned int *seed,
       //
       // compute Jacobian determinant
       //
-      
+
       double y = oldRho[pp][qq];
       double xtilde = log(y) - log(1.0 - y) + u;
       double pot1;
@@ -1603,29 +1605,29 @@ void updateRhoNu(unsigned int *seed,
       else
 	pot1 = - xtilde - log(1.0 + exp(- xtilde));
       double potdytildedxtilde = - xtilde - 2.0 * pot1;
-      
+
       double potdxtildedy = log(1.0 - y) + log(y);
-      
+
       pot += potdytildedxtilde + potdxtildedy;
-      
+
       //
       // if any of the proposed new values are negative, reject the proposal
       //
-      
+
       int isNeg = 0;
       for (p = 0; p < Q; p++)
 	for (q = 0; q < Q; q++)
 	  isNeg += (newRho[p][q] < 0.0);
 
       if (isNeg == 0) {
-	
+
 	//
 	// propose new values for gamma2
 	//
-	
+
 	double oldGamma2 = *gamma2;
 	double newGamma2;
-	
+
 	double s = -1.0;
 	double lambda = 0.0;
 	int g;
@@ -1635,51 +1637,51 @@ void updateRhoNu(unsigned int *seed,
 
 	  vector<vector<double> > var;
 	  inverse(varInv,var);
-      
+
 	  vector<double> nuActive(Q,0.0);
 	  for (q = 0; q < Q; q++) {
 	    int kqg = qg2index(q,g,Q,G);
 	    nuActive[q] = nu[kqg];
 	  }
-	  
+
 	  double value = quadratic(var,nuActive);
 	  lambda += 0.5 * value;
 	  s += 0.5 * Q;
 	}
-	
+
 	newGamma2 = ran.InverseGamma(s,lambda);
 	pot -= ran.PotentialInverseGamma(s,lambda,newGamma2);
-	
+
 	//
 	// compute potential for inverse proposal for gamma2
 	//
-	
+
 	s = -1.0;
 	lambda = 0.0;
 	for (g = 0; g < G; g++) {
 	  vector<vector<double> > varInv;
 	  makeSigma(g,G,varInv,Q,1.0,tau2Rho,a,sigma2,rho);
-	  
+
 	  vector<vector<double> > var;
 	  inverse(varInv,var);
-      
+
 	  vector<double> nuActive(Q);
 	  for (q = 0; q < Q; q++) {
 	    int kqg = qg2index(q,g,Q,G);
 	    nuActive[q] = nu[kqg];
 	  }
-	  
+
 	  double value = quadratic(var,nuActive);
 	  lambda += 0.5 * value;
 	  s += 0.5 * Q;
 	}
-	
+
 	pot += ran.PotentialInverseGamma(s,lambda,oldGamma2);
-	
+
 	//
 	// compute potential for new and old states
 	//
-	
+
 	pot -= potentialRho(Q,rho,nuRho);
 	pot -= potentialGamma2();
 	pot -= potentialNu(Q,G,nu,*gamma2,a,rho,tau2Rho,sigma2);
@@ -1691,7 +1693,7 @@ void updateRhoNu(unsigned int *seed,
 	if (ran.Unif01() <= exp(- pot))
 	  {
 	    (*nAccept)++;
-	    
+
 	    *gamma2 = newGamma2;
 	    int kk;
 	    for (kk = 0; kk < Q * (Q - 1) / 2; kk++)
@@ -1699,12 +1701,12 @@ void updateRhoNu(unsigned int *seed,
 	  }
       }
     }
-    
+
     free(newRhoVector);
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -1795,9 +1797,9 @@ void updateSigma2(unsigned int *seed,
       (*nAccept)++;
     }
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -1890,9 +1892,9 @@ void updateSigma2_HyperInverseWishart(unsigned int *seed,
       (*nAccept)++;
     }
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -1919,17 +1921,17 @@ void updatePhi(unsigned int *seed,
 	       const double *theta,
 	       const double *lambda) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
-    
+
     //
     // propose new value
     //
-    
+
     int q = (int) (ran.Unif01() * Q);
     int g = (int) (ran.Unif01() * G);
-    
+
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
     double u = lower + (upper - lower) * ran.Unif01();
@@ -1937,13 +1939,13 @@ void updatePhi(unsigned int *seed,
     int kqg = qg2index(q,g,Q,G);
     double oldValue = phi[kqg];
     double newValue = oldValue * u;
-    
+
     double pot = - log(1.0 / u);
-    
+
     //
     // subtract potential for old state
     //
-    
+
     pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
     pot -= potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
 
@@ -1965,9 +1967,9 @@ void updatePhi(unsigned int *seed,
       (*nAccept)++;
     }
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -1986,34 +1988,34 @@ void updateTheta(unsigned int *seed,
 		 const double *phi,
 		 const double *lambda) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
-    
+
     //
     // propose new value
     //
-    
+
     int q = (int) (ran.Unif01() * Q);
-    
+
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
     double u = lower + (upper - lower) * ran.Unif01();
 
     double oldValue = theta[q];
     double newValue = oldValue * u;
-    
+
     double pot = - log(1.0 / u);
-    
+
     //
     // subtract potential for old state
     //
-    
+
     pot -= potentialTheta();
     int g;
     for (g = 0; g < G; g++)
       pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
-    
+
     //
     // add potential for new state
     //
@@ -2033,9 +2035,9 @@ void updateTheta(unsigned int *seed,
       (*nAccept)++;
     }
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2054,34 +2056,34 @@ void updateLambda(unsigned int *seed,
 		  const double *phi,
 		  const double *theta) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
-    
+
     //
     // propose new value
     //
-    
+
     int q = (int) (ran.Unif01() * Q);
-    
+
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
     double u = lower + (upper - lower) * ran.Unif01();
 
     double oldValue = lambda[q];
     double newValue = oldValue * u;
-    
+
     double pot = - log(1.0 / u);
-    
+
     //
     // subtract potential for old state
     //
-    
+
     pot -= potentialLambda();
     int g;
     for (g = 0; g < G; g++)
       pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
-    
+
     //
     // add potential for new state
     //
@@ -2101,9 +2103,9 @@ void updateLambda(unsigned int *seed,
       (*nAccept)++;
     }
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2122,34 +2124,34 @@ void updateT(unsigned int *seed,
 	     const double *sigma2,
 	     const double *l) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
-    
+
     //
     // propose new value
     //
-    
+
     int q = (int) (ran.Unif01() * Q);
-    
+
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
     double u = lower + (upper - lower) * ran.Unif01();
 
     double oldValue = t[q];
     double newValue = oldValue * u;
-    
+
     double pot = - log(1.0 / u);
-    
+
     //
     // subtract potential for old state
     //
-    
+
     pot -= potentialT();
     int g;
     for (g = 0; g < G; g++)
       pot -= potentialSigma2qg(q,g,Q,G,sigma2,l,t);
-    
+
     //
     // add potential for new state
     //
@@ -2169,9 +2171,9 @@ void updateT(unsigned int *seed,
       (*nAccept)++;
     }
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2189,34 +2191,34 @@ void updateL(unsigned int *seed,
 	     const double *sigma2,
 	     const double *t) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
-    
+
     //
     // propose new value
     //
-    
+
     int q = (int) (ran.Unif01() * Q);
-    
+
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
     double u = lower + (upper - lower) * ran.Unif01();
 
     double oldValue = l[q];
     double newValue = oldValue * u;
-    
+
     double pot = - log(1.0 / u);
-    
+
     //
     // subtract potential for old state
     //
-    
+
     pot -= potentialL();
     int g;
     for (g = 0; g < G; g++)
       pot -= potentialSigma2qg(q,g,Q,G,sigma2,l,t);
-    
+
     //
     // add potential for new state
     //
@@ -2236,9 +2238,9 @@ void updateL(unsigned int *seed,
       (*nAccept)++;
     }
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2255,20 +2257,20 @@ void updateXi(unsigned int *seed,
 	      double alphaXi,
 	      double betaXi) {
   Random ran(*seed);
-  
+
   int q;
   for (q = 0; q < Q; q++) {
     //
     // set prior parameters
     //
-    
+
     double alpha = alphaXi;
     double beta = betaXi;
-    
+
     //
     // update parameters based on available observations
     //
-    
+
     int g;
     for (g = 0; g < G; g++) {
       int kqg = qg2index(q,g,Q,G);
@@ -2277,18 +2279,18 @@ void updateXi(unsigned int *seed,
       else
 	beta += 1.0;
     }
-    
+
     //
     // Draw new value
     //
-    
+
     double newValue = ran.Beta(alpha,beta);
     xi[q] = newValue;
     (*nAccept)++;
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2306,7 +2308,7 @@ void updateXi_onedelta(unsigned int *seed,
 		       double alphaXi,
 		       double betaXi) {
   Random ran(*seed);
-  
+
   int q,g;
   for (g = 0; g < G; g++) {
     int nOn = 0;
@@ -2314,23 +2316,23 @@ void updateXi_onedelta(unsigned int *seed,
       int kqg = qg2index(q,g,Q,G);
       nOn += delta[kqg];
     }
-    if (nOn != 0 && nOn != Q) {
-      cout << "Error found in function \"updateXi_onedelta\":" << endl;
-      cout << "All delta's for any gene must be equal." << endl;
-      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
-	endl;
-      cout << "Aborting." << endl;
-      exit(-1);
-    }
+//    if (nOn != 0 && nOn != Q) {
+//      cout << "Error found in function \"updateXi_onedelta\":" << endl;
+//      cout << "All delta's for any gene must be equal." << endl;
+//      cout << "For gene \"" << g << "\" this requirement is not fulfilled." <<
+//	endl;
+//      cout << "Aborting." << endl;
+//      exit(-1);
+//    }
   }
 
   double alpha = alphaXi;
   double beta = betaXi;
-  
+
   //
   // update parameters based on available observations
   //
-  
+
   for (g = 0; g < G; g++) {
     int kqg = qg2index(0,g,Q,G);
     if (delta[kqg] == 1)
@@ -2338,18 +2340,18 @@ void updateXi_onedelta(unsigned int *seed,
     else
       beta += 1.0;
   }
-    
+
   //
   // Draw new value
   //
-  
+
   double newValue = ran.Beta(alpha,beta);
   for (q = 0; q < Q; q++)
     xi[q] = newValue;
   (*nAccept)++;
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2375,7 +2377,7 @@ void updateDeltaDDelta(unsigned int *seed,
 		       const double *xi,
 		       const double *b) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
@@ -2386,11 +2388,11 @@ void updateDeltaDDelta(unsigned int *seed,
     int kqg = qg2index(q,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-	  
+
     //
     // propose new values for Delta from full conditionals
     //
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
 
     delta[kqg] = newDelta;
@@ -2399,7 +2401,7 @@ void updateDeltaDDelta(unsigned int *seed,
     delta[kqg] = oldDelta;
     pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
-    
+
     delta[kqg] = oldDelta;
     pot -= potentialDeltag(g,Q,G,delta,xi);
     pot -= potentialDDeltag(g,Q,G,delta,Delta,c2,b,r,tau2R,sigma2);
@@ -2418,16 +2420,16 @@ void updateDeltaDDelta(unsigned int *seed,
 	int index = qg2index(qq,g,Q,G);
 	if (delta[index] == 1)
 	  Delta[index] = newDDelta[index];
-      }	
-      
+      }
+
       (*nAccept)++;
     }
-    
+
     free(newDDelta);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2452,36 +2454,36 @@ void updateDeltaDDelta_onedelta(unsigned int *seed,
 				const double *xi,
 				const double *b) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
 
     int g = (int) (ran.Unif01() * G);
-    
+
     int nOn = 0;
     int q;
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       nOn += delta[kqg];
     }
-    if (nOn != 0 && nOn != Q) {
-      cout << "Error found in function \"updateDeltaDDelta_onedelta\":" << endl;
-      cout << "All delta's for any gene must be equal." << endl;
-      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
-	endl;
-      cout << "Aborting." << endl;
-      exit(-1);
-    }
-    
+//    if (nOn != 0 && nOn != Q) {
+//      cout << "Error found in function \"updateDeltaDDelta_onedelta\":" << endl;
+//      cout << "All delta's for any gene must be equal." << endl;
+//      cout << "For gene \"" << g << "\" this requirement is not fulfilled." <<
+//	endl;
+//      cout << "Aborting." << endl;
+//      exit(-1);
+//    }
+
     int kqg = qg2index(0,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-	  
+
     //
     // propose new values for Delta from full conditionals
     //
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
 
     for (q = 0; q < Q; q++) {
@@ -2496,7 +2498,7 @@ void updateDeltaDDelta_onedelta(unsigned int *seed,
     }
     pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
-    
+
 
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
@@ -2512,7 +2514,7 @@ void updateDeltaDDelta_onedelta(unsigned int *seed,
     }
     pot += potentialDeltag_onedelta(g,Q,G,delta,xi);
     pot += potentialDDeltag(g,Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
-    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);    
+    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       delta[kqg] = oldDelta;
@@ -2524,16 +2526,16 @@ void updateDeltaDDelta_onedelta(unsigned int *seed,
 	delta[kqg] = newDelta;
 	if (newDelta == 1)
 	  Delta[kqg] = newDDelta[kqg];
-      }	
-      
+      }
+
       (*nAccept)++;
     }
-    
+
     free(newDDelta);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2565,7 +2567,7 @@ void updateLSigma2(unsigned int *seed,
 		   const double *a,
 		   const double *b) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
 
@@ -2628,7 +2630,7 @@ void updateLSigma2(unsigned int *seed,
 	int index = qg2index(qq,g,Q,G);
 	on[qq] = delta[index];
       }
-      
+
       pot += potentialSigma2qg(q,g,Q,G,sigma2,l,t);
       pot += potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
       pot += potentialNug(g,Q,G,nu,gamma2,a,rho,tau2Rho,sigma2);
@@ -2650,16 +2652,16 @@ void updateLSigma2(unsigned int *seed,
 	int kqg = qg2index(q,g,Q,G);
 	sigma2[kqg] = newSigma2[g];
       }
-      
+
       (*nAccept)++;
     }
-    
+
     free(oldSigma2);
     free(newSigma2);
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2694,7 +2696,7 @@ void updateLSigma2_HyperInverseWishart(unsigned int *seed,
 				       const vector<int> &oldClique,
 				       const vector<vector<int> > &oldComponents) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
 
@@ -2739,7 +2741,7 @@ void updateLSigma2_HyperInverseWishart(unsigned int *seed,
       pot -= potentialNug(g,Q,G,nu,gamma2,a,rho,tau2Rho,sigma2);
     }
     pot -= potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,Q,G,Omega,oldClique,oldComponents);
-    
+
     //
     // add potential for new state
     //
@@ -2757,13 +2759,13 @@ void updateLSigma2_HyperInverseWishart(unsigned int *seed,
 	int index = qg2index(qq,g,Q,G);
 	on[qq] = delta[index];
       }
-      
+
       pot += potentialSigma2qg(q,g,Q,G,sigma2,l,t);
       pot += potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
       pot += potentialNug(g,Q,G,nu,gamma2,a,rho,tau2Rho,sigma2);
     }
     pot += potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,Q,G,Omega,oldClique,oldComponents);
-      
+
     l[q] = oldValue;
     for (g = 0; g < G; g++) {
       int kqg = qg2index(q,g,Q,G);
@@ -2780,16 +2782,16 @@ void updateLSigma2_HyperInverseWishart(unsigned int *seed,
 	int kqg = qg2index(q,g,Q,G);
 	sigma2[kqg] = newSigma2[g];
       }
-      
+
       (*nAccept)++;
     }
-    
+
     free(oldSigma2);
     free(newSigma2);
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2822,7 +2824,7 @@ void updateTSigma2(unsigned int *seed,
 		   const double *a,
 		   const double *b) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
 
@@ -2846,7 +2848,7 @@ void updateTSigma2(unsigned int *seed,
       oldSigma2[g] = sigma2[kqg];
       newSigma2[g] = sqrt(u) * (oldSigma2[g] - l[q]) + l[q];
     }
-    
+
     double pot = - (((double) G) / 2.0 - 1.0) * log(u);
 
     //
@@ -2885,7 +2887,7 @@ void updateTSigma2(unsigned int *seed,
 	int index = qg2index(qq,g,Q,G);
 	on[qq] = delta[index];
       }
-      
+
       pot += potentialSigma2qg(q,g,Q,G,sigma2,l,t);
       pot += potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
       pot += potentialNug(g,Q,G,nu,gamma2,a,rho,tau2Rho,sigma2);
@@ -2907,16 +2909,16 @@ void updateTSigma2(unsigned int *seed,
 	int kqg = qg2index(q,g,Q,G);
 	sigma2[kqg] = newSigma2[g];
       }
-      
+
       (*nAccept)++;
     }
-    
+
     free(oldSigma2);
     free(newSigma2);
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -2951,7 +2953,7 @@ void updateTSigma2_HyperInverseWishart(unsigned int *seed,
 				       const vector<int> &oldClique,
 				       const vector<vector<int> > &oldComponents) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
 
@@ -2975,7 +2977,7 @@ void updateTSigma2_HyperInverseWishart(unsigned int *seed,
       oldSigma2[g] = sigma2[kqg];
       newSigma2[g] = sqrt(u) * (oldSigma2[g] - l[q]) + l[q];
     }
-    
+
     double pot = - (((double) G) / 2.0 - 1.0) * log(u);
 
     //
@@ -2996,7 +2998,7 @@ void updateTSigma2_HyperInverseWishart(unsigned int *seed,
       pot -= potentialNug(g,Q,G,nu,gamma2,a,rho,tau2Rho,sigma2);
     }
     pot -= potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,Q,G,Omega,oldClique,oldComponents);
-    
+
 
     //
     // add potential for new state
@@ -3015,13 +3017,13 @@ void updateTSigma2_HyperInverseWishart(unsigned int *seed,
 	int index = qg2index(qq,g,Q,G);
 	on[qq] = delta[index];
       }
-      
+
       pot += potentialSigma2qg(q,g,Q,G,sigma2,l,t);
       pot += potentialXqg(q,g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
       pot += potentialNug(g,Q,G,nu,gamma2,a,rho,tau2Rho,sigma2);
     }
     pot += potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,Q,G,Omega,oldClique,oldComponents);
-    
+
     t[q] = oldValue;
     for (g = 0; g < G; g++) {
       int kqg = qg2index(q,g,Q,G);
@@ -3038,16 +3040,16 @@ void updateTSigma2_HyperInverseWishart(unsigned int *seed,
 	int kqg = qg2index(q,g,Q,G);
 	sigma2[kqg] = newSigma2[g];
       }
-      
+
       (*nAccept)++;
     }
-    
+
     free(oldSigma2);
     free(newSigma2);
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -3072,16 +3074,16 @@ void updateLambdaPhi(unsigned int *seed,
 		     const double *sigma2,
 		     const double *theta) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
-    
+
     //
     // propose new value
     //
-    
+
     int q = (int) (ran.Unif01() * Q);
-    
+
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
     double u = lower + (upper - lower) * ran.Unif01();
@@ -3098,11 +3100,11 @@ void updateLambdaPhi(unsigned int *seed,
     }
 
     double pot = - log(1.0 / u);
-    
+
     //
     // subtract potential for old state
     //
-    
+
     pot -= potentialLambda();
     for (g = 0; g < G; g++) {
       pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
@@ -3142,13 +3144,13 @@ void updateLambdaPhi(unsigned int *seed,
 
       (*nAccept)++;
     }
-    
+
     free(oldPhi);
     free(newPhi);
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -3174,20 +3176,20 @@ void updateThetaPhi(unsigned int *seed,
 		    const double *sigma2,
 		    const double *lambda) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
-    
+
     //
     // propose new value
     //
-    
+
     int q = (int) (ran.Unif01() * Q);
-    
+
     double upper = 1.0 + epsilon;
     double lower = 1.0 / upper;
     double u = lower + (upper - lower) * ran.Unif01();
-    
+
     double oldValue = theta[q];
     double newValue = oldValue * u;
     double *oldPhi = (double *) calloc(G,sizeof(double));
@@ -3198,13 +3200,13 @@ void updateThetaPhi(unsigned int *seed,
       oldPhi[g] = phi[kqg];
       newPhi[g] = sqrt(u) * (oldPhi[g] - lambda[q]) + lambda[q];
     }
-    
+
     double pot = - (((double) G) / 2.0 - 1.0) * log(u);
-    
+
     //
     // subtract potential for old state
     //
-    
+
     pot -= potentialTheta();
     for (g = 0; g < G; g++) {
       pot -= potentialPhiqg(q,g,Q,G,phi,lambda,theta);
@@ -3248,9 +3250,9 @@ void updateThetaPhi(unsigned int *seed,
     free(oldPhi);
     free(newPhi);
   }
-    
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -3281,37 +3283,37 @@ void updateDeltaDDelta_MRF1_onedelta(unsigned int *seed,
 				     double omega0,
 				     double kappa) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
 
     int g = (int) (ran.Unif01() * G);
-    
+
     int nOn = 0;
     int q;
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       nOn += delta[kqg];
     }
-    if (nOn != 0 && nOn != Q) {
-      cout << "Error found in function \"updateDeltaDDelta_MRF1_onedelta\":" << 
-	endl;
-      cout << "All delta's for any gene must be equal." << endl;
-      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
-	endl;
-      cout << "Aborting." << endl;
-      exit(-1);
-    }
-    
+//    if (nOn != 0 && nOn != Q) {
+//      cout << "Error found in function \"updateDeltaDDelta_MRF1_onedelta\":" <<
+//	endl;
+//      cout << "All delta's for any gene must be equal." << endl;
+//      cout << "For gene \"" << g << "\" this requirement is not fulfilled." <<
+//	endl;
+//      cout << "Aborting." << endl;
+//      exit(-1);
+//    }
+
     int kqg = qg2index(0,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-	  
+
     //
     // propose new values for Delta from full conditionals
     //
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
 
     for (q = 0; q < Q; q++) {
@@ -3326,7 +3328,7 @@ void updateDeltaDDelta_MRF1_onedelta(unsigned int *seed,
     }
     pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
-    
+
 
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
@@ -3342,7 +3344,7 @@ void updateDeltaDDelta_MRF1_onedelta(unsigned int *seed,
     }
     pot += potentialDelta_MRF1_onedelta(Q,G,delta,neighbour,eta0,omega0,kappa);
     pot += potentialDDeltag(g,Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
-    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);    
+    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       delta[kqg] = oldDelta;
@@ -3354,16 +3356,16 @@ void updateDeltaDDelta_MRF1_onedelta(unsigned int *seed,
 	delta[kqg] = newDelta;
 	if (newDelta == 1)
 	  Delta[kqg] = newDDelta[kqg];
-      }	
-      
+      }
+
       (*nAccept)++;
     }
-    
+
     free(newDDelta);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -3392,37 +3394,37 @@ void updateDeltaDDelta_MRF2_onedelta(unsigned int *seed,
 				     double alpha,
 				     double beta) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
 
     int g = (int) (ran.Unif01() * G);
-    
+
     int nOn = 0;
     int q;
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       nOn += delta[kqg];
     }
-    if (nOn != 0 && nOn != Q) {
-      cout << "Error found in function \"updateDeltaDDelta_MRF2_onedelta\":" << 
-	endl;
-      cout << "All delta's for any gene must be equal." << endl;
-      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
-	endl;
-      cout << "Aborting." << endl;
-      exit(-1);
-    }
-    
+//    if (nOn != 0 && nOn != Q) {
+//      cout << "Error found in function \"updateDeltaDDelta_MRF2_onedelta\":" <<
+//	endl;
+//      cout << "All delta's for any gene must be equal." << endl;
+//      cout << "For gene \"" << g << "\" this requirement is not fulfilled." <<
+//	endl;
+//      cout << "Aborting." << endl;
+//      exit(-1);
+//    }
+
     int kqg = qg2index(0,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-	  
+
     //
     // propose new values for Delta from full conditionals
     //
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
 
     for (q = 0; q < Q; q++) {
@@ -3437,7 +3439,7 @@ void updateDeltaDDelta_MRF2_onedelta(unsigned int *seed,
     }
     pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
-    
+
 
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
@@ -3453,7 +3455,7 @@ void updateDeltaDDelta_MRF2_onedelta(unsigned int *seed,
     }
     pot += potentialDelta_MRF2_onedelta(Q,G,delta,neighbour,alpha,beta);
     pot += potentialDDeltag(g,Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
-    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);    
+    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       delta[kqg] = oldDelta;
@@ -3465,16 +3467,16 @@ void updateDeltaDDelta_MRF2_onedelta(unsigned int *seed,
 	delta[kqg] = newDelta;
 	if (newDelta == 1)
 	  Delta[kqg] = newDDelta[kqg];
-      }	
-      
+      }
+
       (*nAccept)++;
     }
-    
+
     free(newDDelta);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -3504,32 +3506,32 @@ void updateDeltaDDelta_MRF2(unsigned int *seed,
 			    double beta,
 			    double betag) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
 
     int q = (int) (ran.Unif01() * Q);
     int g = (int) (ran.Unif01() * G);
-    
+
     int kqg = qg2index(q,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-	  
+
     //
     // propose new values for Delta from full conditionals
     //
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
 
     delta[kqg] = newDelta;
     pot -= DeltaGibbs(g,newDDelta,Q,G,S,c2,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
-    
+
     delta[kqg] = oldDelta;
     pot += DeltaGibbs(g,Delta,Q,G,S,c2,tau2R,b,r,sigma2,
 		      phi,psi,x,delta,nu,ran,1);
-    
+
 
     delta[kqg] = oldDelta;
     pot -= potentialDelta_MRF2(Q,G,delta,neighbour,alpha,beta,betag);
@@ -3539,26 +3541,26 @@ void updateDeltaDDelta_MRF2(unsigned int *seed,
     delta[kqg] = newDelta;
     pot += potentialDelta_MRF2(Q,G,delta,neighbour,alpha,beta,betag);
     pot += potentialDDeltag(g,Q,G,delta,newDDelta,c2,b,r,tau2R,sigma2);
-    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);    
+    pot += potentialXg(g,Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
     delta[kqg] = oldDelta;
-    
-    
+
+
     if (ran.Unif01() <= exp(- pot)) {
       delta[kqg] = newDelta;
       for (q = 0; q < Q; q++) {
 	int kqg = qg2index(q,g,Q,G);
 	if (delta[kqg] == 1)
 	  Delta[kqg] = newDDelta[kqg];
-      }	
-      
+      }
+
       (*nAccept)++;
     }
-    
+
     free(newDDelta);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -3735,15 +3737,15 @@ void updateAlphaBeta_MRF2_onedelta(unsigned int *seed,
 				   const int *delta,
 				   const vector<vector<int> > &neighbour) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
-    
+
     //
     // propose new value(s)
     //
-    
+
     double oldAlpha = *alpha;
     double newAlpha = *alpha;
     if (epsilonAlpha > 0.0) {
@@ -3774,8 +3776,8 @@ void updateAlphaBeta_MRF2_onedelta(unsigned int *seed,
 	int kqg = qg2index(q,g,Q,G);
 	deltaTemp[kqg] = dd[g];
       }
-    
-    
+
+
     pot -= potentialAlpha();
     pot -= potentialBeta();
     pot -= potentialDelta_MRF2_onedelta(Q,G,delta,neighbour,oldAlpha,oldBeta);
@@ -3820,21 +3822,21 @@ void updateAlphaBetaBetag_MRF2(unsigned int *seed,
 			       const int *delta,
 			       const vector<vector<int> > &neighbour) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
-    
+
     //
     // propose new value(s)
     //
-    
+
     double oldAlpha = *alpha;
     double newAlpha = *alpha;
     if (epsilonAlpha > 0.0) {
       newAlpha += epsilonAlpha * ran.Norm01();
     }
-    
+
     double oldBeta = *beta;
     double newBeta = *beta;
     if (epsilonBeta > 0.0) {
@@ -3860,13 +3862,13 @@ void updateAlphaBetaBetag_MRF2(unsigned int *seed,
     perfectMRF2(dd,Q,G,neighbour,potZero,potZero,newAlpha,newBeta,
 		newBetag,&seedPerfect,1);
     ran.ChangeSeed(seedPerfect);
-    
+
     pot -= potentialAlpha();
     pot -= potentialBeta();
     pot -= potentialBetag();
     pot -= potentialDelta_MRF2(Q,G,delta,neighbour,oldAlpha,oldBeta,oldBetag);
     pot -= potentialDelta_MRF2(Q,G,dd,neighbour,newAlpha,newBeta,newBetag);
-    
+
     pot += potentialAlpha();
     pot += potentialBeta();
     pot += potentialBetag();
@@ -3913,17 +3915,17 @@ void updateOmega_HyperInverseWishart(unsigned int *seed,
   //
 
   vector<vector<vector<double> > > OmegaOld(Omega);
-  
+
   double pot = - OmegaGibbs(df,D,oldClique,oldComponents,Q,G,Delta,
 			  r,sigma2,tau2R,b,Omega,ran,1);
 
   /*
   pot += OmegaGibbs(df,D,oldClique,oldComponents,Q,G,Delta,
 		    r,sigma2,tau2R,b,OmegaOld,ran,0);
-  
+
   pot += potentialOmega_HyperInverseWishart(Omega,D,df,oldClique,oldComponents);
   pot += potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,Q,G,Omega,oldClique,oldComponents);
-  
+
   pot -= potentialOmega_HyperInverseWishart(OmegaOld,D,df,oldClique,oldComponents);
   pot -= potentialDDeltaStar_HyperInverseWishart(Delta,b,sigma2,tau2R,r,Q,G,
 						 OmegaOld,oldClique,oldComponents);
@@ -3932,7 +3934,7 @@ void updateOmega_HyperInverseWishart(unsigned int *seed,
   */
 
   (*nAccept)++;
-  
+
   *seed = ran.ChangeSeed(*seed);
 
   return;
@@ -3958,7 +3960,7 @@ void updateDDeltaStar_HyperInverseWishart(unsigned int *seed,
 					  const vector<vector<vector<double> > > &Omega,
 					  const vector<int> &oldClique,
 					  const vector<vector<int> > &oldComponents) {
-  
+
   Random ran(*seed);
 
   //
@@ -3970,14 +3972,14 @@ void updateDDeltaStar_HyperInverseWishart(unsigned int *seed,
 
   double pot = DeltaStarGibbs(oldClique,oldComponents,Q,G,S,newValues,
 			      r,sigma2,phi,tau2R,b,nu,delta,psi,x,Omega,ran,1);
-  
+
   /*
   double pot2 = DeltaStarGibbs(oldClique,oldComponents,Q,G,S,oldValues,
 			       r,sigma2,phi,tau2R,b,nu,delta,psi,x,Omega,ran,0);
-  
+
   double pot3 = potentialDDeltaStar_HyperInverseWishart(newValues,b,sigma2,tau2R,r,Q,G,Omega,oldClique,oldComponents);
   double pot4 = potentialX(Q,G,S,x,psi,nu,delta,newValues,sigma2,phi);
-  
+
   double pot5 = potentialDDeltaStar_HyperInverseWishart(oldValues,b,sigma2,tau2R,r,Q,G,Omega,oldClique,oldComponents);
   double pot6 = potentialX(Q,G,S,x,psi,nu,delta,oldValues,sigma2,phi);
 
@@ -3993,7 +3995,7 @@ void updateDDeltaStar_HyperInverseWishart(unsigned int *seed,
 
 
   (*nAccept)++;
-  
+
   *seed = ran.ChangeSeed(*seed);
 
   return;
@@ -4030,32 +4032,32 @@ void updateTau2RDDeltaStar_HyperInverseWishart(unsigned int *seed,
       int q = (int) (Q * ran.Unif01());
       int p = (int) ((Q - 1) * ran.Unif01());
       if (p >= q) p++;
-      
+
       double upper = 1.0 + epsilon;
       double lower = 1.0 / upper;
-      
+
       double u = lower + (upper - lower) * ran.Unif01();
       double *oldValues = (double *) calloc(Q,sizeof(double));
       double *newValues = (double *) calloc(Q,sizeof(double));
-      
+
       int i;
       for (i = 0; i < Q; i++)
 	{
 	  oldValues[i] = tau2R[i];
 	  newValues[i] = tau2R[i];
 	}
-      
+
       newValues[q] *= u;
       newValues[p] /= u;
-      
+
       double prod = 1.0;
       for (i = 0; i < Q; i++)
 	prod *= newValues[i];
-      
+
       prod = exp(log(prod) / Q);
       for (i = 0; i < Q; i++)
 	newValues[i] /= prod;
-      
+
       double pot = - log(1.0 / (u * u));
 
       //
@@ -4084,7 +4086,7 @@ void updateTau2RDDeltaStar_HyperInverseWishart(unsigned int *seed,
 						     oldComponents);
       pot += potentialX(Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
 
-      
+
       if (ran.Unif01() <= exp(- pot)) {
 	int q;
 	for (q = 0; q < Q; q++)
@@ -4093,18 +4095,18 @@ void updateTau2RDDeltaStar_HyperInverseWishart(unsigned int *seed,
 	int k;
 	for (k = 0; k < Q * G; k++)
 	  Delta[k] = newDDelta[k];
-	
+
 	(*nAccept)++;
       }
-      
+
       free(newDDelta);
       free(oldValues);
       free(newValues);
     }
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -4142,18 +4144,18 @@ void updateBDDeltaStar_HyperInverseWishart(unsigned int *seed,
   int k;
   for (k = 0; k < nTry; k++) {
     int q = (int) (ran.Unif01() * Q);
-    
+
     double oldValue = b[q];
     double p0 = 0.0;
     double p1 = 0.0;
     if (oldValue > 0.0 && oldValue < 1.0)
       {
-	if (pB0 > 0.0 && oldValue - epsilon < 0.0) 
+	if (pB0 > 0.0 && oldValue - epsilon < 0.0)
 	  p0 = (epsilon - oldValue) / (2.0 * epsilon);
-	if (pB1 > 0.0 && oldValue + epsilon > 1.0) 
+	if (pB1 > 0.0 && oldValue + epsilon > 1.0)
 	  p1 = (oldValue + epsilon - 1.0) / (2.0 * epsilon);
       }
-    
+
     double newValue;
     double lower = 0.0;
     double upper = 0.0;
@@ -4170,18 +4172,18 @@ void updateBDDeltaStar_HyperInverseWishart(unsigned int *seed,
 	if (upper > 1.0) upper = 1.0;
 	newValue = lower + (upper - lower) * ran.Unif01();
       }
-    
-    
+
+
     double p0Back = 0.0;
     double p1Back = 0.0;
     if (newValue > 0.0 && newValue < 1.0)
       {
-	if (pB0 > 0.0 && newValue - epsilon < 0.0) 
+	if (pB0 > 0.0 && newValue - epsilon < 0.0)
 	  p0Back = (epsilon - newValue) / (2.0 * epsilon);
-	if (pB1 > 0.0 && newValue + epsilon > 1.0) 
+	if (pB1 > 0.0 && newValue + epsilon > 1.0)
 	  p1Back = (newValue + epsilon - 1.0) / (2.0 * epsilon);
       }
-    
+
     double lowerBack = 0.0;
     double upperBack = 1.0;
     if (oldValue > 0.0 && oldValue < 1.0)
@@ -4191,8 +4193,8 @@ void updateBDDeltaStar_HyperInverseWishart(unsigned int *seed,
 	if (lowerBack < 0.0) lowerBack = 0.0;
 	if (upperBack > 1.0) upperBack = 1.0;
       }
-    
-    
+
+
     double pot = 0.0;
     if (oldValue == 0.0)  // then (newValue > 0.0 && newValue < 1.0)
       {
@@ -4228,18 +4230,18 @@ void updateBDDeltaStar_HyperInverseWishart(unsigned int *seed,
 	    pot += - log(1.0 / (upperBack - lowerBack));
 	  }
       }
-    
+
     //
     // propose new values for DeltaStar from full conditionals
     //
-    
+
     double *newDDelta = (double *) calloc(Q * G,sizeof(double));
 
     b[q] = newValue;
     pot -= DeltaStarGibbs(oldClique,oldComponents,Q,G,S,newDDelta,r,
 			  sigma2,phi,tau2R,b,nu,delta,psi,x,
 			  Omega,ran,1);
-    
+
     b[q] = oldValue;
     pot += DeltaStarGibbs(oldClique,oldComponents,Q,G,S,Delta,r,
 			  sigma2,phi,tau2R,b,nu,delta,psi,x,
@@ -4258,22 +4260,22 @@ void updateBDDeltaStar_HyperInverseWishart(unsigned int *seed,
 						   oldComponents);
     pot += potentialX(Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
     b[q] = oldValue;
-    
+
     if (ran.Unif01() <= exp(- pot)) {
       b[q] = newValue;
 
       int k;
       for (k = 0; k < Q * G; k++)
 	Delta[k] = newDDelta[k];
-      
+
       (*nAccept)++;
     }
-    
+
     free(newDDelta);
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -4303,7 +4305,7 @@ void updateRDDeltaStar_HyperInverseWishart(unsigned int *seed,
 					   const vector<int> &oldClique,
 					   const vector<vector<int> > &oldComponents) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     vector<vector<double> > oldR;
@@ -4326,14 +4328,14 @@ void updateRDDeltaStar_HyperInverseWishart(unsigned int *seed,
 	newR[q][p] = r[kqq];
       }
     }
-    
+
     double pot = 0.0;
     double u = epsilon * ran.Norm01();
-    
+
     //
     // draw what element to change
     //
-    
+
     vector<double> prob(Q);
     for (p = 0; p < Q; p++)
       prob[p] = 1.0 / ((double) Q);
@@ -4341,15 +4343,15 @@ void updateRDDeltaStar_HyperInverseWishart(unsigned int *seed,
     prob.resize(Q - 1);
     for (p = 0; p < Q - 1; p++)
       prob[p] = 1.0 / ((double) (Q - 1));
-    
+
     int qq = ran.Discrete(prob);
     qq += (qq >= pp);
-    
+
     //
     // compute potential new correlation value
     //
-    
-    newR[pp][qq] = oldR[pp][qq] * exp(u) / 
+
+    newR[pp][qq] = oldR[pp][qq] * exp(u) /
       (1 - oldR[pp][qq] + oldR[pp][qq] * exp(u));
     newR[qq][pp] = newR[pp][qq];
     double *newRVector = (double *) calloc(Q * (Q - 1) / 2,sizeof(double));
@@ -4357,11 +4359,11 @@ void updateRDDeltaStar_HyperInverseWishart(unsigned int *seed,
       for (q = p + 1; q < Q; q++) {
 	int kqq = qq2index(p,q,Q);
 	newRVector[kqq] = newR[p][q];
-      }    
-    
+      }
+
     // check that potential new correlation matrix is positive definite
     //
-    
+
     int err = 0;
     Cholesky chol(newR,err);
     if (err == 0) {
@@ -4369,7 +4371,7 @@ void updateRDDeltaStar_HyperInverseWishart(unsigned int *seed,
       //
       // compute Jacobian determinant
       //
-      
+
       double y = oldR[pp][qq];
       double xtilde = log(y) - log(1.0 - y) + u;
       double pot1;
@@ -4378,32 +4380,32 @@ void updateRDDeltaStar_HyperInverseWishart(unsigned int *seed,
       else
 	pot1 = - xtilde - log(1.0 + exp(- xtilde));
       double potdytildedxtilde = - xtilde - 2.0 * pot1;
-      
+
       double potdxtildedy = log(1.0 - y) + log(y);
-      
+
       pot += potdytildedxtilde + potdxtildedy;
-      
+
       //
       // if any of the proposed new values are negative, reject the proposal
       //
-      
+
       int isNeg = 0;
       for (p = 0; p < Q; p++)
 	for (q = 0; q < Q; q++)
 	  isNeg += (newR[p][q] < 0.0);
 
       if (isNeg == 0) {
-	
+
 	//
 	// propose new values for DeltaStar from full conditionals
 	//
-	
+
 	double *newDDelta = (double *) calloc(Q * G,sizeof(double));
-	
+
 	pot -= DeltaStarGibbs(oldClique,oldComponents,Q,G,S,newDDelta,
 			      newRVector,sigma2,phi,tau2R,b,nu,
 			      delta,psi,x,Omega,ran,1);
-	
+
 	pot += DeltaStarGibbs(oldClique,oldComponents,Q,G,S,Delta,
 			      r,sigma2,phi,tau2R,b,nu,
 			      delta,psi,x,Omega,ran,1);
@@ -4420,25 +4422,25 @@ void updateRDDeltaStar_HyperInverseWishart(unsigned int *seed,
 						       oldComponents);
 	pot += potentialX(Q,G,S,x,psi,nu,delta,newDDelta,sigma2,phi);
 
-      
+
 	if (ran.Unif01() <= exp(- pot)) {
 	  int kk;
 	  for (kk = 0; kk < Q * (Q - 1) / 2; kk++)
 	    r[kk] = newRVector[kk];
-	  
+
 	  for (kk = 0; kk < Q * G; kk++)
 	    Delta[kk] = newDDelta[kk];
-	  
+
 	  (*nAccept)++;
 	}
-      
+
       free(newDDelta);
       }
     }
   }
-  
+
   *seed = ran.ChangeSeed(*seed);
-  
+
   return;
 }
 
@@ -4462,7 +4464,7 @@ void updateDelta_HyperInverseWishart(unsigned int *seed,
 				     const double *xi,
 				     const double *b) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
@@ -4476,15 +4478,15 @@ void updateDelta_HyperInverseWishart(unsigned int *seed,
 
     pot -= potentialDeltag(g,Q,G,delta,xi);
     pot -= potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
-    
+
     delta[kqg] = newDelta;
     pot += potentialDeltag(g,Q,G,delta,xi);
     pot += potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
     delta[kqg] = oldDelta;
-    
+
     if (ran.Unif01() <= exp(- pot)) {
       delta[kqg] = newDelta;
-      
+
       (*nAccept)++;
     }
   }
@@ -4493,7 +4495,7 @@ void updateDelta_HyperInverseWishart(unsigned int *seed,
 
   return;
 }
-    
+
 
 
 
@@ -4514,32 +4516,32 @@ void updateDelta_HyperInverseWishart_onedelta(unsigned int *seed,
 					      const double *xi,
 					      const double *b) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
 
     int g = (int) (ran.Unif01() * G);
-    
+
     int nOn = 0;
     int q;
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       nOn += delta[kqg];
     }
-    if (nOn != 0 && nOn != Q) {
-      cout << "Error found in function \"updateDeltaDDelta_onedelta\":" << endl;
-      cout << "All delta's for any gene must be equal." << endl;
-      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
-	endl;
-      cout << "Aborting." << endl;
-      exit(-1);
-    }
-    
+//    if (nOn != 0 && nOn != Q) {
+//      cout << "Error found in function \"updateDeltaDDelta_onedelta\":" << endl;
+//      cout << "All delta's for any gene must be equal." << endl;
+//      cout << "For gene \"" << g << "\" this requirement is not fulfilled." <<
+//	endl;
+//      cout << "Aborting." << endl;
+//      exit(-1);
+//    }
+
     int kqg = qg2index(0,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-	  
+
     pot -= potentialDeltag_onedelta(g,Q,G,delta,xi);
     pot -= potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
 
@@ -4553,13 +4555,13 @@ void updateDelta_HyperInverseWishart_onedelta(unsigned int *seed,
       int kqg = qg2index(q,g,Q,G);
       delta[kqg] = oldDelta;
     }
-    
+
     if (ran.Unif01() <= exp(- pot)) {
       for (q = 0; q < Q; q++) {
 	int kqg = qg2index(q,g,Q,G);
 	delta[kqg] = newDelta;
       }
-      
+
       (*nAccept)++;
     }
   }
@@ -4568,7 +4570,7 @@ void updateDelta_HyperInverseWishart_onedelta(unsigned int *seed,
 
   return;
 }
-    
+
 
 
 
@@ -4592,29 +4594,29 @@ void updateDelta_HyperInverseWishart_MRF2(unsigned int *seed,
 					  double beta,
 					  double betag) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
-    
+
     int q = (int) (ran.Unif01() * Q);
     int g = (int) (ran.Unif01() * G);
-    
+
     int kqg = qg2index(q,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-    
+
     pot -= potentialDelta_MRF2(Q,G,delta,neighbour,alpha,beta,betag);
     pot -= potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
-    
+
     delta[kqg] = newDelta;
     pot += potentialDelta_MRF2(Q,G,delta,neighbour,alpha,beta,betag);
     pot += potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
     delta[kqg] = oldDelta;
-    
+
     if (ran.Unif01() <= exp(- pot)) {
       delta[kqg] = newDelta;
-      
+
       (*nAccept)++;
     }
   }
@@ -4623,7 +4625,7 @@ void updateDelta_HyperInverseWishart_MRF2(unsigned int *seed,
 
   return;
 }
-    
+
 
 
 void updateDelta_HyperInverseWishart_MRF2_onedelta(unsigned int *seed,
@@ -4645,33 +4647,33 @@ void updateDelta_HyperInverseWishart_MRF2_onedelta(unsigned int *seed,
 						   double alpha,
 						   double beta) {
   Random ran(*seed);
-  
+
   int k;
   for (k = 0; k < nTry; k++) {
     double pot = 0.0;
-    
+
     int g = (int) (ran.Unif01() * G);
-    
+
     int nOn = 0;
     int q;
     for (q = 0; q < Q; q++) {
       int kqg = qg2index(q,g,Q,G);
       nOn += delta[kqg];
     }
-    if (nOn != 0 && nOn != Q) {
-      cout << "Error found in function \"updateDelta_HyperInverseWishart_MRF2_onedelta\":" << endl;
-      cout << "All delta's for any gene must be equal." << endl;
-      cout << "For gene \"" << g << "\" this requirement is not fulfilled." << 
-	endl;
-      cout << "Aborting." << endl;
-      exit(-1);
-    }
-    
+//    if (nOn != 0 && nOn != Q) {
+//      cout << "Error found in function \"updateDelta_HyperInverseWishart_MRF2_onedelta\":" << endl;
+//      cout << "All delta's for any gene must be equal." << endl;
+//      cout << "For gene \"" << g << "\" this requirement is not fulfilled." <<
+//	endl;
+//      cout << "Aborting." << endl;
+//      exit(-1);
+//    }
+
     int kqg = qg2index(0,g,Q,G);
     int oldDelta = delta[kqg];
     int newDelta = 1 - oldDelta;
-    
-    
+
+
     pot -= potentialDelta_MRF2_onedelta(Q,G,delta,neighbour,alpha,beta);
     pot -= potentialXg(g,Q,G,S,x,psi,nu,delta,Delta,sigma2,phi);
 
@@ -4685,13 +4687,13 @@ void updateDelta_HyperInverseWishart_MRF2_onedelta(unsigned int *seed,
       int kqg = qg2index(q,g,Q,G);
       delta[kqg] = oldDelta;
     }
-    
+
     if (ran.Unif01() <= exp(- pot)) {
       for (q = 0; q < Q; q++) {
 	int kqg = qg2index(q,g,Q,G);
 	delta[kqg] = newDelta;
       }
-      
+
       (*nAccept)++;
     }
   }
@@ -4700,7 +4702,7 @@ void updateDelta_HyperInverseWishart_MRF2_onedelta(unsigned int *seed,
 
   return;
 }
-    
+
 
 
 

@@ -188,7 +188,6 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 ##	}
 	tt <- rowttests(esetList, phenotypeLabel)
 
-
 	sam.wrapper <- function(eset, classlabel, method, returnQ, gene.names){
 		require(siggenes) || stop("Package siggenes not available")
 		column <- grep(classlabel, colnames(pData(eset)))

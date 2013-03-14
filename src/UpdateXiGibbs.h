@@ -62,14 +62,14 @@ inline int UpdateXiGibbs::update(Random &ran)
       //
       // set prior parameters
       //
-      
+
       double alpha = str->alphaXi;
       double beta = str->betaXi;
-      
+
       //
       // update parameters based on available observations
       //
-      
+
       int g;
       for (g = 0; g < str->G; g++)
 	{
@@ -78,45 +78,45 @@ inline int UpdateXiGibbs::update(Random &ran)
 	  else
 	    beta += 1.0;
 	}
-      
+
       //
       // Draw new value
       //
-      
+
       double newValue = ran.Beta(alpha,beta);
-      
+
       //
       // Check acceptance probability
       //
-      
+
       if (check != 0)
 	{
 	  double oldValue = str->xi[0];
 	  double pot = - model->potential(ran);
 	  pot -= ran.PotentialBeta(alpha,beta,newValue);
-	  
+
 	  int q;
 	  for (q = 0; q < str->Q; q++)
 	    str->xi[q] = newValue;
-	  
+
 	  pot += model->potential(ran);
 	  pot += ran.PotentialBeta(alpha,beta,oldValue);
-	  
+
 	  for (q = 0; q < str->Q; q++)
 	    str->xi[q] = oldValue;
-	  
-	  if (pot >= 1.0e-6 || pot <= -1.0e-6)
-	    cout << "WARNING: Possible implementation error in UpdateXiGibbs located. Check out!\n\n";
+
+//	  if (pot >= 1.0e-6 || pot <= -1.0e-6)
+//	    cout << "WARNING: Possible implementation error in UpdateXiGibbs located. Check out!\n\n";
 	}
-  
+
       //
       // Set new value
       //
-      
+
       int q;
       for (q = 0; q < str->Q; q++)
 	str->xi[q] = newValue;
-      
+
       addTry();
       addAccept();
       nAccept++;
@@ -129,14 +129,14 @@ inline int UpdateXiGibbs::update(Random &ran)
 	  //
 	  // set prior parameters
 	  //
-	  
+
 	  double alpha = str->alphaXi;
 	  double beta = str->betaXi;
-	  
+
 	  //
 	  // update parameters based on available observations
 	  //
-	  
+
 	  int g;
 	  for (g = 0; g < str->G; g++)
 	    {
@@ -145,40 +145,40 @@ inline int UpdateXiGibbs::update(Random &ran)
 	      else
 		beta += 1.0;
 	    }
-	  
+
 	  //
 	  // Draw new value
 	  //
-	  
+
 	  double newValue = ran.Beta(alpha,beta);
-	  
+
 	  //
 	  // Check acceptance probability
 	  //
-	  
+
 	  if (check != 0)
 	    {
 	      double oldValue = str->xi[q];
 	      double pot = - model->potential(ran);
 	      pot -= ran.PotentialBeta(alpha,beta,newValue);
-	      
+
 	      str->xi[q] = newValue;
-	  
+
 	      pot += model->potential(ran);
 	      pot += ran.PotentialBeta(alpha,beta,oldValue);
-	  
+
 	      str->xi[q] = oldValue;
-	  
-	      if (pot >= 1.0e-6 || pot <= -1.0e-6)
-		cout << "WARNING: Possible implementation error in UpdateXiGibbs located. Check out!\n\n";
+
+//	      if (pot >= 1.0e-6 || pot <= -1.0e-6)
+//		cout << "WARNING: Possible implementation error in UpdateXiGibbs located. Check out!\n\n";
 	    }
-	  
+
 	  //
 	  // Set new value
 	  //
-	  
+
 	  str->xi[q] = newValue;
-	  
+
 	  addTry();
 	  addAccept();
 	  nAccept++;

@@ -33,13 +33,13 @@ inline UpdateMultiplicativePositive::UpdateMultiplicativePositive(const vector<P
 								  const vector<double *> &variable,
 								  double epsilon) : Update(epsilon)
 {
-  if (model.size() != 1 && model.size() != variable.size())
-    {
-      cout << "ERROR: Internal error! Function \"";
-      cout << "UpdateMultiplicativePositive::UpdateMultiplicativePositive\" is called with illegal values.\n";
-      cout << "Aborting.\n";
-      exit(-1);
-    }
+//  if (model.size() != 1 && model.size() != variable.size())
+//    {
+//      cout << "ERROR: Internal error! Function \"";
+//      cout << "UpdateMultiplicativePositive::UpdateMultiplicativePositive\" is called with illegal values.\n";
+//      cout << "Aborting.\n";
+//      exit(-1);
+//    }
 
 
   this->model.resize(model.size());
@@ -107,23 +107,23 @@ inline UpdateMultiplicativePositive::UpdateMultiplicativePositive(const vector<P
 								  const vector<double *> &variable2,
 								  double epsilon) : Update(epsilon)
 {
-  if (model.size() != 1 && (model.size() != variable1.size() || model.size() != variable2.size()))
-    {
-      cout << "ERROR: Internal error! Function \"";
-      cout << "UpdateMultiplicativePositive::UpdateMultiplicativePositive\" is called with illegal values.\n";
-      cout << "Aborting.\n";
-      exit(-1);
-    }
-      
-  
+//  if (model.size() != 1 && (model.size() != variable1.size() || model.size() != variable2.size()))
+//    {
+//      cout << "ERROR: Internal error! Function \"";
+//      cout << "UpdateMultiplicativePositive::UpdateMultiplicativePositive\" is called with illegal values.\n";
+//      cout << "Aborting.\n";
+//      exit(-1);
+//    }
+
+
   this->model.resize(model.size());
   this->variable1.resize(variable1.size());
   this->variable2.resize(variable2.size());
-  
+
   int i;
   for (i = 0; i < model.size(); i++)
     this->model[i] = model[i]->copy();
-  
+
   for (i = 0; i < variable1.size(); i++)
     this->variable1[i] = variable1[i];
 
@@ -140,13 +140,13 @@ inline UpdateMultiplicativePositive::UpdateMultiplicativePositive(const Potentia
 								  const vector<double *> &variable2,
 								  double epsilon) : Update(epsilon)
 {
-  if (variable1.size() != variable2.size())
-    {
-      cout << "ERROR: Internal error! Function \"";
-      cout << "UpdateMultiplicativePositive::UpdateMultiplicativePositive\" is called with illegal values.\n";
-      cout << "Aborting.\n";
-      exit(-1);
-    }
+//  if (variable1.size() != variable2.size())
+//    {
+//      cout << "ERROR: Internal error! Function \"";
+//      cout << "UpdateMultiplicativePositive::UpdateMultiplicativePositive\" is called with illegal values.\n";
+//      cout << "Aborting.\n";
+//      exit(-1);
+//    }
 
 
   this->model.resize(1);
@@ -158,10 +158,10 @@ inline UpdateMultiplicativePositive::UpdateMultiplicativePositive(const Potentia
   int i;
   for (i = 0; i < variable1.size(); i++)
     this->variable1[i] = variable1[i];
-    
+
   for (i = 0; i < variable2.size(); i++)
     this->variable2[i] = variable2[i];
-    
+
   return;
 }
 
@@ -217,7 +217,7 @@ inline int UpdateMultiplicativePositive::update(Random &ran)
 
       double upper = 1.0 + epsilon;
       double lower = 1.0 / upper;
-      
+
       double valueOld1 = *(variable1[i]);
       double valueOld2 = 0.0;
       if (variable2[i] != NULL) valueOld2 = *(variable2[i]);
