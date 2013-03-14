@@ -913,14 +913,14 @@ rupdateL <- function(object,
 	}
 		res <- .C("updateL",
 			  seed=object[["seed"]],
-			    nTry=nTry,
-			    nAccept=nAccept,
-			    epsilon=epsilon,
-			    l=object[["l"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    sigma2=object[["sigma2"]],
-			    t=object[["t"]])
+			  nTry=nTry,
+			  nAccept=nAccept,
+			  epsilon=epsilon,
+			  l=object[["l"]],
+			  Q=object[["Q"]],
+			  G=object[["G"]],
+			  sigma2=object[["sigma2"]],
+			  t=object[["t"]])
 	slot(object, "seed") <- res[["seed"]]
 	slot(object, "l") <- res[["l"]]
 	return(object)
@@ -943,30 +943,31 @@ rupdateXi <- function(object,
 		return(res)
 	}
 	if(one.delta){
-		res <- .C("updateXi_onedelta",
+		res <- .C("updateXi_MA",
 			  seed=object[["seed"]],
-			    nAccept=nAccept,
-			    xi=object[["xi"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    t=object[["t"]],
-			    alphaXi=object[["alphaXi"]],
-			    betaXi=object[["betaXi"]])		##
+			  nAccept=nAccept,
+			  xi=object[["xi"]],
+			  Q=object[["Q"]],
+			  G=object[["G"]],
+			  delta=object[["delta"]],
+			  ##t=object[["t"]],
+			  alphaXi=object[["alphaXi"]],
+			  betaXi=object[["betaXi"]])		##
 
 	} else {
-		res <- .C("updateXi",
+		res <- .C("updateXi_MB",
 			  seed=object[["seed"]],
-			    nAccept=nAccept,
-			    xi=object[["xi"]],
-			    Q=object[["Q"]],
-			    G=object[["G"]],
-			    delta=object[["delta"]],
-			    t=object[["t"]],
-			    alphaXi=object[["alphaXi"]],
-			    betaXi=object[["betaXi"]])
+			  nAccept=nAccept,
+			  xi=object[["xi"]],
+			  Q=object[["Q"]],
+			  G=object[["G"]],
+			  delta=object[["delta"]],
+			  ##t=object[["t"]],
+			  alphaXi=object[["alphaXi"]],
+			  betaXi=object[["betaXi"]])
 	}
 	slot(object, "seed") <- res[["seed"]]
+	## why do we need to do this?
 	slot(object, "delta") <- res[["delta"]]
 	return(object)
 }
