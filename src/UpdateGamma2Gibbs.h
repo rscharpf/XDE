@@ -83,7 +83,7 @@ inline int UpdateGamma2Gibbs::update(Random &ran)
 
 	    varInv[q][p] = varInv[p][q];
 	  }
-      
+
       vector<vector<double> > var;
       inverse(varInv,var);
 
@@ -99,40 +99,40 @@ inline int UpdateGamma2Gibbs::update(Random &ran)
   //
   // Draw new value
   //
-  
+
   double newValue = ran.InverseGamma(s,lambda);
 
   //
   // Check acceptance probability
   //
-  
+
   if (check != 0)
     {
       double oldValue = str->gamma2;
       double pot = - model->potential(ran);
       pot -= ran.PotentialInverseGamma(s,lambda,newValue);
-      
+
       str->gamma2 = newValue;
 
       pot += model->potential(ran);
       pot += ran.PotentialInverseGamma(s,lambda,oldValue);
 
       str->gamma2 = oldValue;
-      
-      if (pot >= 1.0e-6 || pot <= -1.0e-6)
-	cout << "WARNING: Possible implementation error in UpdateGamma2Gibbs located. Check out!\n\n";
+
+//      if (pot >= 1.0e-6 || pot <= -1.0e-6)
+//	cout << "WARNING: Possible implementation error in UpdateGamma2Gibbs located. Check out!\n\n";
     }
-  
+
   //
   // Set new value
   //
-  
+
   str->gamma2 = newValue;
-  
+
   addTry();
   addAccept();
   nAccept++;
-  
+
   return nAccept;
 }
 

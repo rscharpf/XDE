@@ -57,8 +57,8 @@ class Random
 					      const vector<vector<vector<double> > > &Omega,
 					      const vector<int> &oldClique,
 					      const vector<vector<int> > &oldComponents);
-  
-  
+
+
 
   double PotentialGaussian(double variance,double mean,double x);
   double PotentialPoisson(double lambda,int x);
@@ -105,7 +105,7 @@ class Random
 				      const vector<vector<double> > &U);
 
   vector<int> Permutation(int n);
-  
+
   double lnGamma(double x);
 
  private:

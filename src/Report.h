@@ -7,7 +7,7 @@
 class Report
 {
  public:
-  
+
   Report(const string &filename);
   Report(void) {file = 0; return;};
   virtual ~Report(void);
@@ -24,13 +24,13 @@ class Report
 inline Report::Report(const string &filename)
 {
   file = 1;
-  
+
   out.open(filename.c_str());
-  if (out.fail())
-    {
-      cout << "ERROR: Unable to open file " << filename << ". Aborting.\n\n";
-      exit(-1);
-    }
+//  if (out.fail())
+//    {
+//      cout << "ERROR: Unable to open file " << filename << ". Aborting.\n\n";
+//      exit(-1);
+//    }
 
   return;
 }
