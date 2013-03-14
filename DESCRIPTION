@@ -8,7 +8,7 @@ Depends: R (>= 2.10.0), Biobase (>= 2.5.5), methods, graphics
 Imports: Biobase, BiocGenerics, genefilter, graphics,
          grDevices, gtools, MergeMaid,
          methods, stats, utils, mvtnorm
-Suggests: siggenes, genefilter, MASS, RColorBrewer, GeneMeta
+Suggests: siggenes, genefilter, MASS, RColorBrewer, GeneMeta, RUnit
 Maintainer: Robert Scharpf <rscharpf@jhsph.edu>
 Enhances: coda
 License: LGPL-2

@@ -14,9 +14,12 @@
 #include "Update_v2.h"
 
 extern "C" {
-
   // int main(void) {
-  void initializeParams(int *nIt, int *seedR, int *G, int *Q, int *S,
+  void initializeParams(int *nIt,
+			int *seedR,
+			int *G,
+			int *Q,
+			int *S,
 			int *psi,
 			double *alphaA,
 			double *betaA,
@@ -444,8 +447,6 @@ extern "C" {
 	nAccept = 0;
 	updateXi(&seed,&nAccept,xi,*Q,*G,delta,*alphaXi,*betaXi);
       }
-
-
 
       nTry = *Q;
       nAccept = 0;
