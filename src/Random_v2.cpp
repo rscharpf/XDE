@@ -1,5 +1,6 @@
 #include <iostream>
-#include <limits.h>
+//#include <limits.h>
+#include <climits>
 #include <stdio.h>
 
 #include "Matrix_v2.h"
@@ -13,12 +14,12 @@ Random::Random(unsigned int seed)
   temp += 1;
   temp /= FACTOR4;
 
-  if (temp < FACTOR1*FACTOR2*FACTOR3)
-    {
-      cout << "Error: Implemented random number generator requires UINT_MAX to be at least " << 
-	FACTOR1 << "*" << FACTOR2 << "*" << FACTOR3 << "*" << FACTOR4 << "*2-1. Your machine has UNIT_MAX=" << UINT_MAX << ". Aborting!\n";
-      exit(-1);
-    }
+//  if (temp < FACTOR1*FACTOR2*FACTOR3)
+//    {
+//      cout << "Error: Implemented random number generator requires UINT_MAX to be at least " <<
+//	FACTOR1 << "*" << FACTOR2 << "*" << FACTOR3 << "*" << FACTOR4 << "*2-1. Your machine has UNIT_MAX=" << UINT_MAX << ". Aborting!\n";
+//      exit(-1);
+//    }
 
   modulus = FACTOR1;
   modulus *= FACTOR2;
@@ -26,7 +27,7 @@ Random::Random(unsigned int seed)
   modulus *= FACTOR4;
 
   seedValue = seed;
-  
+
   haveNorm01 = 0;
 
   return;
@@ -56,7 +57,7 @@ double Random::Unif01(void)
 {
   seedValue = MULTIPLIER * seedValue + SHIFT;
   if (seedValue == 0) seedValue = MULTIPLIER * seedValue + SHIFT;
-      
+
   if (seedValue > modulus*2-1)
     {
       double x = ((double) (seedValue - 1)) / ((double) modulus);
@@ -66,7 +67,7 @@ double Random::Unif01(void)
     }
   double r = ((double) seedValue) / ((double) modulus);
   r /= 2.0;
-  
+
   return r;
 }
 
@@ -83,16 +84,16 @@ double Random::Norm01(void)
     {
       double u1,u2;
       double x,y;
-      
+
       u1 = Unif01();
       u2 = Unif01();
-      
+
       x = sqrt(-2.0 * log(u1)) * cos(2.0 * PI * u2);
       y = sqrt(-2.0 * log(u1)) * sin(2.0 * PI * u2);
-      
+
       haveNorm01 = 1;
       norm = x;
-      
+
       return y;
     }
 }
@@ -140,7 +141,7 @@ int Random::Binomial(int n,double p)
   // Count the number of successes.
   // Note: this is very inefficient if n is large
   //
-  
+
   int v = 0;
   int k;
   for (k = 0; k < n; k++)
@@ -190,7 +191,7 @@ double Random::Gamma(double p,double lambda)
 	{
 	  double u0 = Unif01();
 	  double u1 = Unif01();
-	  if (u0 > exp(1.0)/(alpha + exp(1.0))) 
+	  if (u0 > exp(1.0)/(alpha + exp(1.0)))
 	    {
 	      x = - log((alpha + exp(1.0))*(1-u0)/(alpha*exp(1.0)));
 	      if (log(u1) > (alpha - 1.0)*log(x))
@@ -250,7 +251,7 @@ double Random::Gamma(double p,double lambda)
 
   return x;
 
-  /*
+    /*
   double prob;
   double u,am,e,s,v1,v2,xx,yy;
   double fp,temp;
@@ -277,13 +278,13 @@ double Random::Gamma(double p,double lambda)
 	}
       while (Unif01() > prob || x == 0.0);
     }
-  
+
   if (ip > 0 && ip < 6)
     {
       xx = 1.0;
       for (j = 1; j <= ip; j++) xx *= Unif01();
       xx = - log(xx);
-      
+
       x += xx;
     }
   else if (ip >= 6)
@@ -307,10 +308,10 @@ double Random::Gamma(double p,double lambda)
 	  e = (1.0 + yy * yy) * exp( am * log(xx / am) - s * yy);
 	}
       while (Unif01() > e);
-      
+
       x += xx;
     }
-  
+
   x /= lambda;
 
   return x;
@@ -354,9 +355,9 @@ double Random::Beta(double alpha,double beta)
   double lambda = 1.0;
   double x1 = Gamma(alpha,lambda);
   double x2 = Gamma(beta,lambda);
-  
+
   double b = x1 / (x1 + x2);
-  
+
   return b;
 }
 
@@ -370,10 +371,10 @@ vector<double> Random::MultiGaussian(const vector<vector<double> > &Sigma,
 
   int err = 0;
   Cholesky chol(Sigma,err);
-  if (err != 0) {
-    cout << "Error in Cholesky!!\n";
-    exit(-1);
-  }
+//  if (err != 0) {
+//    cout << "Error in Cholesky!!\n";
+//    exit(-1);
+//  }
 
   int i;
   vector<double> vec(n);
@@ -382,12 +383,12 @@ vector<double> Random::MultiGaussian(const vector<vector<double> > &Sigma,
 
   vector<double> z;
   matrixMult(chol.q_L(),vec,z);
-  
+
   vector<double> x(n);
   for (i = 0; i < n; i++)
     x[i] = z[i] + mean[i];
 
-  return x;  
+  return x;
 }
 
 
@@ -397,10 +398,10 @@ vector<vector<double> > Random::WishartAlternativeParam(double nu,const vector<v
 {
   int err = 0;
   Cholesky chol(V,err);
-  if (err != 0) {
-    cout << "Error in Cholesky!!\n";
-    exit(-1);
-  }
+//  if (err != 0) {
+//    cout << "Error in Cholesky!!\n";
+//    exit(-1);
+//  }
 
 
   int p = V.size();
@@ -413,20 +414,20 @@ vector<vector<double> > Random::WishartAlternativeParam(double nu,const vector<v
       T[i][j] = 0.0;
   for (i = 0; i < p; i++)
     T[i][i] = sqrt(ChiSquared(nu-i+1.0));
-      
+
   for (i = 0; i < p; i++)
     for (j = 0; j < i; j++)
       T[i][j] = Norm01();
-  
+
   vector<vector<double> > LT;
   matrixMult(chol.q_L(),T,LT);
-  
+
   vector<vector<double> > SS;
   outerProduct(LT,SS);
 
   return SS;
 }
-    
+
 
 
 
@@ -463,17 +464,17 @@ vector<vector<double> >Random::StandardWishartAlternativeParam(int dim,double nu
       T[i][j] = 0.0;
   for (i = 0; i < p; i++)
     T[i][i] = sqrt(ChiSquared(nu-i+1.0));
-      
+
   for (i = 0; i < p; i++)
     for (j = 0; j < i; j++)
       T[i][j] = Norm01();
-  
+
   vector<vector<double> > AA;
   outerProduct(T,AA);
 
   return AA;
 }
-    
+
 
 
 
@@ -525,11 +526,11 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 							     const vector<vector<int> > &oldComponents) {
   /*
   int kk;
-  for (kk = 0; kk < oldClique.size(); kk++) 
+  for (kk = 0; kk < oldClique.size(); kk++)
     cout << "D[" << kk << "].size() = " << D[kk].size() << endl;
   cout << endl;
 
-  for (kk = 0; kk < oldClique.size(); kk++) 
+  for (kk = 0; kk < oldClique.size(); kk++)
     cout << "oldClique[" << kk << "]=" << oldClique[kk] << endl;
   cout << endl;
 
@@ -556,7 +557,7 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
   for (i = 0; i < temp.size(); i++)
     for (j = 0; j < temp[i].size(); j++)
       Sigma[0][i][j] = temp[i][j];
-  
+
   /*
   cout << "Sigma[0]: " << endl;
   for (i = 0; i < Sigma[0].size(); i++) {
@@ -571,7 +572,7 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 
     if (oldComponents[k].size() > 0) {
       // generate DRR, DSS, DRS and DSR from D[k]
-      
+
       vector<vector<double> > DRR;
       vector<vector<double> > DSS;
       vector<vector<double> > DRS;
@@ -585,23 +586,23 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
       for (i = 0; i < DSS.size(); i++) DSS[i].resize(DSS.size());
       for (i = 0; i < DRS.size(); i++) DRS[i].resize(DSS.size());
       for (i = 0; i < DSR.size(); i++) DSR[i].resize(DRR.size());
-      
+
       for (i = 0; i < DSS.size(); i++)
 	for (j = 0; j < DSS[i].size(); j++)
 	  DSS[i][j] = D[k][i][j];
-      
+
       for (i = 0; i < DRR.size(); i++)
 	for (j = 0; j < DRR[i].size(); j++)
 	  DRR[i][j] = D[k][i + DSS.size()][j + DSS.size()];
-      
+
       for (i = 0; i < DSR.size(); i++)
 	for (j = 0; j < DSR[i].size(); j++) {
 	  DSR[i][j] = D[k][i][j + DSS.size()];
 	  DRS[j][i] = D[k][j + DSS.size()][i];
 	}
-      
+
       // pick out SigmaSS, which is already simulated
-      
+
       vector<vector<double> > SigmaSS;
       SigmaSS.resize(oldComponents[k].size());
       for (i = 0; i < SigmaSS.size(); i++) {
@@ -609,14 +610,14 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 	for (j = 0; j < SigmaSS[i].size(); j++)
 	  SigmaSS[i][j] = Sigma[oldClique[k]][oldComponents[k][i]][oldComponents[k][j]];
       }
-      
+
       // simulate SigmaRGivenS
-      
+
       vector<vector<double> > DSSInverse;
       inverse(DSS,DSSInverse);
       vector<vector<double> > temp1;
       matrixMult(DRS,DSSInverse,temp1);
-      
+
       vector<vector<double> > temp2;
       matrixMult(temp1,DSR,temp2);
       vector<vector<double> > DRGivenS;
@@ -626,11 +627,11 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 	for (j = 0; j < DRR[i].size(); j++)
 	  DRGivenS[i][j] = DRR[i][j] - temp2[i][j];
       }
-      
+
       vector<vector<double> > SigmaRGivenS(InverseWishart(df + DRR.size(),DRGivenS));
-      
+
       // simulate U matrix
-      
+
       vector<vector<double> > mean;
       matrixMult(DRS,DSSInverse,mean);
       /*
@@ -645,13 +646,13 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 
       int err = 0;
       Cholesky cholRGivenS(SigmaRGivenS,err);
-      if (err != 0) {
-	cout << "Error in Cholesky!!\n";
-	exit(-1);
-      }
-      
+//      if (err != 0) {
+//	cout << "Error in Cholesky!!\n";
+//	exit(-1);
+//      }
+
       vector<vector<double> > LRGivenS(cholRGivenS.q_L());
-      
+
       /*
       cout << "LRGivenS: " << endl;
       for (i = 0; i < LRGivenS.size(); i++) {
@@ -661,13 +662,13 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
       }
       cout << endl;
       */
-      
+
       err = 0;
       Cholesky cholDSSInverse(DSSInverse,err);
-      if (err != 0) {
-	cout << "Error in Cholesky!!\n";
-	exit(-1);
-      }
+//      if (err != 0) {
+//	cout << "Error in Cholesky!!\n";
+//	exit(-1);
+//      }
       vector<vector<double> > LDSSInverse(cholDSSInverse.q_L());
       vector<vector<double> > LDSSInverseT;
       LDSSInverseT.resize(LDSSInverse[0].size());
@@ -676,7 +677,7 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 	for (j = 0; j < LDSSInverseT[i].size(); j++)
 	  LDSSInverseT[i][j] = LDSSInverse[j][i];
       }
-      
+
       /*
       cout << "LDSSInverseT: " << endl;
       for (i = 0; i < LDSSInverseT.size(); i++) {
@@ -694,17 +695,17 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 	for (j = 0; j < DSS.size(); j++)
 	  U[i][j] = Norm01();
       }
-      
+
       vector<vector<double> > temp3(U);
       matrixMult(LRGivenS,temp3,U);
-      
+
       vector<vector<double> > temp4(U);
       matrixMult(temp4,LDSSInverseT,U);
 
       for (i = 0; i < mean.size(); i++)
 	for (j = 0; j < mean[i].size(); j++)
 	  U[i][j] += mean[i][j];
-      
+
       /*
       cout << "U: " << endl;
       for (i = 0; i < U.size(); i++) {
@@ -716,10 +717,10 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
       */
 
       // compute the two remaining parts of Sigma
-      
+
       vector<vector<double> > SigmaRS;
       matrixMult(U,SigmaSS,SigmaRS);
-      
+
       vector<vector<double> > SigmaSR;
       SigmaSR.resize(SigmaRS[0].size());
       for (i = 0; i < SigmaSR.size(); i++) {
@@ -727,7 +728,7 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 	for (j = 0; j < SigmaSR[i].size(); j++)
 	  SigmaSR[i][j] = SigmaRS[j][i];
       }
-      
+
       vector<vector<double> > SigmaRR(SigmaRGivenS);
       vector<vector<double> > SigmaSSInverse;
       inverse(SigmaSS,SigmaSSInverse);
@@ -735,13 +736,13 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
       matrixMult(SigmaRS,SigmaSSInverse,temp5);
       vector<vector<double> > temp6;
       matrixMult(temp5,SigmaSR,temp6);
-      
+
       for (i = 0; i < SigmaRGivenS.size(); i++)
 	for (j = 0; j < SigmaRGivenS[i].size(); j++)
 	  SigmaRR[i][j] += temp6[i][j];
-      
+
       // put the four parts into one matrix
-      
+
       for (i = 0; i < SigmaSS.size(); i++)
 	for (j = 0; j < SigmaSS[i].size(); j++)
 	  Sigma[k][i][j] = SigmaSS[i][j];
@@ -752,7 +753,7 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 	for (j = 0; j < SigmaRR.size(); j++) {
 	  Sigma[k][i][j + SigmaSS.size()] = SigmaSR[i][j];
 	  Sigma[k][j + SigmaSS.size()][i] = SigmaRS[j][i];
-	}    
+	}
     }
     else {
       vector<vector<double> > temp7(InverseWishart(df,D[k]));
@@ -761,7 +762,7 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 	  Sigma[k][i][j] = temp7[i][j];
     }
 
-    /*    
+    /*
     cout << "Sigma[" << k << "]: " << endl;
     for (i = 0; i < Sigma[k].size(); i++) {
       for (j = 0; j < Sigma[k][i].size(); j++)
@@ -774,7 +775,7 @@ vector<vector<vector<double> > > Random::HyperInverseWishart(double df,const vec
 
   return Sigma;
 }
-    
+
 
 
 vector<double> Random::GaussianGraphicalModel(const vector<double> &mean,
@@ -790,15 +791,15 @@ vector<double> Random::GaussianGraphicalModel(const vector<double> &mean,
     UBlocks[k].resize(Cov[k].size());
 
   vector<double> U(mean);
-  
+
   // generate realisation from the first component
 
   int err = 0;
   Cholesky chol(Cov[0],err);
-  if (err != 0) {
-    cout << "Error in Cholesky!!\n";
-    exit(-1);
-  }
+//  if (err != 0) {
+//    cout << "Error in Cholesky!!\n";
+//    exit(-1);
+//  }
 
   int first = 0;
   vector<double> vec(Cov[0].size(),0.0);
@@ -818,7 +819,7 @@ vector<double> Random::GaussianGraphicalModel(const vector<double> &mean,
   // generate realisations from the remaining components
 
   for (k = 1; k < Cov.size(); k++) {
-    
+
     if (oldComponents[k].size() > 0) {
       // establish covariance submatrices
 
@@ -862,20 +863,20 @@ vector<double> Random::GaussianGraphicalModel(const vector<double> &mean,
       for (i = 0; i < CovRGivenS.size(); i++)
 	for (j = 0; j < CovRGivenS[i].size(); j++)
 	  CovRGivenS[i][j] -= temp2[i][j];
-      
+
       int err = 0;
       Cholesky chol(CovRGivenS,err);
-      if (err != 0) {
-	cout << "Error in Cholesky!!\n";
-	exit(-1);
-      }
+//      if (err != 0) {
+//	cout << "Error in Cholesky!!\n";
+//	exit(-1);
+//      }
 
       // generate realisation
 
       vector<double> vec(CovRGivenS.size(),0.0);
       for (i = 0; i < vec.size(); i++)
 	vec[i] = Norm01();
-      
+
       vector<double> z;
       matrixMult(chol.q_L(),vec,z);
 
@@ -890,9 +891,9 @@ vector<double> Random::GaussianGraphicalModel(const vector<double> &mean,
 
       // insert generated values in data structure
 
-      for (i = 0; i < z.size(); i++) 
+      for (i = 0; i < z.size(); i++)
 	U[i + first] = z[i];
-      
+
       first += z.size();
 
       for (i = 0; i < obs.size(); i++)
@@ -903,11 +904,11 @@ vector<double> Random::GaussianGraphicalModel(const vector<double> &mean,
     else {
       int err = 0;
       Cholesky chol(Cov[k],err);
-      if (err != 0) {
-	cout << "Error in Cholesky!!\n";
-	exit(-1);
-      }
-      
+//      if (err != 0) {
+//	cout << "Error in Cholesky!!\n";
+//	exit(-1);
+//      }
+
       vector<double> vec(Cov[k].size(),0.0);
       for (i = 0; i < vec.size(); i++)
 	vec[i] = Norm01();
@@ -956,17 +957,17 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
 
   int err = 0;
   Cholesky chol(Omega[0],err);
-  if (err != 0) {
-    cout << "Error in Cholesky!!\n";
-    exit(-1);
-  }
+//  if (err != 0) {
+//    cout << "Error in Cholesky!!\n";
+//    exit(-1);
+//  }
 
   int first = 0;
   for (j = 0; j < U[0].size(); j++) {
     vector<double> vec(Omega[0].size(),0.0);
     for (i = 0; i < vec.size(); i++)
       vec[i] = Norm01();
-    
+
     vector<double> z;
     matrixMult(chol.q_L(),vec,z);
     for (i = 0; i < vec.size(); i++)
@@ -989,12 +990,12 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
   */
 
   // generate realisations from the remaining components
-  
+
   for (k = 1; k < Omega.size(); k++) {
-    
+
     if (oldComponents[k].size() > 0) {
       // establish covariance submatrices
-      
+
       vector<vector<double> > OmegaSS;
       vector<vector<double> > OmegaRR;
       vector<vector<double> > OmegaSR;
@@ -1007,23 +1008,23 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
       for (i = 0; i < OmegaRR.size(); i++) OmegaRR[i].resize(OmegaRR.size());
       for (i = 0; i < OmegaSR.size(); i++) OmegaSR[i].resize(OmegaRS.size());
       for (i = 0; i < OmegaRS.size(); i++) OmegaRS[i].resize(OmegaSR.size());
-      
+
       for (i = 0; i < OmegaSS.size(); i++)
 	for (j = 0; j < OmegaSS[i].size(); j++)
 	  OmegaSS[i][j] = Omega[k][i][j];
-      
+
       for (i = 0; i < OmegaRR.size(); i++)
 	for (j = 0; j < OmegaRR[i].size(); j++)
 	  OmegaRR[i][j] = Omega[k][i + OmegaSS.size()][j + OmegaSS.size()];
-      
+
       for (i = 0; i < OmegaSR.size(); i++)
 	for (j = 0; j < OmegaSR[i].size(); j++) {
 	  OmegaSR[i][j] = Omega[k][i][j + OmegaSS.size()];
 	  OmegaRS[j][i] = Omega[k][j + OmegaSS.size()][i];
 	}
-      
+
       // establish conditional covariance matrix, and corresponding cholesky decomposition
-      
+
       vector<vector<double> > OmegaSSInverse;
       inverse(OmegaSS,OmegaSSInverse);
       vector<vector<double> > temp1;
@@ -1034,40 +1035,40 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
       for (i = 0; i < OmegaRGivenS.size(); i++)
 	for (j = 0; j < OmegaRGivenS[i].size(); j++)
 	  OmegaRGivenS[i][j] -= temp2[i][j];
-      
+
       int err = 0;
       Cholesky chol(OmegaRGivenS,err);
-      if (err != 0) {
-	cout << "Error in Cholesky!!\n";
-	exit(-1);
-      }
-      
+//      if (err != 0) {
+//	cout << "Error in Cholesky!!\n";
+//	exit(-1);
+//      }
+
       // generate realisations
-      
+
       for (j = 0; j < U[0].size(); j++) {
 	vector<double> vec(OmegaRR.size(),0.0);
 	for (i = 0; i < vec.size(); i++)
 	  vec[i] = Norm01();
-	
+
 	vector<double> z;
 	matrixMult(chol.q_L(),vec,z);
-	
+
 	vector<double> obs(OmegaSS.size(),0.0);
 	for (i = 0; i < obs.size(); i++)
 	  obs[i] = UBlocks[oldClique[k]][oldComponents[k][i]][j];
-	
+
 	vector<double> mean;
 	matrixMult(temp1,obs,mean);
 	for (i = 0; i < mean.size(); i++)
 	  z[i] += mean[i];
-	
+
 	// insert generated values in data structure
-	
+
 	for (i = 0; i < z.size(); i++)
 	  U[i + first][j] = z[i];
-	
+
 	if (j == U[0].size() - 1) first += z.size();
-	
+
 	for (i = 0; i < obs.size(); i++)
 	  UBlocks[k][i][j] = obs[i];
 	for (i = 0; i < z.size(); i++)
@@ -1077,10 +1078,10 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
     else {
       int err = 0;
       Cholesky chol(Omega[k],err);
-      if (err != 0) {
-	cout << "Error in Cholesky!!\n";
-	exit(-1);
-      }
+//      if (err != 0) {
+//	cout << "Error in Cholesky!!\n";
+//	exit(-1);
+//      }
 
       for (j = 0; j < U[k].size(); j++) {
 	vector<double> vec(Omega[k].size(),0.0);
@@ -1122,10 +1123,10 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
 
   err = 0;
   Cholesky cholR(R,err);
-  if (err != 0) {
-    cout << "Error in Cholesky!!\n";
-    exit(-1);
-  }
+//  if (err != 0) {
+//    cout << "Error in Cholesky!!\n";
+//    exit(-1);
+//  }
   vector<vector<double> > L(cholR.q_L());
   vector<vector<double> > LT;
   LT.resize(L[0].size());
@@ -1134,15 +1135,15 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
     for (j = 0; j < LT[i].size(); j++)
       LT[i][j] = L[j][i];
   }
-  
+
   vector<vector<double> > temp2(U);
   matrixMult(temp2,LT,U);
-  
-  
+
+
   for (i = 0; i < U.size(); i++)
     for (j = 0; j < U[i].size(); j++)
       U[i][j] += mean[i][j];
-  
+
   /*
   cout << "U:" << endl;
   for (i = 0; i < U.size(); i++) {
@@ -1164,7 +1165,7 @@ vector<vector<double> > Random::MatrixVariateNormal(const vector<vector<double> 
     cout << endl;
   }
   */
-  
+
   return U;
 }
 
@@ -1179,32 +1180,32 @@ double Random::PotentialHyperInverseWishart(double df,const vector<vector<vector
   double pot = 0.0;
 
   int k;
-  for (k = 0; k < D.size(); k++) 
+  for (k = 0; k < D.size(); k++)
     pot += PotentialInverseWishart(df,D[k],Sigma[k]);
-  
+
   // subtract potential for separators
 
-  for (k = 1; k < D.size(); k++) 
+  for (k = 1; k < D.size(); k++)
     if (oldComponents[k].size() > 0) {
       vector<vector<double> > DSS;
       vector<vector<double> > SigmaSS;
-      
+
       DSS.resize(oldComponents[k].size());
       SigmaSS.resize(oldComponents[k].size());
       int i,j;
       for (i = 0; i < DSS.size(); i++) DSS[i].resize(DSS.size());
       for (i = 0; i < SigmaSS.size(); i++) SigmaSS[i].resize(SigmaSS.size());
-      
+
       for (i = 0; i < DSS.size(); i++)
 	for (j = 0; j < DSS[i].size(); j++) {
 	  DSS[i][j] = D[oldClique[k]][oldComponents[k][i]][oldComponents[k][j]];
 	  SigmaSS[i][j] = Sigma[oldClique[k]][oldComponents[k][i]][oldComponents[k][j]];
 	}
-      
+
       pot -= PotentialInverseWishart(df,DSS,SigmaSS);
     }
-  
-  
+
+
 
   return pot;
 }
@@ -1228,7 +1229,7 @@ double Random::PotentialGaussianGraphicalModel(const vector<double> &mean,
 
   vector<vector<double> > UBlocks;
   UBlocks.resize(Cov.size());
-  for (k = 0; k < UBlocks.size(); k++) 
+  for (k = 0; k < UBlocks.size(); k++)
     UBlocks[k].resize(Cov[k].size());
 
   int first = 0;
@@ -1239,14 +1240,14 @@ double Random::PotentialGaussianGraphicalModel(const vector<double> &mean,
   for (k = 1; k < Cov.size(); k++) {
     for (i = 0; i < oldComponents[k].size(); i++)
       UBlocks[k][i] = UBlocks[oldClique[k]][oldComponents[k][i]];
-    
+
     for (i = 0; i < Cov[k].size() - oldComponents[k].size(); i++)
       UBlocks[k][i + oldComponents[k].size()] = UU[first + i];
     first += Cov[k].size() - oldComponents[k].size();
   }
 
   // add potential for each clique
-  
+
   for (k = 0; k < Cov.size(); k++) {
     vector<double> zero(UBlocks[k].size(),0.0);
     pot += PotentialMultiGaussian(Cov[k],zero,UBlocks[k]);
@@ -1269,7 +1270,7 @@ double Random::PotentialGaussianGraphicalModel(const vector<double> &mean,
 
       for (i = 0; i < USub.size(); i++)
 	USub[i] = UBlocks[k][i];
-      
+
       vector<double> zero(USub.size(),0.0);
       pot -= PotentialMultiGaussian(CovSub,zero,USub);
     }
@@ -1281,12 +1282,12 @@ double Random::PotentialGaussianGraphicalModel(const vector<double> &mean,
 
 double Random::PotentialMatrixVariateNormal(const vector<vector<double> > &Omega,
 					    const vector<vector<double> > &R,
-					    const vector<vector<double> > &X) {  
+					    const vector<vector<double> > &X) {
   double pot = 0.0;
 
   vector<vector<double> > OmegaInverse;
   double lndetOmega = inverseLnDeterminant(Omega,OmegaInverse);
-  
+
   vector<vector<double> > RInverse;
   double lndetR = inverseLnDeterminant(R,RInverse);
 
@@ -1312,7 +1313,7 @@ double Random::PotentialMatrixVariateNormal(const vector<vector<double> > &Omega
   pot += 0.5 * ((double) (Omega.size() * R.size())) * log(2.0 * 3.14159265);
   pot += 0.5 * ((double) R.size()) * lndetOmega;
   pot += 0.5 * ((double) Omega.size()) * lndetR;
-  
+
   return pot;
 }
 
@@ -1355,13 +1356,13 @@ double Random::PotentialMatrixVariateNormal(const vector<vector<double> > &mean,
     for (i = 0; i < oldComponents[k].size(); i++)
       for (j = 0; j < UU[first].size(); j++)
 	UBlocks[k][i][j] = UBlocks[oldClique[k]][oldComponents[k][i]][j];
-    
+
     for (i = 0; i < Omega[k].size() - oldComponents[k].size(); i++)
       for (j = 0; j < UU[first].size(); j++)
 	UBlocks[k][i + oldComponents[k].size()][j] = UU[first + i][j];
     first += Omega[k].size() - oldComponents[k].size();
   }
-  
+
   /*
   for (k = 0; k < UBlocks.size(); k++) {
     cout << "UBlocks[" << k << "]:" << endl;
@@ -1373,15 +1374,15 @@ double Random::PotentialMatrixVariateNormal(const vector<vector<double> > &mean,
     cout << endl;
   }
   */
-  
+
   // add potential for each clique
-  
+
   for (k = 0; k < Omega.size(); k++)
     pot += PotentialMatrixVariateNormal(Omega[k],R,UBlocks[k]);
-  
+
   // subtract potential for each separator
 
-  for (k = 1; k < Omega.size(); k++) 
+  for (k = 1; k < Omega.size(); k++)
     if (oldComponents[k].size() > 0) {
       vector<vector<double> > OmegaSub;
       vector<vector<double> > USub;
@@ -1397,14 +1398,14 @@ double Random::PotentialMatrixVariateNormal(const vector<vector<double> > &mean,
 	for (j = 0; j < USub[i].size(); j++)
 	  USub[i][j] = UBlocks[k][i][j];
       }
-      
+
       pot -= PotentialMatrixVariateNormal(OmegaSub,R,USub);
     }
-  
+
 
   return pot;
 }
-			 
+
 
 
 
@@ -1428,10 +1429,10 @@ double Random::PotentialGaussian(double variance,double mean,double x)
 double Random::PotentialPoisson(double lambda,int x)
 {
   double pot;
-  
+
   pot = - x * log(lambda);
   pot += lambda;
-  
+
   int k;
   for (k = 2; k <= x; k++)
     pot += log((double) k);
@@ -1465,7 +1466,7 @@ double Random::PotentialGamma(double p,double lambda,double x)
   double pot = - p * log(lambda) + lnGamma(p);
   pot += - (p - 1.0) * log(x);
   pot += lambda * x;
-  
+
   return pot;
 }
 
@@ -1486,7 +1487,7 @@ double Random::PotentialInverseGamma(double p,double lambda,double x)
 double Random::PotentialBeta(double alpha,double beta,double x)
 {
   double pot = 0.0;
-  
+
   pot -= lnGamma(alpha + beta);
   pot += lnGamma(alpha);
   pot += lnGamma(beta);
@@ -1721,7 +1722,7 @@ double Random::PotentialStandardWishartAlternativeParam(double nu,const vector<v
 double Random::PotentialInverseWishartAlternativeParam(double nu,const vector<vector<double> > &V,const vector<vector<double> > &x)
 {
   int m = x.size();
-  
+
   vector<vector<double> > temp1;
   vector<vector<double> > xInverse;
   double detV = inverse(V,temp1);
@@ -1791,7 +1792,7 @@ double Random::PotentialStandardInverseWishartAlternativeParam(double nu,const v
 double Random::PotentialCorrelationStandardInverseWishartAlternativeParam(double nu,const vector<vector<double> > &x)
 {
   int m = x.size();
-  
+
   vector<vector<double> > xInverse;
   double detX = inverse(x,xInverse);
 
@@ -1840,19 +1841,19 @@ vector<int> Random::Permutation(int n)
 double Random::lnGamma(double xx)
 {
   //
-  // return ln(Gamma(xx)). 
+  // return ln(Gamma(xx)).
   //
 
   double x,y,tt,sum;
   static double coeff[6] = {76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,
 			  -0.5395239384953e-5};
   int j;
-  
+
   y = xx;
   tt = xx + 5.5 - (xx + 0.5) * log(xx + 5.5);
   sum = 1.000000000190015;
   for (j = 0; j <= 5; j++) sum += coeff[j]/++y;
-  
+
   double answer = - tt + log(2.5066282746310005 * sum / xx);
 
   return answer;
@@ -1868,7 +1869,7 @@ vector<vector<double> > Random::Wishart(double nu,const vector<vector<double> > 
 
 vector<vector<double> > Random::StandardWishart(int dim,double nu) {
   double nuAlt = nu  + ((double) dim) - 1.0;
-  
+
   return StandardWishartAlternativeParam(dim,nuAlt);
 }
 
@@ -1880,46 +1881,46 @@ vector<vector<double> > Random::InverseWishart(double nu,const vector<vector<dou
 
 vector<vector<double> > Random::StandardInverseWishart(int dim,double nu) {
   double nuAlt = nu  + ((double) dim) - 1.0;
-  
+
   return StandardInverseWishartAlternativeParam(dim,nuAlt);
 }
 
 vector<vector<double> > Random::CorrelationStandardInverseWishart(int dim,double nu) {
   double nuAlt = nu  + ((double) dim) - 1.0;
-  
+
   return CorrelationStandardInverseWishartAlternativeParam(dim,nuAlt);
 }
 
 
 double Random::PotentialWishart(double nu,const vector<vector<double> > &V,const vector<vector<double> > &x) {
   double nuAlt = nu  + ((double) V.size()) - 1.0;
-  
+
   return PotentialWishartAlternativeParam(nuAlt,V,x);
 }
 
 double Random::PotentialStandardWishart(double nu,const vector<vector<double> > &x) {
   double nuAlt = nu  + ((double) x.size()) - 1.0;
-  
+
   return PotentialStandardWishartAlternativeParam(nuAlt,x);
 }
 
 double Random::PotentialInverseWishart(double nu,const vector<vector<double> > &V,const vector<vector<double> > &x) {
   double nuAlt = nu  + ((double) V.size()) - 1.0;
-  
+
   return PotentialInverseWishartAlternativeParam(nuAlt,V,x);
 }
 
 double Random::PotentialStandardInverseWishart(double nu,const vector<vector<double> > &x) {
   double nuAlt = nu  + ((double) x.size()) - 1.0;
-  
+
   return PotentialStandardInverseWishartAlternativeParam(nuAlt,x);
 }
 
 double Random::PotentialCorrelationStandardInverseWishart(double nu,const vector<vector<double> > &x) {
   double nuAlt = nu  + ((double) x.size()) - 1.0;
-  
+
   return PotentialCorrelationStandardInverseWishartAlternativeParam(nuAlt,x);
 }
 
- 
+
 

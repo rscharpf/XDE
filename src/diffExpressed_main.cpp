@@ -1,3 +1,6 @@
+//wrapper for etc.. R interface for the same?
+
+
 #include <R.h>
 
 #include <string>
@@ -80,31 +83,31 @@ extern "C" {
 		   int *IwriteDiffexpressedTofile)
   {
     unsigned int seed = (unsigned int) *Iseed;
-    if (CHECKINPUT)
-      cout << "seed: " << seed << "\n";
+    //if (CHECKINPUT)
+      //cout << "seed: " << seed << "\n";
     Random ran(seed);
-    
+
     int nIt = *InIt;
-    if (CHECKINPUT)
-      cout << "nIt: " << nIt << "\n";
-    
+    //if (CHECKINPUT)
+      //cout << "nIt: " << nIt << "\n";
+
     int Q = *IQ;
-    if (CHECKINPUT)
-      cout << "Q: " << Q << "\n";
-    
+    //if (CHECKINPUT)
+      //cout << "Q: " << Q << "\n";
+
     int G = *IG;
-    if (CHECKINPUT)
-      cout << "G: " << G << "\n";
+    //if(CHECKINPUT)
+      //cout << "G: " << G << "\n";
 
     int *S = IS;
-    if (CHECKINPUT)
-      {
-	cout << "S: ";
-	int q;
-	for (q = 0; q < Q; q++)
-	  cout << S[q] << " ";
-	cout << "\n";
-      }
+    //    if (CHECKINPUT)
+//      {
+//	//cout << "S: ";
+//	int q;
+//	for (q = 0; q < Q; q++)
+//	  cout << S[q] << " ";
+//	cout << "\n";
+//      }
 
     double *x = Ix;
     int *psi = IPsi;
@@ -138,35 +141,35 @@ extern "C" {
     //
 
 #include "PotentialFunction.h"
-    
+
     //
     // Set number of updates fo each type
     //
 
     str.setNumberOfUpdates(InUpdate,Iepsilon,nUpdate,update);
-    if (CHECKINPUT)
-      {
-	cout << "Number of updates in one iteration (epsilon):\n\n";
-	cout << "nu:     " << nUpdate[0] << " (" << update[0]->getEpsilon() << ")\n";
-	cout << "Delta:  " << nUpdate[1] << " (" << update[1]->getEpsilon() << ")\n";
-	cout << "a:      " << nUpdate[2] << " (" << update[2]->getEpsilon() << ")\n";
-	cout << "b:      " << nUpdate[3] << " (" << update[3]->getEpsilon() << ")\n";
-	cout << "c2:     " << nUpdate[4] << "\n";
-	cout << "gamma2: " << nUpdate[5] << "\n";
-	cout << "r:      " << nUpdate[6] << " (" << update[6]->getEpsilon() << ")\n";
-	cout << "rho:    " << nUpdate[7] << " (" << update[7]->getEpsilon() << ")\n";
-	cout << "delta:  " << nUpdate[8] << "\n";
-	cout << "xi:     " << nUpdate[9] << "\n";
-	cout << "sigma2: " << nUpdate[10] << " (" << update[10]->getEpsilon() << ")\n";
-	cout << "t:      " << nUpdate[11] << " (" << update[11]->getEpsilon() << ")\n";
-	cout << "l:      " << nUpdate[12] << " (" << update[12]->getEpsilon() << ")\n";
-	cout << "phi:    " << nUpdate[13] << " (" << update[13]->getEpsilon() << ")\n";
-	cout << "theta:  " << nUpdate[14] << " (" << update[14]->getEpsilon() << ")\n";
-	cout << "lambda: " << nUpdate[15] << " (" << update[15]->getEpsilon() << ")\n";
-	cout << "tau2R:  " << nUpdate[16] << " (" << update[16]->getEpsilon() << ")\n";
-	cout << "tau2Rho:" << nUpdate[17] << " (" << update[17]->getEpsilon() << ")\n";
-	cout << "\n\n";
-      }
+    //if (CHECKINPUT)
+    //{
+	//cout << "Number of updates in one iteration (epsilon):\n\n";
+	//cout << "nu:     " << nUpdate[0] << " (" << update[0]->getEpsilon() << ")\n";
+	//cout << "Delta:  " << nUpdate[1] << " (" << update[1]->getEpsilon() << ")\n";
+	//cout << "a:      " << nUpdate[2] << " (" << update[2]->getEpsilon() << ")\n";
+	//cout << "b:      " << nUpdate[3] << " (" << update[3]->getEpsilon() << ")\n";
+	//cout << "c2:     " << nUpdate[4] << "\n";
+	//cout << "gamma2: " << nUpdate[5] << "\n";
+	//cout << "r:      " << nUpdate[6] << " (" << update[6]->getEpsilon() << ")\n";
+	//cout << "rho:    " << nUpdate[7] << " (" << update[7]->getEpsilon() << ")\n";
+	//cout << "delta:  " << nUpdate[8] << "\n";
+	//cout << "xi:     " << nUpdate[9] << "\n";
+	//cout << "sigma2: " << nUpdate[10] << " (" << update[10]->getEpsilon() << ")\n";
+	//cout << "t:      " << nUpdate[11] << " (" << update[11]->getEpsilon() << ")\n";
+	//cout << "l:      " << nUpdate[12] << " (" << update[12]->getEpsilon() << ")\n";
+	//cout << "phi:    " << nUpdate[13] << " (" << update[13]->getEpsilon() << ")\n";
+	//cout << "theta:  " << nUpdate[14] << " (" << update[14]->getEpsilon() << ")\n";
+	//cout << "lambda: " << nUpdate[15] << " (" << update[15]->getEpsilon() << ")\n";
+	//cout << "tau2R:  " << nUpdate[16] << " (" << update[16]->getEpsilon() << ")\n";
+	//cout << "tau2Rho:" << nUpdate[17] << " (" << update[17]->getEpsilon() << ")\n";
+	//cout << "\n\n";
+    //}
 
 
     //
@@ -189,12 +192,12 @@ extern "C" {
     //
     // run Metropolis-Hastings algorithm
     //
-    
+
     int nSinceReport = 0;
     for (i = 0; i < nIt; i++)
       {
-	if (*IshowIterations) cout << i+1 << " ";
-	cout.flush();
+	//if (*IshowIterations) //cout << i+1 << " ";
+	//cout.flush();
 	int k;
 	for (k = 0; k < update.size(); k++)
 	  {
@@ -202,37 +205,37 @@ extern "C" {
 	    for (t = 0; t < nUpdate[k]; t++)
 	      update[k]->update(ran);
 	  }
-	
+
 	if (reportDiffexpressed != NULL) reportDiffexpressed->update(&str);
 	nSinceReport++;
-	
+
 	if (nSinceReport == nBetweenReport)
 	  {
 	    nSinceReport = 0;
-	    
+
 	    int k;
 	    for (k = 0; k < report.size(); k++)
 	      report[k]->report(&str);
 	  }
       }
 
-    if (*IshowIterations) cout << "\n\n";
-    
+    if (*IshowIterations) //cout << "\n\n";
+
     for (i = 0; i < report.size(); i++)
       delete report[i];
-    
+
     for (i = 0; i < update.size(); i++)
       delete update[i];
 
 
     str.setFinalValues(INu,IDDelta,IA,IB,IC2,IGamma2,IR,IRho,IDelta,
 		       IXi,ISigma2,IT,IL,IPhi,ITheta,ILambda,ITau2R,ITau2Rho);
-    
+
 
     seed = ran.ChangeSeed(seed);
     *Iseed = (int) seed;
-    
+
     return;
   }
-  
+
 } // extern "C"
