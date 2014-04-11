@@ -1,0 +1,139 @@
+##useDynLib(XDE, updateANu, updateBDDelta, .registration=TRUE)
+useDynLib(XDE, .registration=TRUE)
+import(Biobase, methods)
+#MergeMaid.  Can not import all of MergeMaid b/c of conflicts with graphics
+##importClassesFrom("MergeMaid", "mergeExpressionSet", "mergeCor", "mergeCoeff")
+##importMethodsFrom("MergeMaid", geneStudy, "geneStudy<-", exprs, integrative.cors, intCor, intcorDens)
+##importFrom("MergeMaid", mergeExprs)
+importClassesFrom("MergeMaid", mergeExpressionSet)
+importMethodsFrom("MergeMaid", intCor, intcorDens, pairwise.cors)
+importMethodsFrom("genefilter", rowttests)
+importFrom("genefilter", rowSds, rowVars)
+importFrom("gtools", permute)
+importFrom("graphics", legend, pairs, par, plot, smoothScatter)
+importFrom(BiocGenerics, lapply, nrow)
+importFrom("grDevices", colorRampPalette)
+importFrom("stats", as.ts, cor, median, princomp, quantile, rnorm, runif,
+           var)
+importFrom("utils", str)
+exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
+exportMethods("[", "[[", "$",
+              bayesianEffectSize,
+              "bayesianEffectSize<-",
+              burnin,
+              "burnin<-",
+              calculateBayesianEffectSize,
+              firstMcmc,
+              "firstMcmc<-",
+              coerce,
+	            dim,
+              directory,
+              "directory<-",
+              featureData,
+              featureNames,
+              geneCenter,
+##	          goodnessOfFit,
+              hyperparameters,
+              "hyperparameters<-",
+              initialize,
+              iterations,
+              "iterations<-",
+	            lapply,
+              lastMcmc,
+              "lastMcmc<-",
+              notes,
+              nrow,
+              nSamples,
+              output,
+              "output<-",
+              pData,
+              phenotypeLabel,
+              "phenotypeLabel<-",
+              plot,
+              posteriorAvg,
+	      "posteriorAvg<-",
+              savedIterations,
+              seed,
+	      "seed<-",
+              show,
+              showIterations,
+              "showIterations<-",
+              .standardizedDelta,
+              standardizeSamples,
+              studyCenter,
+              studyNames,
+              "studyNames<-",
+              thin,
+              "thin<-",
+              tuning,
+              "tuning<-",
+              updates,
+              "updates<-",
+              zeroNu)
+export(calculatePosteriorAvg,
+       empiricalStart,
+       ssStatistic,
+       symbolsInteresting,
+       xde,
+       xsScores)
+#export(.goodnessOfFit, computeGOF)
+
+
+##---------------------------------------------------------------------------
+##
+## functions and methods for v2 interface
+##
+##---------------------------------------------------------------------------
+importFrom(mvtnorm, rmvnorm)
+##exportClasses(HyperParams, Params)
+##exportClasses(Parameters,ParametersD,ParametersC,ParametersMII)
+##export(HyperParams, Params, rupdateANu, rupdateBDDelta)
+##exportMethods(phenotype)
+##export(rupdateANu,
+##       rupdateBDDelta,
+##       rupdateTau2RhoNu,
+##       rupdateTau2RDDelta,
+##       rupdateNu,
+##       rupdateDDelta,
+##       rupdateC2,
+##       rupdateC2DDelta,
+##       rupdateGamma2,
+##       rupdateGamma2Nu,
+##       rupdateRDDelta,
+##       rupdateRC2,
+##       rupdateRhoNu,
+##       rupdateRhoGamma2,
+##       rupdateSigma2,
+##       rupdatePhi,
+##       rupdateTheta,
+##       rupdateLambda,
+##       rupdateT,
+##       rupdateL,
+##       rupdateXi,
+##    rupdateDeltaDDelta,
+##    rupdateDeltaDDelta_MRF2,
+##       rupdateLSigma2,
+##       rupdateTSigma2,
+##       rupdateLambdaPhi,
+##       rupdateThetaPhi,
+##    rupdateAlpha,
+##    rupdateAlpha_onedelta,
+##    rupdateBeta,
+##    rupdateBeta_onedelta,
+##    rupdateBetag,
+##    rupdateDelta,
+##    rupdateDelta_MRF2,
+##    rupdateSigma2_HyperInverseWishart,
+##    rupdateLSigma2_HyperInverseWishart,
+##    rupdateTSigma2_HyperInverseWishart,
+##    rupdateOmega_HyperInverseWishart,
+##    rupdateDDeltaStar_HyperInverseWishart,
+##    rupdateTau2RDDeltaStar_HyperInverseWishart,
+##    rupdateBDDeltaStar_HyperInverseWishart,
+##    rupdateRDDeltaStar_HyperInverseWishart,
+##    modelA_B_MIupdates
+##)
+       ##rupdateDeltaDDelta_MRF,
+       ##rupdateAlpha_MRF,
+       ##rupdateBeta_MRF,
+       ##rupdateBetag_MRF

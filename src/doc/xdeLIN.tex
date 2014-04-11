@@ -1,0 +1,683 @@
+\documentclass[11pt]{article}
+\usepackage{amssymb,amsmath,multicol}
+\renewcommand{\baselinestretch}{1.1}
+\textwidth 6in
+\textheight 9in
+\hoffset -0.30in
+\topmargin -0.45in
+
+
+% NUMBERING AND ENVIRONMENTS
+
+\newtheorem{prop}{Proposition}
+\newtheorem{lem}{Lemma}
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}{Corollary}
+\newtheorem{thmref}{Theorem}
+\newtheorem{lemref}{Lemma}
+\newtheorem{propref}{Proposition}
+
+\renewcommand{\thethmref}{\Alph{thmref}}
+\renewcommand{\thelemref}{\Alph{lemref}}
+\renewcommand{\thepropref}{\Alph{propref}}
+
+
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+
+\newcommand{\bDelta}{\mbox{\boldmath $\Delta$}}
+\newcommand{\bnu}{\mbox{\boldmath $\nu$}}
+\newcommand{\bx}{\mbox{\boldmath $x$}}
+\newcommand{\bpsi}{\mbox{\boldmath $\psi$}}
+
+% BLACKBOARD BOLD CHARACTERS FOR REALS, INTEGERS, PROBABILITIES, ETC.
+
+\newcommand{\real}{\mbox{$\mathbb R$}}      % real numbers
+
+
+\begin{document}
+\bibliographystyle{plain}
+\title{Bayesian modeling of differentially expressed genes}
+
+
+%\author{}
+
+\date{\today}
+
+%\setcounter{page}{0}
+
+
+\maketitle
+
+
+%\begin{abstract}
+%
+%\end{abstract}
+
+\section{\label{Sec:Notation}Notation}
+\begin{itemize}
+\item[] $p\in \{ 1,\ldots,P\}$: study.
+\item[] $g\in \{ 1,\ldots,G\}$: gene.
+\item[] $s\in \{ 1,\ldots,S_p\}$: sample (array) in study $p$.
+\item[] $x_{gsp}$: observed expression for gene $g$ and sample $s$ in study $p$.
+\item[] $\psi_{sp}\in \{ 0,1\}$ clinical variable for sample $s$ in study $p$.
+\item[] $\delta_{gp}\in\{ 0,1\}$: indicator for differential expression for gene $g$ and study $p$.
+\item[] $\nu_{gp}$: the true underlying mean expression 
+(mean over $\psi_{sp} = 0$ and $\psi_{sp} = 1$).
+\item[] $\Delta_{gp}$: true differential expression (offsets) between the two clinical states.
+\item[] $R = [R_{pq}]_{p,q=1}^P$: covariance matrix for $\bDelta_g = (\Delta_{g1},\ldots,
+\Delta_{gP})^T$.
+\item[] $\Sigma = [\Sigma_{pq}]_{p,q=1}^P$: covariance matrix for $\bnu_g = (\nu_{g1},\ldots,\nu_{gP})^T$.
+\item[] $\sigma^2_{g\psi p}$: variance of expression around the true mean.
+\end{itemize}
+
+
+
+
+\section{\label{Sec:Model}Stochastic model}
+Let $x_{gsp}$ denote observed expression value for gene 
+$g\in \{ 1,\ldots,G\}$ and sample (array) $s\in \{ 1,\ldots,S_q\}$ in 
+study $p \in \{ 1,\ldots,P\}$, where $P\geq 2$. We
+assume that some clinical variable (with two possible values) 
+is available for each of the arrays in all studies. We denote 
+this by $\psi_{sp}\in\{ 0,1\}$ for sample (array) number $s$ in study 
+number $p$. We will assume that the studies have been somehow
+standardized so that the values in each study is centered around
+zero and are approximately Gaussian distributed.
+
+Our model defined below is based on the following assumption,
+for some of the genes, the expression values $x_{gsp}$ are
+differentially expressed (have different mean values)  
+for arrays where $\psi_{sp}=0$ and 
+arrays where $\psi_{sp}=1$. The differential expression
+can be for all studies or only some of them.
+
+
+
+
+We assume the following hierarchical Bayesian model for the 
+expression data. Conditionally on underlying unobserved 
+parameters we assume the expression values to be independently
+Gaussian distributed,
+\begin{equation}\label{x}
+x_{gsp}|\ldots  \sim \mbox{N}(\nu_{gp} + \delta_{gp} (2\psi_{sp} - 1)\Delta_{gp},
+\sigma^2_{g\psi_{sp}p}),
+\end{equation}
+where $\delta_{gp}\in \{ 0,1\}$ indicates whether gene $g$ is 
+differentially expressed ($\delta_{gp}=1$) or not ($\delta_{gp}=0$) in study $p$.
+Thus, if $\delta_{gp} = 0$, the mean of $x_{gsp}$ is $\nu_{gp}$, 
+whereas if $\delta_{gp}=1$, the mean is $\nu_{gp}-\Delta_{gp}$ and
+$\nu_{gp}+\Delta_{gp}$ for samples with $\psi_{sp}=0$ and $\psi_{sp}=1$,
+respectively. 
+
+Given hyper-parameters, we assume $\bnu_g = (\nu_{g1},\ldots,\nu_{gP})^T$ and 
+$\bDelta_g = (\Delta_{g1},\ldots,\Delta_{gP})^T$ to be multi-Gaussian distributed,
+\begin{equation}
+\bnu_g |\ldots \sim \mbox{N}(0,\Sigma) \mbox{~~~~~and~~~~~}
+\bDelta_g |\ldots \sim \mbox{N}(0,R),
+\end{equation}
+where $\Sigma = [\Sigma_{pq}]\in\Re^{P\times P}$ and
+$R = [R_{pq}]\in\Re^{P\times P}$ with
+\begin{equation}\label{Sigma}
+\Sigma_{pq} = \gamma^2 \rho_{pq} \sqrt{ \tau_p^2 \tau_q^2 \sigma_{gp}^{2a_p} 
+\sigma_{gq}^{2a_q}}
+\end{equation}
+and
+\begin{equation}
+R_{pq} = c^2 r_{pq} \sqrt{\tau_p^2 \tau_q^2 \sigma_{gp}^{2b_p}
+\sigma_{gq}^{2b_q}}.
+\end{equation}
+The $a_p$ and $b_p, p=1,\ldots P$ are assumed apriori 
+independent with discrete probabilities in $0$ and $1$ and a continuous density on $(0,1)$.
+More precisely, we let
+\begin{equation}
+\mbox{P}(a_p = 0) = p_a^0 \mbox{~~~,~~~} \mbox{P}(a_p = 1) = p_a^1 \mbox{~~~,~~~}
+a_p | a_p \in (0,1) \sim \mbox{Beta}(\alpha_a,\beta_a),
+\end{equation}
+and
+\begin{equation}
+\mbox{P}(b_p = 0) = p_b^0 \mbox{~~~,~~~} \mbox{P}(b_p = 1) = p_b^1 \mbox{~~~,~~~}
+b_p | b_p \in (0,1) \sim \mbox{Beta}(\alpha_b,\beta_b).
+\end{equation}
+To $c^2$ we assign a uniform prior distribution on 
+$[0,c^2_{\mbox{\tiny Max}}]$, where $c^2_{\mbox{\tiny Max}}$ is a parameter 
+specified by the user, and for $\gamma^2$ we use an 
+improper uniform distributions on $(0,\infty)$.
+We restrict $\tau^2_p>0,p=1,\ldots,P$ and 
+$\tau_1^2 \cdot \ldots \cdot \tau_P^2 = 1$ and assume an (improper) uniform 
+distribution for $(\tau_1^2,\ldots,\tau_P^2)$ under this restriction.
+The $[\rho_{pq}] \in \Re^{P\times P}$ and $[r_{pq}] \in \Re^{P\times P}$ are restricted to be 
+correlation matrices and we assign apriori independent Barnard et al (2000) distributions for them,
+with $\nu_\rho$ and $\nu_r$ degrees of freedom for $[\rho_{pq}]$ and $[r_{pq}]$, respectively.
+
+For the indicators $\delta_{gp},g=1,\ldots,G,p=1,\ldots,P$ we have implemented two prior models. In prior model A
+we assume, for each $p=1,\ldots,P$, $\delta_{1p},\ldots,\delta_{Gp}$ to be apriori independent,
+given a hyper-parameter $\xi_p$, with
+\begin{equation}
+\mbox{P}(\delta_{gp}=1|\xi_p) = \xi_p, \mbox{~~~~~where~~~~~}
+\xi_1,\ldots,\xi_P\sim\mbox{Beta}(\alpha_\xi,\beta_\xi)\end{equation}
+independently.
+In prior model B we set the restriction $\delta_{g1}=\ldots=\delta_{gP} = \delta_g$ for each 
+$g=1,\ldots,G$ and assume the $G$ indicators $\delta_1,\ldots,\delta_G$ to be apriori independent, given a 
+hyper-parameter $\xi$, with
+\begin{equation}
+\mbox{P}(\delta_g = 1 | \xi ) = \xi, \mbox{~~~~~where~~~~~}
+\xi \sim \mbox{Beta}(\alpha_\xi,\beta_\xi).
+\end{equation}
+
+
+
+
+We assume $\sigma^2_{gp}$ in (\ref{Sigma}) to be given from $\sigma^2_{g\psi p}$ in 
+(\ref{x}) via the following relations
+\begin{equation}
+\sigma^2_{g0p} = \sigma^2_{gp} \varphi_{gp} \mbox{~~~~~and~~~~~}
+\sigma^2_{g1p} = \frac{\sigma^2_{gp}} {\varphi_{gp}}.
+\end{equation}
+For $\sigma^2_{gp}$ we assume independent prior distributions, given hyper-parameters,
+\begin{equation}
+\sigma^2_{gp}|\ldots \sim \mbox{Gamma}\left(\frac{l_p^2}{t_p},\frac{l_p}{t_p}\right),
+\end{equation}
+where the mean $l_p$ and variance $t_p$ for $p=1,\ldots,P$ are assigned independent (improper) uniform
+distributions on $(0,\infty)$.
+The $\varphi_{gp}$ are assigned independent gamma priors, given hyper-parameters,
+\begin{equation}
+\varphi_{gp}|\ldots \sim \mbox{Gamma}\left(\frac{\lambda_p^2}{\theta_p},\frac{\lambda_p}{\theta_p}\right),
+\end{equation}
+where the mean $\lambda_p$ and the variance $\theta_p$ for $p=1,\ldots,P$ are assigned independent (improper) uniform
+distributions on $(0,\infty)$.
+
+
+
+\section{\label{MH}Metropolis--Hastings algorithm}
+To simulate from the posterior distribution resulting from the above specified 
+Bayesian model we use a Metropolis--Hastings algorithm
+with the following moves.
+\begin{enumerate}
+\item The $\nu_{pg}$'s are updated in a Gibbs step.
+\item The $\Delta_{pg}$'s are updated in a Gibbs step.
+\item \label{Proposal:a_p}Each $a_p,p=1,\ldots,P$ is updated in turn, 
+where a potential new value for $a_p$, $\widetilde{a}_p$,
+is generated as follows. If $a_p = 0$, $\widetilde{a}_p \sim \mbox{Uniform}(0,\varepsilon)$, if $a_p = 1$, 
+$\widetilde{a}_p \sim \mbox{Uniform}(1-\varepsilon,1)$, and if $a_p\in (0,1)$ we use
+\begin{equation}
+\mbox{P}(\widetilde{a}_p = 0) = \max\{ -(a_p - \varepsilon),0\} \cdot \mbox{I}(p_a^0 \neq 0),
+\end{equation}
+\begin{equation}
+\mbox{P}(\widetilde{a}_p = 1) = \max\{ a_p + \varepsilon - 1,0\} \cdot \mbox{I}(p_a^1 \neq 0)
+\end{equation}
+and
+\begin{equation}
+\widetilde{a}_p |\widetilde{a}_p\in (0,1) \sim \mbox{Uniform}(\max\{a_p-\varepsilon,0\},
+\min\{a_p+\varepsilon,1\}).
+\end{equation}
+The $\varepsilon$ is a tuning parameter that has to be specified by the user. The default value is $0.05$.
+\item Each $b_p,p=1,\ldots,P$ is updated in turn, where the proposal distribution is of the same type as in 
+\ref{Proposal:a_p}. The default value for $\varepsilon$ is again $0.05$.
+\item A block Gibbs update for $c^2$ and $\Delta_{gp}$ for $(g,p)$'s 
+where $\delta_{gp}=0$.
+\item The $\gamma^2$ is updated in a Gibbs step.
+\item \label{Proposal:r}A block update for the correlation matrix 
+$[r_{pq}]$ and the variance $c^2$. First, potential 
+new values for $[r_{pq}]$, $[\widetilde{r}_{pq}]$,
+is set by
+\begin{equation}
+\widetilde{r}_{pq} = (1-\varepsilon) r_{pq} + \varepsilon T_{pq},
+\end{equation}
+where $[T_{pq}]$ is a correlation matrix which with probability a half is 
+generated from the prior for $[r_{pq}]$, or with probability a half
+set equal to unity on the diagonal and with all off diagonal elements
+set equal to the same value $b$. In the latter case, the value $b$ is sampled
+from a uniform distribution on $(-1/(P-1),1)$. Second, the potential
+new value for $c^2$ is sampled from the corresponding full conditional
+(given the potential new values $[\widetilde{r}_{pq}]$). The
+$\varepsilon$ is a tuning parameter that has to be supplied by the user and its default value is $0.01$.
+\item A block update for the correlation matrix $[\rho_{pq}]$ and the 
+variance $\gamma^2$. The potential new values are generated similar to what is done in \ref{Proposal:r}.
+The default value for $\varepsilon$ is again $0.01$.
+\item For each $g=1,\ldots,G$ in turn, a block update for $\delta_{gp}$ and 
+$\bDelta_g$ for a randomly chosen $p$. First, the potential new value for $\delta_{gp}$ is set equal to
+$\widetilde{\delta}_{gp} = 1 - \delta_{gp}$. Second, the potential new value
+for $\bDelta_g$ is sampled from the full conditional (given the potential
+new value $\widetilde{\delta}_{gp}$).
+No tuning parameter for this update.
+\item The $\xi_1,\ldots,\xi_P$ (prior model A) or $\xi$ (prior model B) are updated in a Gibbs step.
+\item \label{Proposal:sigma2}Each $\sigma^2_{gp}$ is updated in turn, where the potential new value is given as
+$\widetilde{\sigma}^2_{gp} = \sigma_{gp}^2 \cdot u$, where $u\sim \mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$.
+The $\varepsilon$ is a tuning parameter that has to be specified by the user and 
+its default value is $0.5$.
+\item \label{Proposal:t}Each $t_p,p=1,\ldots,P$ is updated in turn. The potential new value is given as 
+$\widetilde{t}_p = t_p \cdot u$, where $u\sim\mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$.
+The $\varepsilon$ is a tuning parameter that has to be specified by the user and 
+its default value is $0.1$.
+\item \label{Proposal:l}Each $l_p,p=1,\ldots,P$ is updated in turn. The potential new value is given as 
+$\widetilde{l}_p = l_p \cdot u$, where $u\sim\mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$.
+The $\varepsilon$ is a tuning parameter that has to be specified by the user and 
+its default value is $0.05$.
+\item Each $\varphi_{gp}$ is updated in turn, where the proposal distribution is of the same type as in 
+\ref{Proposal:sigma2}. The default value for $\varepsilon$ is again $0.5$.
+\item Each $\theta_p,p=1,\ldots,P$ is updated in turn, where the proposal distribution is of the same
+type as in \ref{Proposal:t}. The default value for $\varepsilon$ is again $0.1$.
+\item Each $\lambda_p,p=1,\ldots,P$ is updated in turn, where the proposal distribution is of the same
+type as in \ref{Proposal:l}. The default value for $\varepsilon$ is again $0.05$.
+
+\item The $(\tau_1^2,\ldots,\tau_P^2)$ is updated by first uniformly at random drawing a pair $p,q\in \{1,\ldots,P\}$
+so that $p\neq q$. Potential new values for $\tau_p^2$ and $\tau_q^2$ are generated by setting
+\begin{equation}
+\widetilde{\tau}_p^2 = \tau_p^2 \cdot u \mbox{~~~~and~~~~}
+\widetilde{\tau}_q^2 = \tau_q^2 / u,
+\end{equation}
+where $u \sim \mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$. The $\varepsilon$ is again a tuning parameter that
+has to be specified by the user and its default value is set to $0.02$.
+\end{enumerate}
+
+
+\section{Input files}
+The computer program is started with the command {\em diffExpressed}. This command takes the following seven parameters.
+\begin{enumerate}
+\item Seed value. A positive integer used as seed value in the random number generator.
+\item Number of iterations. A non-negative integer value specifying the number of iterations to run 
+in the Metropolis--Hastings algorithm.
+\item Prior model indicator, must be $0$ or $1$. If $0$ is set, prior model A for $\delta_{gp}$ is used. Otherwise
+prior model B is used.
+\item Data file. A filename. The file should specify the data set. See description of the format below.
+\item \label{Input:Paramfile}Parameter file. A filename. The file may specify hyper-parameter values. See description 
+of the format below.
+\item Initial values file. A filename. The file may specify initial values for the parameter values.
+See description of the format below.
+\item Update file. A filename. The file may specify the number of updates of each type in each iteration, and a value for the tuning parameter $\epsilon$ (for 
+updates where this is relevant). See
+description of the format below.
+\item \label{Input:Output}Output file. A filename. The file may specify which simulated values to print to files. See description of
+the file format below.
+\end{enumerate}
+For any of parameters \ref{Input:Paramfile} to \ref{Input:Output} a '=' may be used instead of a filename. If so, default 
+values will be used. For choice of default values, see description below. 
+
+In the following, we describe the format of each the five input files.
+\subsection{Data file}
+The first line of the data file should contain an integer, giving the number of studies, $P$.
+Each of the following $P$ lines should give 
+two file names. The first file should contain expression values, 
+whereas the second file should contain corresponding clinical values. 
+
+Each of the files containing expression values should start with two integers, giving the number of
+genes $G$ and the number of samples $S_p$, respectively. Following this, the expression values should
+be given as a $G\times S_p$ matrix. The order of the genes must be the same in all $P$ files 
+with expression values.
+
+Each of the files containing clinical values should start with an integer, giving the 
+number of samples, $S_p$. Following this, the $S_q$ clinical values should be given as a
+vector of zeros and ones.
+
+\subsection{\label{parameterfile}Parameter file}
+This file should have six lines. In each line a specified number of values should be given.
+Additional text in a line is just ignored. Thus, in each line comments may be 
+added after the parameter values. To specify that a default value should be used
+for a parameter value, a '=' or a string with '=' as the first character can be 
+given instead of a numerical value. If the file contains less than five lines,
+default values are used for the missing lines. If the file contains more than 
+five lines, the extra lines are ignored.
+
+The parameters given in each of the five lines are (default values are given in parenthesis):
+\begin{enumerate}
+\item Four values: $<\alpha_a (1.0)>$ $<\beta_a (1.0)>$ $<p_a^0 (0.0)>$ $<p_a^1 (0.0)>$
+\item Four values: $<\alpha_b (1.0)>$ $<\beta_b (1.0)>$ $<p_b^0 (0.0)>$ $<p_b^1 (0.0)>$
+\item One value: $<\nu_r (P+1)>$
+\item One value: $<\nu_\rho (P+1)>$
+\item Two values: $<\alpha_\xi (1.0)>$ $<\beta_\xi (1.0)>$
+\item One value: $<c^2_{\mbox{\tiny{Max}}} (1.0)>$ 
+\end{enumerate}
+
+\subsection{\label{initial}Initial data file}
+This file should have $16+P$ lines. Except lines 7 and 8, each line contains one value, 
+the initial value for one parameter. Lines 7 and 8 can contain up to $P(P-1)/2$ values.
+Additional text in a line is again ignored and can be used for comments. A '=' or a
+string with '=' as the first character can again be used to specify that default values
+should be used (for lines 7 and 8 the '=' option can only be used when all values should
+take default values). If the file contains less than $16+P$ lines,
+default values are used for the missing lines. If the file contains more than 
+$16+P$ lines, the extra lines are ignored.
+
+Note that a parameter may be fixed be specifying its value in this file and 
+specifying zero for the corresponding number of updates in the update file.
+
+The initial values specified in each of the $16+P$ lines are (default values are random
+and not specified here):
+\begin{enumerate}
+\item $<\nu_{gp}>$. If a value is specified, the same value is used for all components.
+\item $<\Delta_{gp}>$. If a value is specified, the same value is used for all components.
+\item $<a_p>$. If a value is specified, the same value is used for all components.
+\item $<b_p>$. If a value is specified, the same value is used for all components.
+\item $<c^2>$.
+\item $<\gamma^2>$.
+\item $<r_{pq}>$. Up to $P(P-1)/2$ values can be specified. Values are specified in the order
+$r_{12},r_{13},\ldots,r_{1P},r_{23},\ldots,r_{2P}$ and so on until $r_{P-1,P}$. If fewer 
+than $P(P-1)/2$ values are specified, the last value is reused for all the remaining variables.
+If more than $P(P-1)/2$ values are specified, the extra values are ignored. The specified 
+values must, together with $1$'s on the diagonal, form a symmetric positive definite matrix.
+\item $<\rho_{pq}>$. Up to $P(P-1)/2$ values can be specified. Values are specified in the order
+$\rho_{12},\rho_{13},\ldots,\rho_{1P},\rho_{23},\ldots,\rho_{2P}$ and so on until $\rho_{P-1,P}$. If fewer 
+than $P(P-1)/2$ values are specified, the last value is reused for all the remaining variables.
+If more than $P(P-1)/2$ values are specified, the extra values are ignored. The specified 
+values must, together with $1$'s on the diagonal, form a symmetric positive definite matrix.
+\item $<\delta_{gp}>$. If a value is specified, the same value is used for all components.
+\item $<\xi_p >$. If a value is specified, the same value is used for all components.
+\item $<\sigma^2_{gp}>$. If a value is specified, the same value is used for all components.
+\item $<t_p>$. If a value is specified, the same value is used for all components.
+\item $<l_p>$. If a value is specified, the same value is used for all components.
+\item $<\phi_{gp}>$. If a value is specified, the same value is used for all components.
+\item $<\theta_p>$. If a value is specified, the same value is used for all components.
+\item $<\lambda_p>$. If a value is specified, the same value is used for all components.
+\item $<\tau^2_1>$.\\
+\vdots
+\item[16+P.] $<\tau^2_P>$. 
+\end{enumerate}
+If the product of the values given for $\tau^2_1,\ldots,\tau^2_P$ differ from unity,
+these values are corrected by multiplying them all with the same value.
+
+\section{Update file}
+This file should have $17$ lines, where each line specify one or two values.
+In line $i$, the first number gives the number of updates of type $i$
+(as defined in Section \ref{MH}) in one iteration. If appropriate, the second
+number in line $i$ specify the tuning parameter for update type $i$.
+Additional text in a line is again ignored and can be used for comments. A '=' or a
+string with '=' as the first character can again be used to specify that a default value
+should be used. If the file contains less than $17$ lines,
+default values are used for the missing lines. If the file contains more than 
+$17$ lines, the extra lines are ignored.
+
+Note that using a number larger than one for Gibbs updates has no effect for 
+the convergence.
+
+%The default number of updates in one iteration is (default value for the tuning parameter
+%is given in parenthesis):
+%\begin{enumerate}
+%\item $\nu_{gp}$: 1
+%\item $\Delta_{gp}$: 1
+%\item $a_p$: 20 (0.05)
+%\item $b_p$: 20 (0.05)
+%\item $c^2$: 1
+%\item $\gamma^2$: 1
+%\item $r_{pq}$: 20 (0.01)
+%\item $\rho_{pq}$: 20 (0.01)
+%\item $\delta_{gp}$: 1
+%\item $\xi$: 1
+%\item $\sigma^2_{gp}$: 3 (0.5)
+%\item $t_p$: 10 (0.1)
+%\item $l_p$: 10 (0.1)
+%\item $\phi_{gp}$: 3 (0.5)
+%\item $\theta_p$: 10 (0.1)
+%\item $\lambda_p$: 10 (0.1)
+%\item $\tau^2_p$: 20 (0.02)
+%\end{enumerate}
+%
+
+\section{\label{out}Output file}
+This file should have $22$ lines. Each line contains one value.
+Additional text in a line is again ignored and can be used for comments. A '=' or a
+string with '=' as the first character can again be used to specify that default values
+should be used. If the file contains less than $20$ lines,
+default values are used for the missing lines. If the file contains more than 
+$20$ lines, the extra lines are ignored.
+
+The parameters given in the $22$ lines are:
+\begin{enumerate}
+\item The number of Metropolis--Hastings iterations between each output to log files. Default
+value is 1.
+\item File name of an output file with potential (minus log density) values. Default is no 
+output. A total of nineteen values are written to the file. The first value is the (total) posterior 
+potential, the second value is the potential associated with the likelihood. Thereafter follow
+potentials associated with each of the $17$ variables specified in Section \ref{initial} and in 
+the same order as given there.
+\item File name of an output file with acceptance rates of Metropolis--Hastings proposals. Default
+is no output. A total of $17$ values are written to the file, one value for each of 
+the $17$ proposal types specified in Section \ref{MH}, and in the same order as in this
+section.
+\item File name of an output file with $\nu_{gp}$ values. Default is no output.
+A total of $GP$ values is written to file and the order is $\nu_{11}$,
+$\ldots$, $\nu_{1P}$, $\nu_{21}$, $\ldots$, $\nu_{2P}$ and so on.
+\item File name of an output file with $\delta_{gp}\cdot \Delta_{gp}$ values. Default is no output.
+A total of $GP$ values is written to file and the order is as for $\nu_{gp}$ above.
+\item File name of an output file with $a_p$ values. Default is no output.
+A total of $P$ values is written to file and the order is $a_1,\ldots,a_P$.
+\item File name of an output file with $b_p$ values. Default is no output.
+A total of $P$ values is written to file and the order is as for $a_p$ above.
+\item File name of an output file with $c^2$ value. Default is no output.
+\item File name of an output file with $\gamma^2$ value. Default is no output.
+\item File name of an output file with $r_{pq}$ values. Default is no output.
+A total of $P(P-1)/2$ values is written to file and the order is $r_{12},\ldots,
+r_{1P},r_{23},\ldots,r_{2P},r_{34}$ and so on.
+\item File name of an output file with $\rho_{pq}$ values. Default is no output.
+A total of $P(P-1)/2$ values is written to file and the order is as for $r_{pq}$ above.
+\item File name of an output file with $\delta_{gp}$ values. Default is no output.
+A total of $GP$ values is written to file and the order is as for $\nu_{gp}$ above.
+\item File name of an output file with $\xi_p$  (prior model A) or $\xi$ (prior model B) value. Default is no output.
+A total of $P$ values are written to file and the order is $\xi_1,\ldots,\xi_P$. If prior model
+B is used the same value $\xi$ is written $p$ times.
+\item File name of an output file with $\sigma^2_{gp}$ values. Default is no output.
+A total of $GP$ values is written to file and the order is as for $\nu_{gp}$ above.
+\item File name of an output file with $t_p$ values. Default is no output.
+A total of $P$ values is written to file and the order is as for $a_p$ above.
+\item File name of an output file with $l_p$ values. Default is no output.
+A total of $P$ values is written to file and the order is as for $a_p$ above.
+\item File name of an output file with $\phi_{gp}$ values. Default is no output.
+A total of $GP$ values is written to file and the order is as for $\nu_{gp}$ above.
+\item File name of an output file with $\theta_p$ values. Default is no output.
+A total of $P$ values is written to file and the order is as for $a_p$ above.
+\item File name of an output file with $\lambda_p$ values. Default is no output.
+A total of $P$ values is written to file and the order is as for $a_p$ above.
+\item File name of an output file with $\tau^2_p$ values. Default is no output.
+A total of $P$ values is written to file and the order is as for $a_p$ above.
+
+\item File name of an output file with $\mbox{P}(\delta_{gp}=1|\ldots)$ values.
+Default is no output. A total of $GP$ values is written to file and the order
+is as for $\nu_{gp}$ above.
+\item File name of an output file where the running averages of differential expression, concordant
+differential expression and discordant differential expression is written. This file is 
+no longer used. No output.
+%Unlike the other
+%output files, old values are overwritten each time new values are produced. The number of 
+%output numbers is therefore $3G$. The order of the output values is first all running 
+%averages for differential expression, followed by all running averages for concordant
+%differential expression and then all running averages for all discordant differential 
+%expression.
+\end{enumerate}
+
+
+\section{Call to diffExpressed\_main.so from R}
+The diffExpressed\_main.so takes a total of $54$ arguments. Note that in the C++-code
+no checking of the input values is done, so make sure all input values are legal
+and all vectors are sufficiently long. The arguments are
+\begin{enumerate}
+\item Seed value. Input/Output. At input a positive integer. At output a new positive 
+integer that can be used as seed if one wants to continue the same run for more 
+iterations.
+\item Indicator for printing iteration numbers to screen. Input only. Legal values: $0$ and $1$.
+\item Number of Metropolis--Hastings iterations. Input only. Legal values: positive integers.
+\item $P$: Number of studies. Input only.
+\item $G$: Number of genes. Input only.
+\item Prior model indicator, must be $0$ or $1$. If $0$ is set, prior model A for $\delta_{gp}$ is used. Otherwise
+prior model B is used.
+\item $S$: A vector of $P$ values, giving the number of samples in each study. Input only.
+\item $x$: A vector of $PG\sum_{p=1}^P S_p$ expression values. Input only. The order of the
+values is $x_{111},x_{121},\ldots,x_{1,S_1,1},x_{2,1,1},x_{2,2,1},\ldots,x_{2,S_1,1},\ldots,
+x_{G,S_1,1},\ldots,x_{112},x_{122}$ and so on.
+\item $\psi$: A vector of $P\sum_{p=1}^P S_p$ clinical values. Input only. The order 
+of the values is $\psi_{11},\psi_{21},\ldots,\psi_{S_1,1},\psi_{12},\psi_{22},\ldots,
+\psi_{S_2,2},\ldots,\psi_{S_P,P}$.
+\item \label{initialValues}Indicator for using specified input values. Input only. If $1$ is given, the 
+simulation will used initial values as specified in the following 17 parameters. If $0$
+is given the initial values will be sampled randomly.
+
+\item $\nu$: Initial values for $\nu_{gp}$. Input/Output. The order of the values is
+$\nu_{11},\nu{21},\ldots,\nu_{G1},\nu_{12}$, $\nu_{22},\ldots,\nu_{G2}$ and so on. At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Note that the vector must be of correct size ($GP$) even if argument \ref{initialValues} specifies
+that the input values should not be used as initial values.
+
+\item $\Delta$: Initial values for $\Delta_{gp}$. Input/Output. The order is as for $\nu$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($GP$).
+
+\item $a$: Initial values for $a_{p}$. Input/Output. The order is $a_1,\ldots,a_P$.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item $b$: Initial values for $b_{p}$. Input/Output. The order is as for $a$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item $c^2$: Initial values for $c^2$. Input/Output.
+At output it contains the simulated value after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($1$).
+
+\item $\gamma^2$: Initial values for $\gamma^2$. Input/Output.
+At output it contains the simulated value after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($1$).
+
+\item $r$: Initial values for $r_{pq}$. Input/Output. The order is $r_{12},r_{13},\ldots,
+r_{1P},r_{23},r_{24},\ldots,r_{2P}$, $\ldots,r_{P-1,P}$.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P(P-1)/2$).
+
+\item $\rho$: Initial values for $\rho_{pq}$. Input/Output. The order is as for $r$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P(P-1)/2$).
+
+\item $\delta$: Initial values for $\delta_{gp}$. Input/Output. The order is as for 
+$\nu_{gp}$ above. At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($GP$).
+
+\item $\xi$: Initial values for $\xi_p$. Input/Output.
+At output it contains the simulated value after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item $\sigma_2$: Initial values for $\sigma^2_{gp}$. Input/Output. The order is as for $\nu$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($GP$).
+
+\item $t$: Initial values for $t_{p}$. Input/Output. The order is as for $a$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item $l$: Initial values for $l_{p}$. Input/Output. The order is as for $a$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item $\phi$: Initial values for $\phi_{gp}$. Input/Output. The order is as for $\nu$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($GP$).
+
+\item $\theta$: Initial values for $\theta_{p}$. Input/Output. The order is as for $a$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item $\lambda$: Initial values for $\lambda_{p}$. Input/Output. The order is as for $a$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item $\tau^2$: Initial values for $\tau^2_{p}$. Input/Output. The order is as for $a$ above.
+At output
+the vector contains the simulated values after the last Metropolis--Hastings iteration.
+Again the size of the vector must be of the correct size ($P$).
+
+\item Hyper-parameter values: A vector of $12$ values. Input only. The order is the same 
+as specified in Section \ref{parameterfile}.
+
+\item Number of updates of each type in one Metropolis--Hastings iterations: A vector of 
+$17$ positive integers. Input only. Element $i$ specifies number of updates of type $i$, 
+see Section \ref{MH}.
+
+\item $\varepsilon$: A vector of $17$ positive real numbers. Input only. Element $i$ 
+specifies the $\varepsilon$ for update type $i$. If update type $i$ doesn't include 
+any tuning parameter $\varepsilon$, the value is just ignored.
+
+\item \label{writeoutput}A vector of $22$ elements. Input only. The first element specifies the number of 
+Metropolis--Hastings iterations between the storing of simulated values. Elements
+$2$ to $22$ are indicators specifying whether or not to store a specific variable type.
+The type of variable types and the order used is identical to what is used 
+in Section \ref{out}. The stored values are either written to files or 
+stored in memory, see the next parameter.
+
+\item \label{file}Write to file indicator. Input only. If a non-zero value is given, simulated values
+are written to files, otherwise the simulated values are stored in memory (which may 
+require a lot of memory). See also \ref{diffIndicator}.
+
+\item Name of directory for where to write files of simulated values. Input only. One file is produced
+for each of the $17$ variables, the file names are predefined. If parameter \ref{file} is
+$0$, this parameter is ignored.
+
+\item \label{potSim}Simulated potential values (in one long vector). Output only. 
+The same potential values as previously written 
+to file, and in the same order. Note that at input the vector size must be large enough to 
+store all the values produced. If parameter \ref{file} is set to $1$ or the corresponding
+element in parameter \ref{writeoutput} is zero, this variable is not 
+used.
+
+\item As item \ref{potSim}, but Metropolis--Hastings acceptance rates.
+
+\item As item \ref{potSim}, but simulated $\nu$-values.
+
+\item As item \ref{potSim}, but simulated $\Delta$-values.
+
+\item As item \ref{potSim}, but simulated $a$-values.
+
+\item As item \ref{potSim}, but simulated $b$-values.
+
+\item As item \ref{potSim}, but simulated $c^2$-values.
+
+\item As item \ref{potSim}, but simulated $\gamma^2$-values.
+
+\item As item \ref{potSim}, but simulated $r$-values.
+
+\item As item \ref{potSim}, but simulated $\rho$-values.
+
+\item As item \ref{potSim}, but simulated $\delta$-values.
+
+\item As item \ref{potSim}, but simulated $\xi$-values.
+
+\item As item \ref{potSim}, but simulated $\sigma^2$-values.
+
+\item As item \ref{potSim}, but simulated $t$-values.
+
+\item As item \ref{potSim}, but simulated $l$-values.
+
+\item As item \ref{potSim}, but simulated $\phi$-values.
+
+\item As item \ref{potSim}, but simulated $\theta$-values.
+
+\item As item \ref{potSim}, but simulated $\lambda$-values.
+
+\item As item \ref{potSim}, but simulated $\tau^2$-values.
+
+\item As item \ref{potSim}, but simulated 
+$\mbox{P}(\delta_{gp}=1|\ldots )$-values.
+
+\item \label{ave}Averages of differential expression, concordant differential expression
+and discordant differential expression (all in one long vector). Output only. 
+Unlike the previous output arguments, only the final values are given as output.
+Thus, the vector size must be $3G$. The order of the output values is first all
+averages for differential expression, followed by all averages for concordant
+differential expression and then all running averages for all discordant differential 
+expression. If the corresponding element in parameter \ref{writeoutput} is zero, 
+this variable is not used. If parameter \ref{file} is set to $1$ this variable is 
+only used if parameter \ref{diffIndicator} is set to $1$.
+
+\item \label{diffIndicator}Indicator for using parameter \ref{ave}. 
+\end{enumerate}
+
+
+\end{document}

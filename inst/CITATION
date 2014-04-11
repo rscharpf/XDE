@@ -1,0 +1,12 @@
+citEntry(entry="Article",
+	author="Robert B. Scharpf and Haakon Tjelmeland and Giovanni
+	Parmigiani and Andrew Nobel",
+	title="A Bayesian model for cross-study differential gene
+	expression",
+	journal="JASA",
+	year="2009",
+	url="10.1198/jasa.2009.ap07611",
+	textVersion=paste("A Bayesian model for cross-study
+	differential gene expression", "R.B. Scharpf, H. Tjelmeland,
+	G. Parmigiani, and A.B. Nobel", "2009, JASA 104, p 1295--1310")
+)
