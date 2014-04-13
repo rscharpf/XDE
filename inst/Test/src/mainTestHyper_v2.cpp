@@ -13,8 +13,6 @@
 #include "Utility_v2.h"
 #include "Update_v2.h"
 
-
-
 extern "C" {
   // int main(void) {
   void initializeParams(int *nIt,
@@ -50,7 +48,6 @@ extern "C" {
 			int *simulateExpression, // whether to simulate data from the prior
 			double *x,
 			int *writeout,
-			char *file_path,
 			int *simulateSigma2,
 			int *oldCliqueInput,
 			int *oldComponentsInput,
@@ -110,7 +107,6 @@ extern "C" {
 
     for (q = 0; q < *Q; q++) {
       a[q] = aIn[q];
-      cout << "a: " << a[q] << endl;
       b[q] = bIn[q];
       l[q] = lIn[q];
       t[q] = tIn[q];
@@ -251,21 +247,6 @@ extern "C" {
 
     vector<vector<vector<double> > > Omega(ran.HyperInverseWishart(df,D,oldClique,oldComponents));
 
-    // RS:I think Omega is the object returned by HyperInverseWishart
-    int k=0;
-//    int j=0;
-//    cout << "Omega elements ";
-//    for(k =0; k < 3; k++){
-//      for (i = 0; i < 3; i++) {
-//	for(j = 0; j <= i; j++){
-//
-//	  cout << Omega[k][i][j] <<  " ";
-//	}
-//	cout << endl;
-//      }
-//    }
-//    cout << "End Omega elements ";
-
     vector<vector<double> > zero;
     zero.resize(*G);
     for (g = 0; g < *G; g++) {
@@ -344,13 +325,11 @@ extern "C" {
 	xfile.close();
       }
     }
-
-
-    for (g = 0; g < *G; g++) {
-      std::vector<std::vector<double> > Sigma;
-      makeSigma(g,*G,Sigma,*Q,*gamma2,tau2Rho,a,sigma2,rho);
-      std::vector<double> zero(*Q,0.0);
-      std::vector<double> rr(ran.MultiGaussian(Sigma,zero));
+  for (g = 0; g < *G; g++) {
+    std::vector<std::vector<double> > Sigma;
+    makeSigma(g,*G,Sigma,*Q,*gamma2,tau2Rho,a,sigma2,rho);
+    std::vector<double> zero(*Q,0.0);
+    std::vector<double> rr(ran.MultiGaussian(Sigma,zero));
 
     int q;
     for (q = 0; q < *Q; q++) {
@@ -373,15 +352,6 @@ extern "C" {
   betag = 0.01;
 
   // end random start
-  //const size_t size_path = strlen(file_path);
-  //char *str[200];
-  //char pathToLog=*file_path;
-  //cout << "path: " << file_path << endl;
-  //char *a_file=malloc(snprintf(NULL, 0, "%s/%s", *file_path, "a.txt") + 1);
-  //char *tmpname;
-  //sprintf(a_file, "%s/%s", *file_path, "a.txt");;
-  //char *a_file=NULL;
-  //char *s
   ofstream aFile("a.txt");
   ofstream bFile("b.txt");
   ofstream lFile("l.txt");
@@ -418,10 +388,9 @@ extern "C" {
     potentialXi(*Q,xi,*alphaXi,*betaXi);
 
 
-
   //int nIt = 1000000;
-  //int k;
-  for (k = 0; k < *nIt; k++) {
+    int k;
+    for (k = 0; k < *nIt; k++) {
 
       if (k == 0) {
 	cout << endl << "pot: " << pot << " " <<

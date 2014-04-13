@@ -128,7 +128,6 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L,
 			     gamma2=0.5^2,
 			     tau2Rho=rep(1.0,Q),
 			     writeout=rep(1L, 20),
-			     file_path=tempdir(),
 			     ...){
 	simulateExpression <- if(length(x)<2) TRUE else FALSE
 	x <- numeric(G*sum(S))
@@ -141,7 +140,6 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L,
 		message("simulating clinical variable")
 		psi <- as.integer(runif(sum(S)) > 0.5)
 	}
-	message("path: ", file_path)
 	tmp <- .C("initializeParams",
 		  nIt=nIt,
 		  seedR=as.integer(seed),
@@ -162,7 +160,7 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L,
 		  alphaXi=1.0,
 		  betaXi=1.0,
 		  c2Max=10.0,
-		  sigma2=rep(1.0, G*Q), ## G * Q
+		  sigma2=rep(0.0, G*Q), ## G * Q
 		  tau2Rho=as.numeric(tau2Rho),
 		  gamma2=as.numeric(gamma2),
 		  tau2R=as.numeric(tau2Rho),
@@ -176,7 +174,6 @@ initializeParams <- function(G=3592L, nIt=1L, Q=3L,
 		  simulateExpression=as.integer(simulateExpression),
 		  x=as.numeric(x),
 		  writeout=as.integer(writeout),
-		  file_path=file_path,
 		  simulateSigma2=1L,
 		  oldCliqueInput=clique.params[["oldClique"]],
 		  oldComponentsInput=as.integer(unlist(clique.params[["oldComponents"]])),

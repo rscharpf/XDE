@@ -1,0 +1,546 @@
+% \VignetteIndexEntry{XdeParameterClass Vignette}
+% \VignetteKeywords{microarray, differential expression}
+% \VignettePackage{XDE}
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage[mathcal]{euscript}
+
+\parindent 0in  % Left justify
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rfunction}[1]{\texttt{#1}}
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\stan}{\texttt{Stanford}}
+\newcommand{\xde}{\textit{XDE}}
+\newcommand{\eset}{\Robject{ExpressionSet}}
+\newcommand{\esets}{\Robject{ExpressionSet}s}
+\newcommand{\esetList}{\Robject{ExpressionSetList}}
+\newcommand{\esetLists}{\Robject{ExpressionSetList}s}
+\newcommand{\xparam}{\Robject{XdeParameter}}
+\newcommand{\xmcmc}{\Robject{XdeMcmc}}
+\newcommand{\R}{\textsf{R}}
+\newcommand{\bioc}{http://www.bioconductor.org}
+\newcommand{\xdeVignette}{\xde{} vignette}
+\textwidth=6.2in
+\textheight=8.5in
+\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\title{The \xparam{} Class}
+\author{H\aa kon Tjelmeland and Robert B. Scharpf}
+
+\begin{document}
+
+\maketitle
+
+<<echo=FALSE>>=
+options(width=60)
+@ 
+
+\section{Introduction}
+
+The goal of this vignette is to briefly describe the Bayesian
+hierarchical model to estimate differential expression across multiple
+studies.  This vignette necessarily assumes familiarity with
+hierarchical models and Bayesian methods of computation, such as MCMC.
+After reading this vignette, one should be able to:
+
+\begin{itemize}
+  
+\item create an instance of the \xparam{} class that will provide all
+  the necessary parameters for fitting the Bayesian model, including
+  starting values of all the MCMC chains
+  
+\item change values from their default setting to custom setting. This
+  includes
+  
+  \begin{itemize}
+  \item changing the values of any of the hyperparameters
+      
+  \item changing the starting values of the MCMC chains
+      
+  \item change the number of updates per MCMC iteration for any of the
+    parameters
+      
+  \item store all, some, or none of the MCMC chains
+      
+  \end{itemize}
+    
+\end{itemize}
+  
+Apart from these pragmatic goals, the vignette provides a means to
+look-up the role of any parameters in our formulation of the Bayesian
+model. A more detailed discussion of the Bayesian model is provided
+elsewhere \cite{Scharpf2007d}.  If you are content with the default
+settings provided when creating an instance of the \xparam{} class,
+fitting the model, assessing convergence, and generating alternative
+measures of differential expression are discussed in the
+\xdeVignette{}.
+
+\section{\label{sec:model} The Stochastic Model}
+
+\newcommand{\bDelta}{\mbox{\boldmath $\Delta$}}
+\newcommand{\bnu}{\mbox{\boldmath $\nu$}}
+\newcommand{\bx}{\mbox{\boldmath $x$}}
+\newcommand{\bpsi}{\mbox{\boldmath $\psi$}}
+
+Let $x_{gsp}$ denote observed expression value for gene $g\in \{
+1,\ldots,G\}$ and sample (array) $s\in \{ 1,\ldots,S_q\}$ in study $p
+\in \{ 1,\ldots,P\}$, where $P\geq 2$. We assume that some clinical
+variable (with two possible values) is available for each of the
+arrays in all studies. We denote this by $\psi_{sp}\in\{ 0,1\}$ for
+sample (array) number $s$ in study number $p$. We will assume that the
+studies have been somehow standardized so that the values in each
+study is centered around zero and are approximately Gaussian
+distributed.
+
+Our model defined below is based on the following assumptions, $(i)$
+for some of the genes, the expression values $x_{gsp}$ are
+differentially expressed (have different mean values) for arrays where
+$\psi_{sp}=0$ and arrays where $\psi_{sp}=1$, and $(ii)$ any gene is
+either differentially expresses in all studies or in no studies (the
+``$\delta_g$'' model).  Assumption $(ii)$ can be relaxed by fitting
+the ``$\delta_{gp}$'' model that allows for a given gene to be
+differentially expressed in some studies but not in others.  The
+following description of the Bayesian model is for the $\delta_g$"
+model.  The $\delta_{gp}$ model is very similar, substituting
+$\delta_{gp}$ for $\delta_g$ and independent beta priors with
+parameter $\xi_p$ instead of $\xi$.
+
+We assume the following hierarchical Bayesian model for the expression
+data. Conditionally on underlying unobserved parameters we assume the
+expression values to be independently Gaussian distributed,
+\begin{equation}\label{x}
+x_{gsp}|\ldots  \sim \mbox{N}(\nu_{gp} + \delta_g (2\psi_{sp} - 1)\Delta_{gp},
+\sigma^2_{g\psi_{sp}p}),
+\end{equation}
+where $\delta_g\in \{ 0,1\}$ indicates whether gene $g$ is 
+differentially expressed ($\delta_g=1$) or not ($\delta_g=0$).
+Thus, if $\delta_g = 0$, the mean of $x_{gsp}$ is $\nu_{gp}$, 
+whereas if $\delta_g=1$, the mean is $\nu_{gp}-\Delta_{gp}$ and
+$\nu_{gp}+\Delta_{gp}$ for samples with $\psi_{sp}=0$ and $\psi_{sp}=1$,
+respectively. 
+
+Given hyper-parameters, we assume $\bnu_g = (\nu_{g1},\ldots,\nu_{gP})^T$ and 
+$\bDelta_g = (\Delta_{g1},\ldots,\Delta_{gP})^T$ to be multi-Gaussian distributed,
+\begin{equation}
+\bnu_g |\ldots \sim \mbox{N}(0,\Sigma) \mbox{~~~~~and~~~~~}
+\bDelta_g |\ldots \sim \mbox{N}(0,R),
+\end{equation}
+where $\Sigma = [\Sigma_{pq}]\in\Re^{P\times P}$ and
+$R = [R_{pq}]\in\Re^{P\times P}$ with
+\begin{equation}\label{Sigma}
+\Sigma_{pq} = \gamma^2 \rho_{pq} \sqrt{ \tau_p^2 \tau_q^2 \sigma_{gp}^{2a_p} 
+\sigma_{gq}^{2a_q}}
+\end{equation}
+and
+\begin{equation}
+R_{pq} = c^2 r_{pq} \sqrt{\tau_p^2 \tau_q^2 \sigma_{gp}^{2b_p}
+\sigma_{gq}^{2b_q}}.
+\end{equation}
+The $a_p$ and $b_p, p=1,\ldots P$ are assumed apriori 
+independent with discrete probabilities in $0$ and $1$ and a continuous density on $(0,1)$.
+More precisely, we let
+\begin{equation}
+\mbox{P}(a_p = 0) = p_a^0 \mbox{~~~,~~~} \mbox{P}(a_p = 1) = p_a^1 \mbox{~~~,~~~}
+a_p | a_p \in (0,1) \sim \mbox{Beta}(\alpha_a,\beta_a),
+\end{equation}
+and
+\begin{equation}
+\mbox{P}(b_p = 0) = p_b^0 \mbox{~~~,~~~} \mbox{P}(b_p = 1) = p_b^1 \mbox{~~~,~~~}
+b_p | b_p \in (0,1) \sim \mbox{Beta}(\alpha_b,\beta_b).
+\end{equation}
+To $c^2$ we assign a uniform prior distribution on 
+$[0,c^2_{\mbox{\tiny Max}}]$, where $c^2_{\mbox{\tiny Max}}$ is a parameter 
+specified by the user, and for $\gamma^2$ we use an 
+improper uniform distributions on $(0,\infty)$.
+We restrict $\tau^2_p>0,p=1,\ldots,P$ and 
+$\tau_1^2 \cdot \ldots \cdot \tau_P^2 = 1$ and assume an (improper) uniform 
+distribution for $(\tau_1^2,\ldots,\tau_P^2)$ under this restriction.
+The $[\rho_{pq}] \in \Re^{P\times P}$ and $[r_{pq}] \in \Re^{P\times P}$ are restricted to be 
+correlation matrices and we assign apriori independent Barnard et al (2000) distributions for them,
+with $\nu_\rho$ and $\nu_r$ degrees of freedom for $[\rho_{pq}]$ and $[r_{pq}]$, respectively.
+
+We assume the indicators $\delta_1,\ldots,\delta_G$ to be apriori independent, given a 
+hyper-parameter $\xi$, with
+\begin{equation}
+\mbox{P}(\delta_g = 1 | \xi ) = \xi, \mbox{~~~~~where~~~~~}
+\xi \sim \mbox{Beta}(\alpha_\xi,\beta_\xi).
+\end{equation}
+We assume $\sigma^2_{gp}$ in (\ref{Sigma}) to be given from $\sigma^2_{g\psi p}$ in 
+(\ref{x}) via the following relations
+\begin{equation}
+\sigma^2_{g0p} = \sigma^2_{gp} \varphi_{gp} \mbox{~~~~~and~~~~~}
+\sigma^2_{g1p} = \frac{\sigma^2_{gp}} {\varphi_{gp}}.
+\end{equation}
+For $\sigma^2_{gp}$ we assume independent prior distributions, given hyper-parameters,
+\begin{equation}
+\sigma^2_{gp}|\ldots \sim \mbox{Gamma}\left(\frac{l_p^2}{t_p},\frac{l_p}{t_p}\right),
+\end{equation}
+where the mean $l_p$ and variance $t_p$ for $p=1,\ldots,P$ are assigned independent (improper) uniform
+distributions on $(0,\infty)$.
+The $\varphi_{gp}$ are assigned independent gamma priors, given hyper-parameters,
+\begin{equation}
+\varphi_{gp}|\ldots \sim \mbox{Gamma}\left(\frac{\lambda_p^2}{\theta_p},\frac{\lambda_p}{\theta_p}\right),
+\end{equation}
+where the mean $\lambda_p$ and the variance $\theta_p$ for $p=1,\ldots,P$ are assigned independent (improper) uniform
+distributions on $(0,\infty)$.
+
+\section{\label{sec:MH} Metropolis-Hastings algorithm}
+
+To simulate from the posterior distribution resulting from the above
+specified Bayesian model, we use a Metropolis--Hastings algorithm.
+Default values for the tuning parameters in this algorithm and how
+these tuning parameters may be modified are discussed in Section
+\ref{sec:xparamClass}.  The Metropolis--Hastings algorithm uses the
+following moves:
+
+\begin{enumerate}
+\item The $\nu_{pg}$'s are updated in a Gibbs step.
+  
+\item The $\Delta_{pg}$'s are updated in a Gibbs step.
+  
+\item \label{Proposal:a_p}Each $a_p,p=1,\ldots,P$ is updated in turn,
+  where a potential new value for $a_p$, $\widetilde{a}_p$, is
+  generated as follows. If $a_p = 0$, $\widetilde{a}_p \sim
+  \mbox{Uniform}(0,\varepsilon)$, if $a_p = 1$, $\widetilde{a}_p \sim
+  \mbox{Uniform}(1-\varepsilon,1)$, and if $a_p\in (0,1)$ we use
+\begin{equation}
+\mbox{P}(\widetilde{a}_p = 0) = \max\{ -(a_p - \varepsilon),0\} \cdot \mbox{I}(p_a^0 \neq 0),
+\end{equation}
+\begin{equation}
+\mbox{P}(\widetilde{a}_p = 1) = \max\{ a_p + \varepsilon - 1,0\} \cdot \mbox{I}(p_a^1 \neq 0)
+\end{equation}
+and
+\begin{equation}
+\widetilde{a}_p |\widetilde{a}_p\in (0,1) \sim \mbox{Uniform}(\max\{a_p-\varepsilon,0\},
+\min\{a_p+\varepsilon,1\}).
+\end{equation}
+
+\item Each $b_p,p=1,\ldots,P$ is updated in turn, where the proposal
+  distribution is of the same type as in \ref{Proposal:a_p}. 
+  
+\item A block Gibbs update for $c^2$ and $\bDelta_g$ for $g$'s where
+  $\delta_g=0$.
+  
+\item The $\gamma^2$ is updated in a Gibbs step.
+  
+\item \label{Proposal:r}A block update for the correlation matrix 
+$[r_{pq}]$ and the variance $c^2$. First, potential 
+new values for $[r_{pq}]$, $[\widetilde{r}_{pq}]$,
+is set by
+\begin{equation}
+\widetilde{r}_{pq} = (1-\varepsilon) r_{pq} + \varepsilon T_{pq},
+\end{equation}
+where $[T_{pq}]$ is a correlation matrix which with probability a half
+is generated from the prior for $[r_{pq}]$, or with probability a half
+set equal to unity on the diagonal and with all off diagonal elements
+set equal to the same value $b$. In the latter case, the value $b$ is
+sampled from a uniform distribution on $(-1/(P-1),1)$. Second, the
+potential new value for $c^2$ is sampled from the corresponding full
+conditional (given the potential new values
+$[\widetilde{r}_{pq}]$). The $\varepsilon$ is a tuning parameter.
+
+\item A block update for the correlation matrix $[\rho_{pq}]$ and the
+  variance $\gamma^2$. The potential new values are generated similar
+  to what is done in \ref{Proposal:r}.  
+  
+\item For each $g=1,\ldots,G$ in turn, a block update for $\delta_g$
+  and $\bDelta_g$. First, the potential new value for $\delta_g$ is
+  set equal to $\widetilde{\delta}_g = 1 - \delta_g$. Second, the
+  potential new value for $\bDelta_g$ is sampled from the full
+  conditional (given the potential new value $\widetilde{\delta}_g$).
+  No tuning parameter for this update.
+  
+\item The $\xi$ is updated in a Gibbs step.
+  
+\item \label{Proposal:sigma2}Each $\sigma^2_{gp}$ is updated in turn,
+  where the potential new value is given as $\widetilde{\sigma}^2_{gp}
+  = \sigma_{gp}^2 \cdot u$, where $u\sim
+  \mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$.  The $\varepsilon$
+  is a tuning parameter.
+
+\item \label{Proposal:t}Each $t_p,p=1,\ldots,P$ is updated in
+  turn. The potential new value is given as $\widetilde{t}_p = t_p
+  \cdot u$, where
+  $u\sim\mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$.  The
+  $\varepsilon$ is a tuning parameter.
+
+\item \label{Proposal:l}Each $l_p,p=1,\ldots,P$ is updated in
+  turn. The potential new value is given as $\widetilde{l}_p = l_p
+  \cdot u$, where
+  $u\sim\mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$.  The
+  $\varepsilon$ is a tuning parameter.
+
+\item Each $\varphi_{gp}$ is updated in turn, where the proposal
+  distribution is of the same type as in \ref{Proposal:sigma2}.
+
+\item Each $\theta_p,p=1,\ldots,P$ is updated in turn, where the
+  proposal distribution is of the same type as in
+  \ref{Proposal:t}. 
+
+\item Each $\lambda_p,p=1,\ldots,P$ is updated in turn, where the
+  proposal distribution is of the same type as in
+  \ref{Proposal:l}. 
+
+\item The $(\tau_1^2,\ldots,\tau_P^2)$ is updated by first uniformly
+  at random drawing a pair $p,q\in \{1,\ldots,P\}$ so that $p\neq
+  q$. Potential new values for $\tau_p^2$ and $\tau_q^2$ are generated
+  by setting
+\begin{equation}
+\widetilde{\tau}_p^2 = \tau_p^2 \cdot u \mbox{~~~~and~~~~}
+\widetilde{\tau}_q^2 = \tau_q^2 / u,
+\end{equation}
+where $u \sim \mbox{Uniform}(1/(1+\varepsilon),1+\varepsilon)$. The
+$\varepsilon$ is again a tuning parameter.
+
+
+\end{enumerate}
+
+\section{\label{sec:xparamClass} The \xparam{} class}
+
+The Bayesian hierarchical model can be tuned and output modified in a
+number of ways. The \xparam{} class is an effort to organize these
+options and to facilitate tweaking.  In our experience, it is easier
+to change and keep track of the parameters in the class than to
+provide a function for fitting the model with numerous arguments.  The
+\xparam{} class is not a container for the gene expression data (see
+\esetList{} in the \xdeVignette{}).
+
+\subsection{Initializing the \xparam{} class}
+
+There are numerous options for customizing the fit of the Bayesian
+model as well as the output.  Default values are defined in the
+initialization method for the \xparam{} class.  Initialization
+requires an object of class \esetList{} and the name of the
+classification variable used to define differential expression.  (The
+initialization method will produce an error if the supplied
+phenotypeLabel is not present in the \Robject{varLabel}s of each
+element of the \esetList{}).  Using the example dataset discussed in
+the \xdeVignette{}, we have defined the covariate ``adenoVsquamous''
+that takes the value 0 for adenocarcinomas and 1 for squamous
+carcinomas. The \Rfunction{show} method only lists the first few
+parameters in each slot of the \xparam{} object.
+
+<<params>>=
+library(XDE)
+data(expressionSetList)
+xlist <- expressionSetList
+params <- new("XdeParameter", esetList=xlist, phenotypeLabel="adenoVsquamous")
+params
+@
+
+\subsection{Starting values for MCMC chains}
+
+A complete listing of initial values for the MCMC can be obtained by
+
+<<firstMcmc>>=
+initialValues <- firstMcmc(params)
+str(initialValues)
+@ 
+
+The initial values of the MCMC chains stored in \texttt{firstMcmc} are
+generated by random sampling from the prior distributions for these
+parameters.  One may replace any one of the named elements in this
+list with different starting values.  At this time, we do not provide
+checks that the replacement vectors are of the appropriate length.
+WARNING: providing a replacement vector of the incorrect length may
+cause the MCMC algorithm to crash without warning.  Note that
+specifiedInitialValues in the \xparam{} object is always
+\Robject{TRUE} as the values created here are the initial values used
+to run the MCMC, regardless of the starting values were explicitly
+defined or simulated from the priors.
+
+<<specifiedInitialValues>>=
+params@specifiedInitialValues
+@ 
+\noindent If one were to change \Robject{specifiedInitialValues} to
+\Robject{FALSE}, the MCMC would begin at a different set of initial
+values drawn from the prior and not the values provided in the
+\xparam{} class.
+
+\subsection{Hyper-parameters}
+
+When initializing \xparam for three studies as we are here, the
+default values for the hyper-parameters are as follows:
+
+<<hyperparameters>>=
+hyperparameters(params)
+@ 
+
+The names used in the software implementation that correspond to the
+notation used in Section \ref{sec:model} are as follows:
+
+\[
+\begin{array}{rl}
+  \mbox{hyperparameter} & \mbox{\xde{} name} \\  \hline 
+  \alpha_a & \mbox{alpha.a} \\
+  \beta_a  & \mbox{beta.a} \\
+  p^0_a    & \mbox{p0.a} \\
+  p^1_a    & \mbox{p1.a} \\
+  \alpha_b & \mbox{alpha.b} \\
+  \beta_b  & \mbox{beta.b}  \\ 
+  p^0_b    & \mbox{p0.b} \\
+  p^1_b    & \mbox{p1.b} \\
+  \nu_r    & \mbox{nu.r} \\
+  \nu_{\rho} & \mbox{nu.rho} \\
+  \alpha_{\xi} & \mbox{alpha.xi} \\
+  \beta_{\xi}  & \mbox{beta.xi} \\
+  c^2_{\mbox{max}} & \mbox{c2max}
+\end{array}
+\]
+
+In situations in which there is no signal (all noise), the
+$c^2_{\mbox{max}}$ is provided as a precaution to avoid sampling from
+infinity. However, in simulations of complete noise, the
+$c^2_{\mbox{max}}$ parameter was not generally needed and remains in
+the present model primarily for debugging purposes.  Modification of
+any of the above hyperparameters can be performed in the usual way:
+
+<<hyperparamReplace, eval=FALSE>>=
+hyperparameters(params)["alpha.a"] <- 1
+@ 
+
+\subsection{Tuning parameters for Metropolis-Hastings proposals}
+
+A default $\epsilon$ for each of the Metropolis-Hastings proposals
+discussed in Section \ref{sec:MH} is created when initializing the
+\xparam{} class.  See
+
+<<tuning>>=
+tuning(params)
+@ 
+
+for a named vector of the default values. A replacement method has
+been defined to facilitate the tuning of the proposals.  To
+illustrate, the $\epsilon$ used in the proposal for the parameter $a$
+(the power conjugate parameter for $\nu$) could be adjusted by the
+following command:
+
+<<changeEpsilon>>=
+tuning(params)["a"] <- tuning(params)["a"]*0.5
+@ 
+
+\subsection{\label{sec:updates} Frequency of updates for each MCMC iteration}
+
+One may control the frequency at which any of the parameters described
+in Section \ref{sec:MH} are updated at each iteration of the MCMC
+through the method \Robject{updates}.  See
+
+<<updates>>=
+updates(params)
+@ 
+
+Specifying zero updates forces a parameter to remain at its initial
+value.  For instance, one may impose conjugacy between location and
+scale by initializing the power conjugate parameter, $b$, to 1 and
+changing the number of updates per MCMC iteration to zero:
+
+<<conjugacy, eval=FALSE>>=
+firstMcmc(params)$B <- rep(1,3)
+updates(params)["b"] <- 0
+@ 
+
+Alternatively, one could force independence of location and scale by
+setting $b$ to zero:
+
+<<independence, eval=FALSE>>=
+firstMcmc(params)$B <- rep(0, 3)
+updates(params)["b"] <- 0
+@ 
+
+By default, $b$ is allowed to vary between zero and 1.  Block updates
+are denoted by 'And'.  For instance, $r$ and $c^2$ are updated as a
+block (as described above).  Therefore, to update the $r$ parameter 3
+times per MCMC iteration, one would use the command
+<<blockUpdates, eval=FALSE>>=
+updates(params)["rAndC2"] <- 3
+@ 
+
+\subsection{MCMC output}
+
+\xde{} provides options to save all, some, or none of the chains
+produced by MCMC.  Options for writing MCMC chains to file are
+provided in the \Robject{output} slot of the \xparam class.
+
+<<output>>=
+output(params)
+@ 
+
+The first value, thin, tells the MCMC algorithm how often to write the
+chain to file.  For instance, if thin is two every other iteration is
+written to file.  The remaining numbers in the output vector are
+either zero (nothing is written to file) or one.  If the output is
+one, the simulated value from the current iteration is added to the
+log file.  The log files are plain text files and are by default
+stored in the current working directory.  One may change the location
+of where to store the log files by providing a different path
+
+<<differentPath, eval=FALSE>>=
+directory(params) <- "logFiles"
+@ 
+
+If the directory ``logFiles'' does not exist, the above replacement
+method for directory will automatically create the directory. In
+general, directory should provide the path relative to the current
+working directory or the complete path to the desired directory.
+
+An additional slot in the \xparam class that may be useful is
+\texttt{burnin}.  By default, \texttt{burnin} is \texttt{TRUE} and no
+chains are written to file.  One reason for this setting as a default
+is to easily check whether the \xde{} model will run with the default
+values without producing voluminous output in the MCMC chains.  For
+instance, we often set
+
+<<burnin>>=
+burnin(params) <- TRUE
+iterations(params) <- 5
+@ 
+
+Note the following behavior of the replacement method for burnin:
+<<burnin2>>=
+output(params)[2:22] <- rep(1, 21)
+output(params)
+burnin(params) <- TRUE
+output(params)
+@ 
+Hence, when setting burnin to \texttt{TRUE} we assume that none of the
+iterations are to be saved.  Similarly, when setting \texttt{burnin}
+to FALSE, we assume that one wishes to save all of the parameters:
+<<burnin3>>=
+##Specify a thin of 1 and save none of the parameters
+output(params)[2:22] <- rep(0, 21)
+output(params)
+burnin(params) <- FALSE
+output(params)
+@ 
+
+To save a subset of the parameters, we recommend setting the \texttt{burnin} argument to \texttt{FALSE} and turning off the parameters that one does not wish to save.  Warning: the parameters $\Delta_{gp}, \delta_{g}, \mbox{probDelta}_g, \sigma_{gp}^2, \nu_{gp}, \phi_{gp}$ are all indexed by genes and/or study and may therefore require a large amount of memory to save.  Use the following commands  to avoid writing these chains to file:
+
+<<doNotSaveHugeChains>>=
+burnin(params) <- FALSE
+output(params)[c("nu", "DDelta", "delta", "probDelta", "sigma2", "phi")] <- 0
+output(params)
+@ 
+
+\section{Session Information}
+
+The version number of \R{} and packages loaded for generating the
+vignette were:
+
+<<echo=FALSE, results=tex>>=
+toLatex(sessionInfo())
+@ 
+
+\bibliography{genomics}
+\bibliographystyle{plain}
+
+\end{document}
+
