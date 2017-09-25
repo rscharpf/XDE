@@ -20,3 +20,4 @@ Collate: functions.R AllClasses.R AllGenerics.R RUpdates.R
         methods-XdeMcmc.R xde.R zzz.R
 LazyLoad: yes
 biocViews: Microarray, DifferentialExpression
+RoxygenNote: 6.0.1
