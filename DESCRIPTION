@@ -17,8 +17,11 @@ Imports: BiocGenerics,
          methods,
          stats,
          utils,
-         mvtnorm
-Suggests: siggenes, genefilter, MASS, RColorBrewer, GeneMeta, RUnit
+         mvtnorm,
+         RColorBrewer,
+         GeneMeta,
+         siggenes
+Suggests: MASS, RUnit
 Maintainer: Robert Scharpf <rscharpf@jhsph.edu>
 Enhances: coda
 License: LGPL-2

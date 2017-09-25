@@ -93,7 +93,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
   ##################################################
 	##Parameters not indexed by gene or study
 	if(name %in% c("c2", "gamma2")){
-		mcmc <- matrix(mcmc, nc=1, byrow=TRUE)
+		mcmc <- matrix(mcmc, ncol=1, byrow=TRUE)
 		if(name == "c2"){
 			##check for xi-inflation
 			if(median(mcmc, na.rm=TRUE) < 0.01){
@@ -107,7 +107,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
 	##Correlation parameters
 	if(name %in% c("r", "rho")){
 		S <- length(studyNames(x))
-		mcmc <- matrix(mcmc, nc=S*(S-1)/2, byrow=TRUE)
+		mcmc <- matrix(mcmc, ncol=S*(S-1)/2, byrow=TRUE)
 		return(mcmc)    
 	}
 

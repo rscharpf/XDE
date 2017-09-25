@@ -151,11 +151,11 @@ setMethod("zeroNu", "ExpressionSetList",
 
 setMethod("goodnessOfFit", c("ExpressionSetList", "XdeMcmc"),
 	  function(object,
-		   fit,
-		   phenotype,
-		   firstIteration=1,
-		   lastIteration=iterations(fit),
-		   by=2){
+             fit,
+             phenotype,
+             firstIteration=1,
+             lastIteration=iterations(fit),
+             by=2){
 		  stopifnot(phenotype %in% varLabels(object[[1]]))
 		  psi <- lapply(object, function(x) pData(x)[, match(phenotype, varLabels(object))])
 		  nus <- fit$nu
@@ -164,14 +164,15 @@ setMethod("goodnessOfFit", c("ExpressionSetList", "XdeMcmc"),
 		  sigma2 <- fit$sigma2
 		  phi <- fit$phi
 		  computeGOF(object,
-			     nus=nus,
-			     Delta=Delta,
-			     delta=delta,
-			     sigma2=sigma2,
-			     phi=phi,
-			     firstIteration=firstIteration,
-			     lastIteration=lastIteration,
-			     by=by)
+                 nus=nus,
+                 Delta=Delta,
+                 delta=delta,
+                 sigma2=sigma2,
+                 phi=phi,
+                 psi=psi,
+                 firstIteration=firstIteration,
+                 lastIteration=lastIteration,
+                 by=by)
 	  })
 
 

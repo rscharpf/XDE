@@ -497,14 +497,15 @@ empiricalStart <- function(object, zeroNu=FALSE,
 }
 
 computeGOF <- function(object,
-		       nus,
-		       Delta,
-		       delta,
-		       sigma2,
-		       phi,
-		       firstIteration,
-		       lastIteration,
-		       by=2){
+                       nus,
+                       Delta,
+                       delta,
+                       sigma2,
+                       phi,
+                       psi,
+                       firstIteration,
+                       lastIteration,
+                       by=2){
 	results <- list()
 	avgM.k <- list()
 	m.k <- 0

@@ -49,6 +49,7 @@ rupdateBDDelta <- function(object,
 			   nAccept=0L,
 			   epsilon=0.2,
 			   dryrun=FALSE){
+  phenodata <- NULL
 	if(dryrun){
 		obj <- list(seed=object[["seed"]],
 			    nTry=nTry,
@@ -2287,6 +2288,7 @@ rupdateBDDeltaStar_HyperInverseWishart <- function(object,
                      nAccept=0L,
                      epsilon=0.2,
                      dryrun=FALSE){
+  phenodata <- NULL
   if(dryrun){
     res <- list(seed=object[["seed"]],
                 nTry=nTry,
@@ -2436,6 +2438,7 @@ modelA_B_MIupdates <- function(object,
 	d.i <- object[["delta"]]
 	DD.i <- object[["Delta"]]
 	S <- object[["S"]]
+  d <- x <- NULL
 	for(i in seq_len(nupdates)){
 		res <- .C("updateANu",
 			  seed=object[["seed"]],

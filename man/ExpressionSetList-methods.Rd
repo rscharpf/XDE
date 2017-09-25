@@ -5,6 +5,7 @@
 %\alias{coerce,list,ExpressionSetList-method}
 %\alias{dim,ExpressionSetList-method}
 %\alias{lapply,ExpressionSetList-method}
+\alias{[, ExpressionSetList,ANY,ANY,ANY-method}
 \alias{phenotype}
 \title{Methods for ExpressionSetList}
 \description{

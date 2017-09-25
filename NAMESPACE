@@ -16,8 +16,9 @@ importFrom("graphics", legend, pairs, par, plot, smoothScatter)
 importFrom(BiocGenerics, lapply, nrow)
 importFrom("grDevices", colorRampPalette)
 importFrom("stats", as.ts, cor, median, princomp, quantile, rnorm, runif,
-           var)
-importFrom("utils", str)
+           var, rgamma, rbinom, qnorm, pchisq)
+importFrom(RColorBrewer, brewer.pal)
+importFrom("utils", str, packageDescription, head, tail)
 exportClasses("ExpressionSetList", "XdeParameter", "XdeMcmc")
 exportMethods("[", "[[", "$",
               bayesianEffectSize,

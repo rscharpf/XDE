@@ -11,7 +11,10 @@
 }
 
 \usage{
-symbolsInteresting(rankingStatistic, percentile = 0.9, colors = c("grey50", "royalblue"), symbols = c(".", "o"), size = c(3, 1), background = c("white", "grey70"))
+symbolsInteresting(rankingStatistic, percentile = 0.9,
+                   colors = c("grey50", "royalblue"),
+                   symbols = c(".", "o"), size = c(3, 1),
+                   background = c("white", "grey70"))
 }
 \arguments{
   \item{rankingStatistic}{ Any numerical vector }
