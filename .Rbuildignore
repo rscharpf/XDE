@@ -1,0 +1,9 @@
+^data-raw$
+.gitignore
+.git/*
+.*\.DS_Store
+.*\.swp
+.*\*.Rprofile
+.*\*.Rhistory
+.*\*.o
+TODO.org
