@@ -6,18 +6,34 @@ Date: 2011-05-10
 Author: R.B. Scharpf, G. Parmigiani, A.B. Nobel, and H. Tjelmeland
 Description: Multi-level model for cross-study detection of
         differential gene expression.
-Depends: R (>= 2.10.0), Biobase (>= 2.5.5), methods, graphics
-Imports: Biobase, BiocGenerics, genefilter, graphics, grDevices,
-        gtools, MergeMaid, methods, stats, utils, mvtnorm
+Depends: R (>= 2.10.0),
+         Biobase (>= 2.5.5)
+Imports: BiocGenerics,
+         genefilter,
+         graphics,
+         grDevices,
+         gtools,
+         MergeMaid,
+         methods,
+         stats,
+         utils,
+         mvtnorm
 Suggests: siggenes, genefilter, MASS, RColorBrewer, GeneMeta, RUnit
 Maintainer: Robert Scharpf <rscharpf@jhsph.edu>
 Enhances: coda
 License: LGPL-2
-Collate: functions.R AllClasses.R AllGenerics.R RUpdates.R
-        methods-XdeParameter.R methods-matrix.R methods-data.frame.R
-        methods-ExpressionSet.R methods-ExpressionSetList.R
-        methods-mergeExpressionSet.R methods-Parameters.R
-        methods-XdeMcmc.R xde.R zzz.R
+Collate: functions.R
+         AllClasses.R
+         AllGenerics.R
+         RUpdates.R
+         methods-XdeParameter.R
+         methods-matrix.R
+         methods-data.frame.R
+         methods-ExpressionSet.R
+         methods-ExpressionSetList.R
+         methods-mergeExpressionSet.R
+         methods-Parameters.R
+         methods-XdeMcmc.R xde.R zzz.R
 LazyLoad: yes
 biocViews: Microarray, DifferentialExpression
 RoxygenNote: 6.0.1

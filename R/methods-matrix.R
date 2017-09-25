@@ -2,7 +2,7 @@ setMethod("pairs", "matrix",
           function(x, ...){
             op <- par(no.readonly=TRUE)
             on.exit(par(op))
-            require(RColorBrewer) || stop("Package RColorBrewer is not available")
+            ##require(RColorBrewer) || stop("Package RColorBrewer is not available")
             par(mfrow=c(1,1), las=1)
             panel <- function(...){
               par(new="TRUE")
@@ -12,7 +12,7 @@ setMethod("pairs", "matrix",
               r <- round(cor(x[[1]], x[[2]], method="spearman"), 2)
               legend("topleft", legend=as.character(r), bty="n", cex=1.4)
             }
-            graphics:::pairs(x, panel=panel, upper.panel=NULL, ...)
+            pairs(x, panel=panel, upper.panel=NULL, ...)
           })
 
 ##N is a vector of sample sizes

@@ -39,14 +39,11 @@ setMethod(".studySplit", "ExpressionSet",
             }
             if(!identical(featureNames(eset[[1]]), featureNames(eset[[2]])))
               stop("feature names not identical in the study split")
-            gs <- matrix(1, nr=nrow(eset[[1]]), nc=nsplit)
+            gs <- matrix(1, nrow=nrow(eset[[1]]), ncol=nsplit)
             rownames(gs) <- featureNames(eset[[1]])
-            
             xset <- new("ExpressionSetList",
                         list(split1=eset[[1]],
                              split2=eset[[2]],
                              split3=eset[[3]]))
-##            xset <- new("XdeSet", data=eset, geneStudy=gs, phenotypeLabel=phenotypeLabel)
-##            studyNames(xset) <- paste(studyName, 1:length(eset), sep="")
             xset
           })

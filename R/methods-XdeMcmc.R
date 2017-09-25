@@ -85,7 +85,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
 		nr <- iterations(x)
 		nc <- length(studyNames(x))
 		if(length(mcmc) < nr*nc) byrow <- FALSE else byrow <- TRUE
-		mcmc <- matrix(mcmc, nr=iterations(x), nc=length(studyNames(x)), byrow=byrow)
+		mcmc <- matrix(mcmc, nrow=iterations(x), ncol=length(studyNames(x)), byrow=byrow)
 		colnames(mcmc) <- studyNames(x)
 		return(mcmc)    
 	}
@@ -114,7 +114,7 @@ setMethod("$", "XdeMcmc", function(x, name) {
 	##---------------------------------------------------------------------------
 	##Diagnostics
 	if(name == "acceptance"){
-		mcmc <- matrix(mcmc, nc = 18, nr = iterations(x), byrow = TRUE)
+		mcmc <- matrix(mcmc, ncol = 18, nrow = iterations(x), byrow = TRUE)
 		##Drop parameters updated by gibbs
 		##mcmc <- mcmc[, -c(1, 2, 5, 6, 10)]
 		colnames(mcmc) <- c("nu", "Delta", "a", "b", "c2", "gamma2",

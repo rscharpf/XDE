@@ -189,10 +189,14 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 	tt <- rowttests(esetList, phenotypeLabel)
 
 	sam.wrapper <- function(eset, classlabel, method, returnQ, gene.names){
-		require(siggenes) || stop("Package siggenes not available")
+		##require(siggenes) || stop("Package siggenes not available")
 		column <- grep(classlabel, colnames(pData(eset)))
-		if(length(column) == 0) { warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]}
-		if(length(column) > 1)  {warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]}
+		if(length(column) == 0) {
+      warning("Invalid classlabel.  Using the first column in phenoData"); classlabel <- pData(eset)[, 1]
+    }
+		if(length(column) > 1)  {
+      warning("More than 1 phenotype has the class label.  Using the first"); classlabel <- pData(eset)[, column[1]]
+    }
 		if(length(column) == 1) classlabel <- pData(eset)[, column]
 		X <- exprs(eset)
 		stat <- sam(data=X, cl=classlabel, method=method,
@@ -203,7 +207,7 @@ ssStatistic <- function(statistic=c("t", "sam", "z")[1],
 
 	z.wrapper <- function(object, classlabel, useREM=TRUE){
 		##object is a list of ExpressionSets
-		require(GeneMeta) || stop("Package GeneMeta is not available")
+		##require(GeneMeta) || stop("Package GeneMeta is not available")
 		pDataList <- function(eset, covariateName){
 			1-(pData(eset)[, grep(covariateName, colnames(pData(eset)))])
 		}
@@ -429,7 +433,7 @@ empiricalStart <- function(object, zeroNu=FALSE,
 		avdif
 	}
 	DDelta <- sapply(object, averageDifference, classLabel=phenotypeLabel)
-	require(genefilter)
+	##require(genefilter)
 	tt <- rowttests(object, phenotypeLabel)
 	delta <- abs(tt) > T_THRESH
 	if(one.delta){
@@ -491,10 +495,6 @@ empiricalStart <- function(object, zeroNu=FALSE,
 				 Tau2Rho=tau2Rho)
 	linInitialValues
 }
-
-
-
-
 
 computeGOF <- function(object,
 		       nus,
@@ -573,7 +573,7 @@ computeGOF <- function(object,
 	}
 	pvals <- -log10(1-pchisq(R.b, df=ncol(m.k)-1))
 	pvals[is.infinite(pvals)] <- 16
-	require(genefilter)
+	##require(genefilter)
 	sds0 <- rowSds(z[, psi==0])
 	sds1 <- rowSds(z[, psi==1])
 	n0 <- sum(psi==0)
